@@ -61,3 +61,12 @@ Layar untuk keadaan di luar jalur normal; masing-masing selalu punya jalan kemba
 | S4 Offline | Pembayaran taksi gagal karena offline; ditegaskan tidak ada tagihan ganda | 12 (Tokyo Taxi) | Try again → 07; Back to the card → 12 | Transaksi tidak terkirim; tidak ada perubahan on-chain |
 | S5 Home · 6 people, 5 countries | Varian Home untuk grup besar: 3 avatar + "+3", teks "Indonesia · Singapore · +3 more" | Varian 03 | Baris avatar → S6; New trip → 04; tab Card → 12 | Envio `MemberJoined`; Supabase `profiles` |
 | S6 Trip members | Daftar lengkap anggota dan negaranya; masih muat 4 orang lagi | S5 | Invite more friends → 05; kembali → S5 | Supabase `profiles`; batas 10 anggota di kontrak |
+
+## Akun & profil (P1–P2)
+
+Ditambahkan 28 Sep 2026 (belum ada di dokumen live Claude Docs). Nama, kota, dan negara yang tampil di Invite, Members, dan Home berasal dari sini.
+
+| Layar | Fungsi | Datang dari | Lanjut ke | Kontrak & data |
+| --- | --- | --- | --- | --- |
+| P1 Set up profile | Sekali setelah passkey pertama dibuat: nama, kota, negara, warna avatar. Teko "wink" | 02 (Continue with Face ID, akun baru); Edit di P2 | Continue → 03; kembali → 02 | api → `profiles` (display_name, city, country_code, avatar_color) |
+| P2 Profile | Tab ketiga: kartu profil + Edit, ringkasan trip, info "Signed in with Face ID", notifikasi, trip lalu, bantuan, Sign out | tab Profile di 03 / S5 | Edit → P1; Sign out → 01; tab Trips → 03; tab Card → 12 | api → `profiles`, `push_subs`; Envio (jumlah trip, total kembalian); sesi Mera (sign out = akhiri sesi) |

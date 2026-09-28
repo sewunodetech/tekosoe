@@ -33,7 +33,7 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 | --- | --- | --- |
 | 01 Welcome | `index.tsx` | F01Welcome |
 | 02 Sign in | `sign-in.tsx` | F02SignIn; Face ID masih langsung ke Home (TODO Mera) |
-| 03 Home · S5 | `(tabs)/index.tsx` | F03Home + kartu grup besar S05BigGroup |
+| 03 Home · S5 | `(tabs)/trips.tsx` (URL `/trips`) | F03Home + kartu grup besar S05BigGroup |
 | 12 Card | `(tabs)/card.tsx` | F12Card; Tokyo Taxi → S4 |
 | 04 New trip | `trip/new.tsx` | F04Create |
 | 05 Invite | `invite/[code]/index.tsx` | F05Invite; deep link `tekosoe://invite/<code>` |
@@ -51,6 +51,8 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 | S2 Waiting | `trip/[id]/spend/[spendId]/waiting.tsx` | S02Waiting |
 | S3 Declined | `trip/[id]/spend/[spendId]/declined.tsx` | S03Declined (modal) |
 | R2–R3 Receipt | `trip/[id]/spend/[spendId]/receipt.tsx` | S08ReceiptLocked → S09ReceiptView |
+| P1 Set up profile | `setup-profile.tsx` *(belum dibuat — WP M12)* | P01SetupProfile; sekali setelah akun baru |
+| P2 Profile | `(tabs)/profile.tsx` *(belum dibuat — WP M12)* | P02Profile; tab ketiga |
 
 ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri: `/` → Sign in → Home → Japan Trip → Pay → Request approval → "Demo: open this on Rina's phone" → Approve → (pot kosong) → Preview settle-up → See your invoice.
 

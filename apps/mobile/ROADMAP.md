@@ -33,7 +33,7 @@ Prinsip utama: **mobile tidak boleh macet menunggu backend.** Layar dipisahkan d
 
 | Lapisan | Masuk | Keluar |
 | --- | --- | --- |
-| **P0** (wajib) | Lapisan data demo/live · sesi Mera + Face ID · semua aksi uang (create/join/deposit/spend/approve/reject/dispute/payDebt) · status transaksi & error · form lengkap (validasi nominal, tanggal, split custom) · struk (kamera/PDF → enkripsi → upload → `attachReceipt` → buka dengan Face ID) · invoice (PDF lewat expo-print, share) · deep link undangan · build EAS | Redesign layar (desain sudah final) · dark mode · multi-bahasa · pengaturan/profil lengkap |
+| **P0** (wajib) | Lapisan data demo/live · sesi Mera + Face ID · profil (P1 Set up profile, P2 Profile) · semua aksi uang (create/join/deposit/spend/approve/reject/dispute/payDebt) · status transaksi & error · form lengkap (validasi nominal, tanggal, split custom) · struk (kamera/PDF → enkripsi → upload → `attachReceipt` → buka dengan Face ID) · invoice (PDF lewat expo-print, share) · deep link undangan · build EAS | Redesign layar (desain sudah final) · dark mode · multi-bahasa · pengaturan lanjutan di luar P2 (ganti bahasa, mata uang, dll.) |
 | **P1** | Feed real-time (polling/subscription) · push notification (approval, invoice) | OCR struk |
 | **P2** | Kartu simulasi bayar ke toko demo · kunci enkripsi turunan PRF | Kartu sungguhan · on/off-ramp fiat |
 
@@ -93,8 +93,9 @@ Kerjakan berurutan sesuai dependensi. Centang di `docs/STATUS.md` › Mobile saa
 | **M9 Undangan & deep link** | Gabung dari link | `tekosoe://invite/<code>` + universal link (butuh `.well-known` dari `apps/web`) · share sheet di layar 04 | Link dari HP A membuka layar 05 di HP B | M4 |
 | **M10 Rilis & QA** | Siap juri | Skrip cek kata terlarang di UI · aksesibilitas dasar · reduce motion · uji 3 HP end-to-end · EAS build APK + TestFlight | Definisi selesai di bagian 1 terpenuhi | M4–M9 |
 | **M11 P1/P2** | Tambahan | Feed real-time · push (expo-notifications) · kartu simulasi ke toko demo · kunci PRF | Sesuai FR-14, FR-15, FR-16, FR-17, FR-18 | M10 aman |
+| **M12 Profil & akun** | Layar P1 Set up profile + P2 Profile (desain: canvas Final UI › `P01SetupProfile`, `P02Profile`) | Route `setup-profile.tsx` + tab `(tabs)/profile.tsx` (tab ketiga, ikon `profile` sudah ada di `Icon`) · data demo dulu, lalu simpan/baca `profiles` lewat api · P1 muncul sekali setelah akun baru (flag di sesi) · Sign out mengakhiri sesi Mera · toggle notifikasi (aktif penuh di M11) | Akun baru melewati P1 lalu ke Home; nama/kota tampil di Invite & Members; Sign out kembali ke Welcome | M1 (UI demo), M3 (live) |
 
-**Bisa dikerjakan sambil menunggu backend:** M0, M1, M2, M3, M5. M4 dan M6 memakai adapter demo sampai kontrak dan indexer siap.
+**Bisa dikerjakan sambil menunggu backend:** M0, M1, M2, M3, M5, dan UI M12. M4 dan M6 memakai adapter demo sampai kontrak dan indexer siap.
 
 ### Peta dependensi
 
@@ -113,7 +114,7 @@ M4..M9 ─> M10 ─> M11
 | Tanggal | WP |
 | --- | --- |
 | 28–29 Sep | M0, M1, M2 (spike Mera di hari pertama) |
-| 30 Sep – 2 Okt | M3, M5, M4 di mode demo |
+| 30 Sep – 2 Okt | M3, M5, M12 (UI demo), M4 di mode demo |
 | 3–6 Okt | M4 + M6 di mode live (setelah kontrak & indexer siap), M7, M8, M9 |
 | 7–8 Okt | M11, hanya kalau P0 aman |
 | 9–11 Okt | M10: uji 3 HP, build EAS, rekam video |

@@ -38,6 +38,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] M9 Undangan & deep link
 - [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
 - [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
+- [x] Desain P1 Set up profile + P2 Profile di canvas Final UI (28 Sep)
+- [ ] M12 Profil & akun: layar P1 + tab P2, simpan ke `profiles` lewat api, Sign out
 
 ## Gambaran semua tim (per lapisan) — lihat `docs/ROADMAP.md`
 
