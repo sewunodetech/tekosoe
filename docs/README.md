@@ -11,6 +11,8 @@ Snapshot dari dokumen perencanaan di Claude Docs (diekspor 28 Sep 2026). Dokumen
 | [05-user-flow.md](05-user-flow.md) | Flow masuk/bergabung dan di dalam grup | › User Flow |
 | [06-peta-layar.md](06-peta-layar.md) | Setiap layar: fungsi, navigasi, kontrak & data | › Peta Layar |
 | [07-rencana-pengembangan.md](07-rencana-pengembangan.md) | Target bounty, scope P0–P3, arsitektur, rencana uji, timeline, checklist submission, risiko | Monad Metropolis — Dokumen Pengembangan |
+| [ROADMAP.md](ROADMAP.md) | Goal, scope, fase & paket kerja semua tim, serah-terima antar tim | Dipelihara di repo |
+| [../apps/mobile/ROADMAP.md](../apps/mobile/ROADMAP.md) | Roadmap mobile detail: arsitektur, kebutuhan data dari tim lain, WP M0–M11 | Dipelihara di repo |
 | [STATUS.md](STATUS.md) | Progres hidup: apa yang sudah jadi, alamat kontrak, blocker | Dipelihara di repo |
 | [decisions/](decisions/) | Catatan keputusan (ADR) | Dipelihara di repo |
 

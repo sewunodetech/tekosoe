@@ -1,5 +1,7 @@
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
+> **Mulai dari [`ROADMAP.md`](ROADMAP.md)** — goal, scope, arsitektur target (`src/data`, `src/features`, `src/wallet`, `src/tx`), dan paket kerja M0–M11. Ambil WP berikutnya yang dependensinya sudah ✅ di `docs/STATUS.md` › Mobile.
+
 ## Tekosoe — aturan app
 
 Lihat juga `AGENTS.md` di root. App ini memegang **semua interaksi user**; transaksi ditandatangani di perangkat lewat Mera lalu dikirim langsung ke Monad.
