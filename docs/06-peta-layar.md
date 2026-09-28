@@ -9,8 +9,8 @@ Akun dibuat dengan passkey, lalu user membuat trip atau bergabung lewat link und
 | Layar | Fungsi | Datang dari | Lanjut ke | Kontrak & data |
 | --- | --- | --- | --- | --- |
 | 01 Welcome | Perkenalan produk: "One pot for the whole trip". Teko menuang ke tiga gelas, anggota dari tiga negara | Membuka app pertama kali | Get started → 02; I already have an account → 02 | — |
-| 02 Sign in | Buat akun atau masuk dengan Face ID (passkey Mera). Teko mengedip | 01 | Continue with Face ID → 03; kembali → 01 | Mera: passkey → alamat; drip gas ke akun baru |
-| 03 Home | Daftar trip: kartu trip aktif (pot, saldo kamu, negara anggota), trip yang sudah settle, tips dari Teko | 02; tab Trips; kembali dari 04 dan 07 | Kartu Japan Trip → 07; New trip → 04; tab Card → 12 | Envio: pot dan saldo per trip; Supabase: nama trip |
+| 02 Sign in | Buat akun atau masuk dengan Face ID (passkey Mera). Teko mengedip | 01 | Continue with Face ID → P1 (akun baru) atau 03 (akun lama); kembali → 01 | Mera: passkey → alamat; drip gas ke akun baru |
+| 03 Home | Daftar trip: kartu trip aktif (pot, saldo kamu, negara anggota), trip yang sudah settle, tips dari Teko | P1 (akun baru); 02 (akun lama); tab Trips; kembali dari 04 dan 07 | Kartu Japan Trip → 07; New trip → 04; tab Card → 12 | Envio: pot dan saldo per trip; Supabase: nama trip |
 | 04 New trip | Membuat trip: nama, tanggal berakhir, batas approval, link undangan | 03; Plan another trip di 13 | Create trip → 07; Copy link / Share → 05; kembali → 03 | `createGroup`; Supabase `group_meta` |
 | 05 Invite | Yang dilihat teman saat membuka link: pengundang, anggota, pot, batas approval. Teko "love" | 04; Invite more friends di S6 | Join with Face ID → 06 | Supabase `group_meta`, `profiles` |
 | 06 Join + put in | Bergabung, memilih setoran awal dan safety net | 05 | Join and put in $100 → 07; kembali → 05 | `joinGroup`, `approve` AUSD sebesar safety net, `deposit` |
@@ -64,7 +64,7 @@ Layar untuk keadaan di luar jalur normal; masing-masing selalu punya jalan kemba
 
 ## Akun & profil (P1–P2)
 
-Ditambahkan 28 Sep 2026 (belum ada di dokumen live Claude Docs). Nama, kota, dan negara yang tampil di Invite, Members, dan Home berasal dari sini.
+Setelah passkey pertama dibuat, user langsung mengisi profil (P1) sebelum masuk Home. Nama, kota, dan negara yang tampil di Invite, Members, dan Home berasal dari sini.
 
 | Layar | Fungsi | Datang dari | Lanjut ke | Kontrak & data |
 | --- | --- | --- | --- | --- |
