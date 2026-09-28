@@ -40,4 +40,4 @@ forge test -vvv
 forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast   # butuh DEPLOYER_PRIVATE_KEY, AUSD_ADDRESS
 ```
 
-Dependensi (`@openzeppelin/contracts`, `forge-std`) dipasang lewat `pnpm install` di root; lihat `remappings.txt`.
+Dependensi (`@openzeppelin/contracts`, `forge-std`) dipasang lewat `npm install` di root; lihat `remappings.txt`.
