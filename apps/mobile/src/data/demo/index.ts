@@ -1,31 +1,12 @@
-import { formatDollars, parseDollars } from '@tekosoe/shared';
-
 import { palette } from '@/constants/theme';
+import { usd } from '@/lib/money';
+import type { Invoice, Member, Spend, Trip } from '../types';
 
 /**
- * Data demo dari cerita di canvas "Final UI": tiga teman (Indonesia, Singapura, Australia) di Jepang.
- * Semua layar membaca dari sini supaya ceritanya konsisten.
- * TODO: ganti dengan data Envio (angka) + apps/api (nama, judul, struk) — lihat apps/mobile/AGENTS.md.
+ * Adapter data DEMO: cerita Rina/Wei/Jack di Jepang dari canvas "Final UI".
+ * Layar tidak boleh meng-import file ini — pakai hook di `src/features/*`.
+ * Helper uang ada di `src/lib/money.ts`.
  */
-
-/** Dolar → bigint AUSD (6 desimal). */
-export const usd = (dollars: number | string) => parseDollars(String(dollars));
-
-/** "$150.00" */
-export const money = (amount: bigint) => formatDollars(amount);
-
-/** "+$70.00" / "−$10.00" */
-export const signed = (amount: bigint) => (amount > 0n ? `+${formatDollars(amount)}` : formatDollars(amount));
-
-export type Member = {
-  id: string;
-  name: string;
-  /** Nama yang ditampilkan dari sudut pandang user ("You"). */
-  label: string;
-  city: string;
-  country: string;
-  tint: string;
-};
 
 export const members = {
   rina: { id: 'rina', name: 'Rina', label: 'Rina', city: 'Jakarta, Indonesia', country: 'Indonesia', tint: palette.apricot },
@@ -37,20 +18,6 @@ export const members = {
 } satisfies Record<string, Member>;
 
 export const me = members.jack;
-
-export type ActivityIcon = 'food' | 'music' | 'train';
-
-export type Spend = {
-  id: string;
-  title: string;
-  icon: ActivityIcon;
-  amount: bigint;
-  paidBy: Member;
-  forWhom: string;
-  shares: { member: Member; share: bigint }[];
-  when: string;
-  hasReceipt: boolean;
-};
 
 const japanMembers = [members.rina, members.wei, members.jack];
 
@@ -93,22 +60,6 @@ export const spends: Record<string, Spend> = {
   },
 };
 
-export type Trip = {
-  id: string;
-  name: string;
-  pot: bigint;
-  myBalance: bigint;
-  members: Member[];
-  /** Kalimat negara di kartu trip. */
-  countries: string;
-  status: string;
-  settlesOn: string;
-  approvalLimit: bigint;
-  activity: Spend[];
-  /** Perkiraan "If we settled today". */
-  settleToday: { member: Member; amount: bigint }[];
-};
-
 export const trips: Record<string, Trip> = {
   japan: {
     id: 'japan',
@@ -145,7 +96,6 @@ export const trips: Record<string, Trip> = {
 export const getTrip = (id?: string) => trips[id ?? ''] ?? trips.japan;
 export const getSpend = (id?: string) => spends[id ?? ''] ?? spends.dinner;
 
-/** Ringkasan per anggota setelah settle (F13). */
 export const settlement = {
   tripId: 'japan',
   date: 'Oct 14',
@@ -156,21 +106,6 @@ export const settlement = {
   ],
 };
 
-export type InvoiceStatus = 'refunded' | 'due' | 'paid';
-
-export type Invoice = {
-  number: string;
-  status: InvoiceStatus;
-  owner: Member;
-  /** Label HP di header ("Wei's phone") untuk demo multi-perangkat. */
-  device?: string;
-  headline: string;
-  headlineColor: 'positive' | 'text';
-  subline: string;
-  lines: { date: string; title: string; sub: string; amount: bigint; positive?: boolean }[];
-  totals: { label: string; value: bigint; strong?: boolean }[];
-};
-
 const commonLines = {
   deposit: { date: 'Oct 8', title: 'You put in', sub: 'Deposit', amount: usd(100), positive: true },
   dinner: { date: 'Oct 9', title: 'Dinner in Shibuya', sub: 'Your share of $90.00', amount: -usd(30) },
@@ -178,7 +113,6 @@ const commonLines = {
   train: { date: 'Oct 11', title: 'Train tickets to Kyoto', sub: 'Your share of $150.00', amount: -usd(50) },
 };
 
-/** I1 (Jack, refunded), I2 (Wei, due), I3 (Rina, paid). */
 export const invoices: Record<string, Invoice> = {
   jack: {
     number: 'INV-JPN-0003',

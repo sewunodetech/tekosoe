@@ -2,6 +2,7 @@ import { Link, useLocalSearchParams, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Sparkle } from '@/components/decor';
+import { combine, QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
 import { ActivityRow, MemberAmountRow } from '@/components/trip-rows';
 import { Button } from '@/components/ui/button';
@@ -10,16 +11,26 @@ import { AvatarStack, Screen, SectionLabel, Surface } from '@/components/ui/layo
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors, fonts, radius } from '@/constants/theme';
-import { getTrip, money, signed, spends, usd } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money, signed, usd } from '@/lib/money';
 
 // 07 Trip — canvas "Final UI" › F07Group. Dengan `?state=empty` menjadi S1 Pot is empty (S01PotEmpty),
 // yang muncul setelah permintaan $150 disetujui di layar 10.
-// TODO: Envio (pot, saldo, feed) + api (judul, status struk).
+// TODO (M6): Envio (pot, saldo, feed) + api (judul, status struk). Pot kosong dari pot == 0, bukan query param.
 export default function TripScreen() {
   const { id, state } = useLocalSearchParams<{ id: string; state?: string }>();
-  const trip = getTrip(id);
-  const empty = state === 'empty';
+  // Pengeluaran terakhir yang disetujui (demo: tiket kereta), untuk keadaan S1.
+  const query = combine(useTrip(id), useSpend('train'));
+  return (
+    <QueryState query={query}>
+      {([trip, lastSpend]) => <TripView trip={trip} lastSpend={lastSpend} empty={state === 'empty'} />}
+    </QueryState>
+  );
+}
 
+function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; empty: boolean }) {
   return (
     <Screen
       gap={16}
@@ -68,7 +79,7 @@ export default function TripScreen() {
               </Text>
             </Surface>
           </View>
-          <ActivityRow spend={{ ...spends.train, hasReceipt: true }} fresh meta="You · approved by Rina · just now" />
+          <ActivityRow spend={lastSpend} fresh meta={`You · approved by ${trip.members[0].name} · just now`} />
         </>
       ) : (
         <>

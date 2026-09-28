@@ -10,15 +10,25 @@ import { Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getSpend, getTrip, money } from '@/lib/demo';
+import { combine, QueryState } from '@/components/query-state';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // R2 Receipt, locked → R3 Receipt, unlocked — canvas "Final UI" › S08ReceiptLocked, S09ReceiptView
 // TODO: api → receipts, group_keys; Envio ReceiptAttached. Buka kunci grup dengan Face ID (PRF Mera),
 // unduh ciphertext, cocokkan keccak256 dengan receiptHash on-chain, lalu dekripsi di HP.
 export default function ReceiptScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
-  const trip = getTrip(id);
-  const spend = getSpend(spendId);
+  return (
+    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Receipt">
+      {([trip, spend]) => <ReceiptView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const [unlocked, setUnlocked] = useState(false);
   const count = trip.members.length === 3 ? 'three' : String(trip.members.length);
 

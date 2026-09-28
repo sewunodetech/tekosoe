@@ -16,15 +16,24 @@ import { Icon } from '@/components/ui/icon';
 import { InfoBox, Pill, Screen } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getTrip } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
 
 // R1 Add receipt — canvas "Final UI" › S07ReceiptCapture
-// TODO: expo-camera / expo-document-picker → kompres → AES-GCM kunci grup → keccak256(ciphertext)
+// TODO (M7): expo-camera / expo-document-picker → kompres → AES-GCM kunci grup → keccak256(ciphertext)
 // → unggah lewat api → attachReceipt(groupId, spendId, receiptHash).
 export default function AddReceiptScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
+  return (
+    <QueryState query={useTrip(id)} title="Add receipt" headerAction="close">
+      {(trip) => <AddReceiptView trip={trip} />}
+    </QueryState>
+  );
+}
+
+function AddReceiptView({ trip }: { trip: Trip }) {
   const others = trip.members.filter((m) => m.label !== 'You').map((m) => m.name);
 
   return (

@@ -8,14 +8,19 @@ import { Icon } from '@/components/ui/icon';
 import { KeyValue, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getTrip } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
 
 // 06 Join + put in — canvas "Final UI" › F06Join
 // TODO: satu signing session Mera: joinGroup(groupId, inviteSecret, pullCap) + approve AUSD (pullCap) + deposit.
 export default function JoinScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
-  const trip = getTrip(code);
+  return <QueryState query={useTrip(code)}>{(trip) => <JoinView trip={trip} />}</QueryState>;
+}
+
+function JoinView({ trip }: { trip: Trip }) {
   const [putIn, setPutIn] = useState<number>(100);
   const [safetyNet, setSafetyNet] = useState<number>(50);
 

@@ -6,14 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { KeyValue, Screen, Surface } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getTrip, money } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // S4 Offline / payment failed — canvas "Final UI" › S04Offline. Dari kartu (Tokyo Taxi).
 // Transaksi tidak terkirim; tidak ada perubahan on-chain, jadi tidak ada tagihan ganda.
 export default function PaymentFailedScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
+  return (
+    <QueryState query={useTrip(id)} headerAction="none">
+      {(trip) => <PaymentFailedView trip={trip} />}
+    </QueryState>
+  );
+}
+
+function PaymentFailedView({ trip }: { trip: Trip }) {
 
   return (
     <Screen

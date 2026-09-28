@@ -7,15 +7,25 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getSpend, getTrip, money } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // 11 Payment details — canvas "Final UI" › F11Detail
 // TODO: Envio SpendExecuted + api (judul, struk). "I wasn't part of this" → disputeShare(groupId, spendId).
 export default function PaymentDetailsScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
-  const trip = getTrip(id);
-  const spend = getSpend(spendId);
+  return (
+    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Payment details">
+      {([trip, spend]) => <PaymentDetailsView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const myShare = spend.shares.find((s) => s.member.label === 'You')?.share ?? 0n;
 
   return (

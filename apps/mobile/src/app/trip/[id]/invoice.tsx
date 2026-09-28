@@ -7,8 +7,12 @@ import { Icon } from '@/components/ui/icon';
 import { KeyValue, Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette } from '@/constants/theme';
-import { getInvoice, getTrip, money, signed, type InvoiceStatus } from '@/lib/demo';
+import type { Invoice, InvoiceStatus, Trip } from '@/data/types';
+import { useInvoice } from '@/features/invoices/useInvoice';
+import { useTrip } from '@/features/trips/useTrip';
+import { money, signed } from '@/lib/money';
 
 // I1 Refunded · I2 Due · I3 Paid — canvas "Final UI" › S10Invoice, S11InvoiceDue, S12InvoicePaid.
 // `?who=jack|wei|rina` memilih invoice anggota (demo multi-HP).
@@ -22,8 +26,15 @@ const BADGE: Record<InvoiceStatus, { label: string; bg: string; color: string }>
 
 export default function InvoiceScreen() {
   const { id, who } = useLocalSearchParams<{ id: string; who?: string }>();
-  const trip = getTrip(id);
-  const invoice = getInvoice(who);
+  const query = combine(useTrip(id), useInvoice(who ?? 'jack'));
+  return (
+    <QueryState query={query} title="Trip invoice">
+      {([trip, invoice]) => <InvoiceView trip={trip} invoice={invoice} />}
+    </QueryState>
+  );
+}
+
+function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
   const badge = BADGE[invoice.status];
   const verifyUrl = `tekosoe.app/v/${invoice.number}`;
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;

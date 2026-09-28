@@ -2,7 +2,8 @@ import { Link, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { type Member, type Spend, money, signed } from '@/lib/demo';
+import type { Member, Spend } from '@/data/types';
+import { money, signed } from '@/lib/money';
 import { PulseDot } from './decor';
 import { Avatar } from './ui/avatar';
 import { Icon } from './ui/icon';

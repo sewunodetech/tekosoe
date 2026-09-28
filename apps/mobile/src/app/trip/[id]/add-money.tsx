@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Bob, Coin } from '@/components/decor';
+import { QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
 import { Button } from '@/components/ui/button';
 import { ChoiceChips } from '@/components/ui/choice-chips';
@@ -10,13 +11,22 @@ import { KeyValue, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors, fonts } from '@/constants/theme';
-import { getTrip, money, signed, usd } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
+import { money, signed, usd } from '@/lib/money';
 
 // 08 Add money — canvas "Final UI" › F08AddMoney
-// TODO: deposit(groupId, amount).
+// TODO (M4): deposit(groupId, amount).
 export default function AddMoneyScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
+  return (
+    <QueryState query={useTrip(id)} title="Add money" headerAction="close">
+      {(trip) => <AddMoneyView trip={trip} />}
+    </QueryState>
+  );
+}
+
+function AddMoneyView({ trip }: { trip: Trip }) {
   const [amount, setAmount] = useState<number>(50);
 
   return (

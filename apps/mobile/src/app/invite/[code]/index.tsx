@@ -8,14 +8,22 @@ import { PersonRow } from '@/components/trip-rows';
 import { Button } from '@/components/ui/button';
 import { Screen, Surface } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getTrip, members } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
 
 // 05 Invite — canvas "Final UI" › F05Invite. Dibuka dari tekosoe://invite/<code> atau tautan web.
 // TODO: api → group_meta, profiles berdasarkan kode undangan.
 export default function InviteScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
-  const trip = getTrip(code);
+  return <QueryState query={useTrip(code)}>{(trip) => <InviteView trip={trip} />}</QueryState>;
+}
+
+function InviteView({ trip }: { trip: Trip }) {
+  // Anggota pertama = pembuat trip; yang ditampilkan hanya anggota lain (bukan "You").
+  const organizer = trip.members[0];
+  const others = trip.members.filter((m) => m.label !== 'You');
 
   return (
     <Screen
@@ -43,14 +51,15 @@ export default function InviteScreen() {
 
       <View style={{ gap: 6 }}>
         <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} color={colors.textMuted}>
-          {members.rina.name} invited you to
+          {organizer.name} invited you to
         </Text>
         <Text variant="hero">{trip.name}</Text>
       </View>
 
       <Surface style={{ paddingVertical: 6 }}>
-        <PersonRow member={members.rina} badge="Organizer" />
-        <PersonRow member={members.wei} />
+        {others.map((m) => (
+          <PersonRow key={m.id} member={m} badge={m.id === organizer.id ? 'Organizer' : undefined} />
+        ))}
       </Surface>
 
       <View style={styles.facts}>

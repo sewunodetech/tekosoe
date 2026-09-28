@@ -9,7 +9,13 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { colors, palette, radius } from '@/constants/theme';
-import { members } from '@/lib/demo';
+
+// Chip negara di Welcome adalah ilustrasi pemasaran dari desain, bukan data user.
+const members = {
+  rina: { name: 'Rina', tint: palette.apricot },
+  wei: { name: 'Wei', tint: palette.greenSoft },
+  jack: { name: 'Jack', tint: palette.sky },
+};
 
 // 01 Welcome — canvas "Final UI" › F01Welcome
 export default function WelcomeScreen() {
