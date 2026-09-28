@@ -16,4 +16,4 @@ Lihat juga `AGENTS.md` di root. Next.js statis di Vercel dengan tiga tugas saja:
 2. **Link undangan** yang membuka app (deep link skema `tekosoe://`, fallback ke halaman unduh).
 3. **File asosiasi domain untuk passkey** — `/.well-known/apple-app-site-association` dan `/.well-known/assetlinks.json` di domain yang sama dengan `EXPO_PUBLIC_PASSKEY_DOMAIN`. Tanpa ini passkey native tidak jalan.
 
-Bukan tempat backend: penjadwal, gas, dan Supabase ada di `apps/api`. Tidak ada istilah kripto di halaman yang dilihat user umum.
+Bukan tempat backend: penjadwal, gas, dan database ada di `apps/api`. Tidak ada istilah kripto di halaman yang dilihat user umum.

@@ -11,7 +11,7 @@ Dokumen perencanaan ada di [`docs/`](docs/README.md). Baca dokumen yang relevan 
 | Kalau kamu mengerjakan… | Baca dulu |
 | --- | --- |
 | Fitur apa pun | [`docs/STATUS.md`](docs/STATUS.md) (apa yang sudah/belum), [`docs/02-prd.md`](docs/02-prd.md) (FR/NFR) |
-| Kontrak, indexer, backend, DB | [`docs/03-spesifikasi-teknis.md`](docs/03-spesifikasi-teknis.md) |
+| Kontrak, indexer, backend, DB | [`docs/03-spesifikasi-teknis.md`](docs/03-spesifikasi-teknis.md) (di sana "Supabase" = database metadata; provider belum final, lihat ADR 0002) |
 | Layar app | [`docs/06-peta-layar.md`](docs/06-peta-layar.md), [`docs/05-user-flow.md`](docs/05-user-flow.md), [`docs/04-user-stories.md`](docs/04-user-stories.md) |
 | Prioritas, uji, timeline | [`docs/07-rencana-pengembangan.md`](docs/07-rencana-pengembangan.md) |
 | Alasan bisnis | [`docs/01-brd.md`](docs/01-brd.md) |
@@ -24,11 +24,11 @@ Dokumen asli (live) ada di Claude Docs: "Tekosoe — Dokumen Produk" dan "Monad 
 ```
 apps/mobile        Expo (React Native) + Expo Router — semua interaksi user
 apps/web           Next.js statis — verifikasi invoice, link undangan, file domain passkey
-apps/api           Hono di Docker — penjadwal settle, gas/drip MON, satu-satunya pintu ke Supabase, push
+apps/api           Hono di Docker — penjadwal settle, gas/drip MON, satu-satunya pintu ke database, push
 packages/contracts Foundry — GroupVault.sol
 packages/indexer   Envio HyperIndex — sumber data baca untuk uang
 packages/shared    ABI, alamat, chain, tipe, skema metadata (zod) — dipakai semua paket
-supabase/          migrasi SQL, RLS, bucket receipts
+database/          migrasi Postgres (Neon/Supabase — belum final, lihat ADR 0002)
 docs/              BRD, PRD, spesifikasi, user stories, flow, peta layar, rencana, keputusan
 ```
 
@@ -36,16 +36,16 @@ Setiap folder punya `AGENTS.md` sendiri dengan aturan lokal. Baca itu juga saat 
 
 ## Aturan yang tidak boleh dilanggar
 
-1. **Uang hanya on-chain.** Saldo, pemakaian, dan settle hanya ada di kontrak dan dibaca lewat Envio. Supabase tidak pernah menyimpan saldo.
+1. **Uang hanya on-chain.** Saldo, pemakaian, dan settle hanya ada di kontrak dan dibaca lewat Envio. Database metadata tidak pernah menyimpan saldo.
 2. **Tidak ada custody.** Kunci user tidak pernah keluar dari perangkat. Backend hanya memegang kunci untuk gas dan DB — tidak pernah dana atau kunci user.
 3. **Satu account layer: Mera.** Tidak ada Privy, WalletConnect, atau "connect wallet".
 4. **Tidak ada istilah kripto di layar user.** Kata "wallet", "gas", "seed phrase", "blockchain", "token", "hash" tidak boleh muncul di UI. Nominal selalu dalam dolar.
 5. **AUSD 6 desimal.** Simpan sebagai `bigint` unit terkecil; konversi ke dolar hanya di lapisan tampilan.
 6. **Integrasi sponsor harus nyata di testnet**, bukan mock (kecuali mock token khusus untuk uji reentrancy).
-7. **Rahasia tidak pernah di-commit.** Hanya `.env.example`. `SUPABASE_SERVICE_ROLE_KEY` hanya di `apps/api`.
+7. **Rahasia tidak pernah di-commit.** Hanya `.env.example`. `DATABASE_URL` dan kredensial storage hanya di `apps/api`.
 8. **Mera belum terdokumentasi baik.** Setiap nama fungsi `@category-labs/mera` wajib diverifikasi dari source paket di `node_modules` atau repo contoh publik. Jangan mengarang API.
 9. **Scope berlapis P0 → P1 → P2 → P3.** Jangan mulai lapisan berikutnya sebelum lapisan sebelumnya jalan end-to-end di testnet. Kalau waktu mepet, potong dari P3, lalu P2 — tidak pernah dari P0.
-10. Untuk library apa pun (Expo, Next.js, viem, Hono, Envio, Supabase, Foundry), ambil dokumentasi terbaru (Context7 / docs resmi) — versi di repo ini lebih baru dari data latih.
+10. Untuk library apa pun (Expo, Next.js, viem, Hono, Envio, Neon/Supabase, Foundry), ambil dokumentasi terbaru (Context7 / docs resmi) — versi di repo ini lebih baru dari data latih.
 
 ## Alur kerja agent
 

@@ -15,7 +15,7 @@ apps/api            Hono — settle scheduler, gas drip, metadata API, push
 packages/contracts  Foundry — GroupVault
 packages/indexer    Envio HyperIndex
 packages/shared     ABI, chain, money, metadata schemas
-supabase/           SQL migrations
+database/           Postgres migrations (metadata only)
 docs/               BRD, PRD, technical spec, user stories, flows, screen map, dev plan
 ```
 

@@ -33,9 +33,6 @@ packages/contracts/lib/
 # envio
 packages/indexer/generated/
 
-# supabase
-supabase/.branches/
-supabase/.temp/
 
 # os / editor
 .DS_Store

@@ -1,6 +1,7 @@
 -- Tekosoe — metadata off-chain. Uang dan aturan tetap on-chain; tabel ini TIDAK PERNAH menyimpan saldo.
--- Sumber: docs/03-spesifikasi-teknis.md › Database off-chain (Supabase).
--- Semua akses lewat apps/api dengan service role. RLS aktif tanpa policy = role anon/authenticated ditolak.
+-- Sumber: docs/03-spesifikasi-teknis.md › Database off-chain. Postgres biasa (Neon / Supabase / lokal).
+-- Satu-satunya klien adalah apps/api lewat DATABASE_URL. RLS aktif tanpa policy sebagai lapisan pengaman
+-- untuk role lain; role pemilik tabel (yang dipakai api) tetap bisa akses.
 -- group_id / spend_id: uint256 on-chain disimpan sebagai numeric(78,0). Alamat: lowercase hex.
 
 create domain eth_address as text check (value ~ '^0x[0-9a-f]{40}$');
@@ -72,7 +73,7 @@ create table receipts (
   group_id      numeric(78, 0) not null,
   spend_id      numeric(78, 0) not null,
   n             int not null,
-  storage_path  text not null, -- {group_id}/{spend_id}/{n}.bin di bucket receipts
+  storage_path  text not null, -- {group_id}/{spend_id}/{n}.bin di object storage (lihat database/AGENTS.md)
   receipt_hash  bytes32_hex not null, -- keccak256(ciphertext) = receiptHash on-chain
   mime          text not null,
   attached_by   eth_address not null,
@@ -99,7 +100,3 @@ alter table push_subs     enable row level security;
 alter table group_keys    enable row level security;
 alter table receipts      enable row level security;
 alter table invoices      enable row level security;
-
--- Bucket privat untuk ciphertext struk.
-insert into storage.buckets (id, name, public) values ('receipts', 'receipts', false)
-on conflict (id) do nothing;

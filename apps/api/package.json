@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
-    "@supabase/supabase-js": "^2.117.2",
     "@tekosoe/shared": "workspace:*",
     "hono": "^4.13.9",
     "tsx": "^4.23.15",

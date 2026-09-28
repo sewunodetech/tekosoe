@@ -19,7 +19,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] Monorepo pnpm + Turborepo, struktur folder sesuai spesifikasi
 - [x] Dokumen perencanaan di `docs/`, panduan agent di `AGENTS.md`
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
-- [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `supabase/`
+- [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
 - [ ] `pnpm install` dan semua workspace lolos `typecheck`
 - [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
 
@@ -34,7 +34,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] Keberatan bagian (FR-10)
 - [ ] Settle otomatis via penjadwal + tagihan (FR-11, FR-12)
 - [ ] UI tanpa istilah kripto, nominal dolar (FR-13)
-- [ ] Metadata Supabase via API, hash cocok `noteHash`
+- [ ] Metadata di database via API, hash cocok `noteHash`
 - [ ] Struk: enkripsi di HP, `attachReceipt`, buka dengan Face ID (FR-19, FR-20)
 - [ ] Invoice per anggota: Paid/Refunded/Due, Pay, PDF (FR-22)
 
@@ -69,3 +69,4 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - Apakah SDK Mera + ekstensi PRF jalan di React Native? (spike hari pertama; cadangan: in-app browser dengan domain yang sama)
 - Kompatibilitas Alchemy Gas Manager dengan EOA Mera
 - Model bisnis untuk pitch belum dipilih
+- Provider database (Neon vs Supabase) dan object storage struk — lihat `docs/decisions/0002-database-provider.md`

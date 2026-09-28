@@ -2,7 +2,7 @@ import { keccak256, toBytes, type Hex } from "viem";
 import { z } from "zod";
 
 /**
- * Metadata off-chain yang disimpan di Supabase lewat apps/api.
+ * Metadata off-chain yang disimpan di database (Postgres) lewat apps/api.
  * Setiap baris dikunci ke data on-chain lewat groupId dan noteHash (docs/03-spesifikasi-teknis.md › Database off-chain).
  */
 
