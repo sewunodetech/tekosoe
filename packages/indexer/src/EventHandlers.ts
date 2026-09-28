@@ -1,5 +1,5 @@
 /**
- * Handler Envio untuk GroupVault. SKELETON — jalankan `pnpm codegen` dulu supaya modul `generated` ada,
+ * Handler Envio untuk GroupVault. SKELETON — jalankan `npm run codegen` dulu supaya modul `generated` ada,
  * lalu verifikasi API (`indexer.onEvent`, `context.<Entity>.get/set`) terhadap tipe hasil codegen.
  *
  * Aturan: Member.net = deposited − used dihitung ulang dengan aturan yang sama persis seperti kontrak.

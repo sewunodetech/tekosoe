@@ -1,0 +1,99 @@
+import { Link, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { Button } from '@/components/ui/button';
+import { ChoiceChips } from '@/components/ui/choice-chips';
+import { Icon } from '@/components/ui/icon';
+import { KeyValue, Screen, Surface } from '@/components/ui/layout';
+import { ScreenHeader } from '@/components/ui/screen-header';
+import { Text } from '@/components/ui/text';
+import { colors, fonts, palette, radius } from '@/constants/theme';
+import { getTrip } from '@/lib/demo';
+
+// 06 Join + put in — canvas "Final UI" › F06Join
+// TODO: satu signing session Mera: joinGroup(groupId, inviteSecret, pullCap) + approve AUSD (pullCap) + deposit.
+export default function JoinScreen() {
+  const { code } = useLocalSearchParams<{ code: string }>();
+  const trip = getTrip(code);
+  const [putIn, setPutIn] = useState<number>(100);
+  const [safetyNet, setSafetyNet] = useState<number>(50);
+
+  return (
+    <Screen
+      gap={18}
+      footer={
+        <Link href={`/trip/${trip.id}`} asChild>
+          <Button label={`Join and put in $${putIn}`} />
+        </Link>
+      }>
+      <ScreenHeader title={`Join ${trip.name}`} />
+
+      <Surface style={styles.amountCard}>
+        <Text variant="label" color={colors.textMuted}>
+          Put in to start
+        </Text>
+        <Text style={styles.bigAmount}>${putIn}</Text>
+        <ChoiceChips options={[50, 100, 200] as const} value={putIn} onChange={setPutIn} format={(v) => `$${v}`} />
+        <Text variant="caption" color={colors.textMuted}>
+          You can add more any time.
+        </Text>
+      </Surface>
+
+      <View style={styles.safety}>
+        <View style={styles.safetyTitle}>
+          <View style={styles.shield}>
+            <Icon name="shield" size={18} strokeWidth={2} />
+          </View>
+          <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 15 }}>Safety net</Text>
+        </View>
+        <Text style={{ fontFamily: fonts.body, fontSize: 14, lineHeight: 21 }} color={palette.bark}>
+          If you end up spending more than you put in, up to this much is collected automatically at settle-up. Only if
+          needed.
+        </Text>
+        <ChoiceChips options={[25, 50, 100] as const} value={safetyNet} onChange={setSafetyNet} format={(v) => `$${v}`} tone="ink" borderless />
+      </View>
+
+      <Surface style={{ gap: 10 }}>
+        <KeyValue label="Put in now" value={`$${putIn}.00`} />
+        <KeyValue label="Safety net up to" value={`$${safetyNet}.00`} />
+        <KeyValue label="Your balance" value="$420.00" />
+      </Surface>
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  amountCard: {
+    padding: 22,
+    borderRadius: 26,
+    alignItems: 'center',
+    gap: 14,
+  },
+  bigAmount: {
+    fontFamily: fonts.display,
+    fontSize: 56,
+    lineHeight: 58,
+    letterSpacing: -1.5,
+    color: colors.text,
+  },
+  safety: {
+    padding: 18,
+    borderRadius: radius.card,
+    backgroundColor: colors.warmBg,
+    gap: 12,
+  },
+  safetyTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  shield: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: palette.peachSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

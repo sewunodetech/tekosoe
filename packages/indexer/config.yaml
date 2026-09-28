@@ -1,7 +1,7 @@
 # Envio HyperIndex — GroupVault di Monad testnet.
 # Event harus identik dengan packages/contracts/src/interfaces/IGroupVault.sol.
-# Setelah kontrak di-deploy: isi `address` dan `start_block`, lalu `pnpm codegen`.
-# Format mengikuti Envio v3; kalau codegen menolak, bandingkan dengan template `pnpm envio init`.
+# Setelah kontrak di-deploy: isi `address` dan `start_block`, lalu `npm run codegen`.
+# Format mengikuti Envio v3; kalau codegen menolak, bandingkan dengan template `npx envio init`.
 name: tekosoe-indexer
 schema: ./schema.graphql
 

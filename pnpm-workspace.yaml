@@ -1,6 +1,0 @@
-packages:
-  - apps/*
-  - packages/*
-
-# Expo/React Native membutuhkan node_modules yang tidak di-symlink secara ketat
-nodeLinker: hoisted

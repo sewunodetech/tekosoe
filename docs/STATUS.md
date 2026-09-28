@@ -16,14 +16,32 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 
 ## Setup repo
 
-- [x] Monorepo pnpm + Turborepo, struktur folder sesuai spesifikasi
+- [x] Monorepo npm workspaces + Turborepo, struktur folder sesuai spesifikasi
 - [x] Dokumen perencanaan di `docs/`, panduan agent di `AGENTS.md`
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
 - [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
-- [ ] `pnpm install` dan semua workspace lolos `typecheck`
+- [ ] `npm install` dan semua workspace lolos `typecheck`
 - [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
 
-## P0 — Wajib
+## Mobile (tim kita) — lihat `apps/mobile/ROADMAP.md`
+
+- [x] UI semua layar Final UI + maskot Teko + sistem desain (data demo) — branch `mobile-dev`
+- [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko
+- [ ] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/kosong/error
+- [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil
+- [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata
+- [ ] M4 Transaksi: `src/tx`, semua mutation, status Processing → Done, error ramah
+- [ ] M5 Form & validasi
+- [ ] M6 Data live: adapter Envio + api
+- [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3
+- [ ] M8 Invoice: `payDebt`, PDF, share, QR asli
+- [ ] M9 Undangan & deep link
+- [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
+- [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
+
+## Gambaran semua tim (per lapisan) — lihat `docs/ROADMAP.md`
+
+### P0 — Wajib
 
 - [ ] Onboarding passkey Mera; masuk lagi di perangkat lain dengan akun sama (FR-01, FR-02)
 - [ ] Gas tanpa MON milik user (FR-03)
@@ -38,18 +56,18 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] Struk: enkripsi di HP, `attachReceipt`, buka dengan Face ID (FR-19, FR-20)
 - [ ] Invoice per anggota: Paid/Refunded/Due, Pay, PDF (FR-22)
 
-## P1 — Envio
+### P1 — Envio
 
 - [ ] Indexer HyperIndex untuk semua event
 - [ ] Feed real-time (FR-14), saldo & perkiraan settle-up (FR-15)
 - [ ] OCR struk (FR-21); PDF invoice server + email (FR-23)
 
-## P2 — Mera PRF
+### P2 — Mera PRF
 
 - [ ] Kartu simulasi (FR-16)
 - [ ] Kunci enkripsi turunan passkey, kunci grup (FR-17)
 
-## P3 — Alchemy
+### P3 — Alchemy
 
 - [ ] Gas Manager dengan akun Mera (maks. setengah hari)
 - [ ] Webhooks → push notification (FR-18)
