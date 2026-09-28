@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
-    "@tekosoe/shared": "workspace:*",
+    "@tekosoe/shared": "*",
     "hono": "^4.13.9",
     "tsx": "^4.23.15",
     "viem": "^2.56.9",

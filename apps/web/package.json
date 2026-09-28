@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tekosoe/shared": "workspace:*",
+    "@tekosoe/shared": "*",
     "next": "16.3.6",
     "viem": "^2.56.9",
     "react": "19.2.8",

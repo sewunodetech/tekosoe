@@ -21,13 +21,13 @@ docs/               BRD, PRD, technical spec, user stories, flows, screen map, d
 
 ## Getting started
 
-Requirements: Node 22+, pnpm (`corepack enable`), [Foundry](https://getfoundry.sh), Docker (for the Envio indexer).
+Requirements: Node 22+ (npm), [Foundry](https://getfoundry.sh), Docker (for the Envio indexer).
 
 ```bash
-pnpm install
+npm install
 cp .env.example apps/mobile/.env   # fill in the values, then do the same for apps/api
-pnpm --filter @tekosoe/mobile start
-pnpm --filter @tekosoe/contracts test
+npm run start -w @tekosoe/mobile
+npm test -w @tekosoe/contracts
 ```
 
 ## Deployments (Monad testnet, chain 10143)

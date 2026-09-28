@@ -16,11 +16,11 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 
 ## Setup repo
 
-- [x] Monorepo pnpm + Turborepo, struktur folder sesuai spesifikasi
+- [x] Monorepo npm workspaces + Turborepo, struktur folder sesuai spesifikasi
 - [x] Dokumen perencanaan di `docs/`, panduan agent di `AGENTS.md`
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
 - [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
-- [ ] `pnpm install` dan semua workspace lolos `typecheck`
+- [ ] `npm install` dan semua workspace lolos `typecheck`
 - [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
 
 ## P0 — Wajib

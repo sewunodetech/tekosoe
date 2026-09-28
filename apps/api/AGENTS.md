@@ -19,6 +19,6 @@ Hono (Node/TypeScript) dalam Docker, deploy ke Railway atau Fly. Empat tugas saj
 ## Perintah
 
 ```bash
-pnpm --filter @tekosoe/api dev
+npm run dev -w @tekosoe/api
 docker build -f apps/api/Dockerfile .
 ```

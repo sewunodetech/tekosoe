@@ -52,19 +52,21 @@ Setiap folder punya `AGENTS.md` sendiri dengan aturan lokal. Baca itu juga saat 
 1. **Orientasi.** Baca `docs/STATUS.md` dan `AGENTS.md` folder yang akan disentuh. Cari FR/US yang relevan.
 2. **Rencana singkat.** Sebutkan FR/US yang dikerjakan dan file yang akan diubah. Kalau menyentuh kontrak ↔ indexer ↔ app, kerjakan berurutan: kontrak → `packages/shared` (ABI) → indexer → api → app.
 3. **Implementasi** mengikuti spesifikasi. Kalau spesifikasi ambigu atau kamu harus menyimpang, catat di `docs/decisions/` (format ADR singkat) — jangan diam-diam.
-4. **Verifikasi** sebelum bilang selesai: `pnpm typecheck`, `pnpm lint`, `pnpm test`; kontrak juga `forge test` (dan fuzz untuk invariant saldo).
+4. **Verifikasi** sebelum bilang selesai: `npm run typecheck`, `npm run lint`, `npm test`; kontrak juga `forge test` (dan fuzz untuk invariant saldo).
 5. **Update `docs/STATUS.md`**: centang item yang selesai, tambah catatan (alamat kontrak, hash transaksi testnet, blocker).
 6. **Commit kecil** dengan pesan konvensional (`feat(contracts): ...`, `fix(mobile): ...`). Riwayat commit selama hackathon dinilai juri.
 
 ## Perintah
 
 ```bash
-pnpm install              # semua workspace
-pnpm dev                  # jalankan semua dev server via turbo
-pnpm build | lint | typecheck | test
-pnpm --filter @tekosoe/mobile start      # Expo
-pnpm --filter @tekosoe/contracts test    # forge test
-pnpm --filter @tekosoe/indexer codegen   # envio codegen
+npm install                                 # sekali di root — semua workspace (npm workspaces)
+npm run dev                                 # semua dev server via turbo
+npm run build | lint | typecheck | test
+npm run start -w @tekosoe/mobile            # Expo
+npm test -w @tekosoe/contracts              # forge test
+npm run codegen -w @tekosoe/indexer         # envio codegen
+npm install <pkg> -w @tekosoe/api           # tambah dependensi ke satu workspace (selalu dari root)
+cd apps/mobile && npx expo install <pkg>   # khusus mobile: versi cocok dengan SDK Expo
 ```
 
 ## Fakta jaringan

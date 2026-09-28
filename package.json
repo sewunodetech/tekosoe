@@ -2,7 +2,11 @@
   "name": "tekosoe",
   "private": true,
   "description": "Shared wallet lintas negara yang settle-up sendiri — Monad testnet, AUSD, passkey Mera",
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "engines": {
     "node": ">=22"
   },
@@ -16,5 +20,8 @@
   "devDependencies": {
     "turbo": "^2.11.5",
     "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "viem": "2.56.9"
   }
 }

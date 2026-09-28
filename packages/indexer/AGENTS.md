@@ -15,8 +15,8 @@ Envio HyperIndex (v3) — **sumber data baca untuk semua hal soal uang**: daftar
 ## Perintah
 
 ```bash
-pnpm codegen   # envio codegen — wajib setelah mengubah config.yaml / schema.graphql
-pnpm dev       # envio dev (butuh Docker)
+npm run codegen   # envio codegen — wajib setelah mengubah config.yaml / schema.graphql
+npm run dev       # envio dev (butuh Docker)
 ```
 
 API Envio berubah antar versi: cek dokumentasi terbaru (Context7 `/enviodev/hyperindex`) sebelum menulis handler.

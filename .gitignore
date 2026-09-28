@@ -1,6 +1,5 @@
 # dependencies
 node_modules/
-.pnpm-store/
 
 # env — hanya .env.example yang di-commit
 .env

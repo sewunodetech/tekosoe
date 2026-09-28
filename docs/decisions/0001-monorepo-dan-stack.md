@@ -9,7 +9,7 @@ Spesifikasi Teknis menetapkan satu monorepo TypeScript berisi app mobile, halama
 
 ## Keputusan
 
-- pnpm workspace + Turborepo. Paket bernama `@tekosoe/*`.
+- npm workspaces + Turborepo (awalnya pnpm, diganti npm atas permintaan tim). Paket bernama `@tekosoe/*`; paket internal direferensikan dengan versi `"*"`.
 - `apps/mobile`: Expo SDK 57 + Expo Router (dari template `create-expo-app` default). NativeWind ditambahkan saat mulai membangun UI.
 - `apps/web`: Next.js 16 (App Router, Tailwind v4), dideploy statis ke Vercel.
 - `apps/api`: Hono + `@hono/node-server`, dijalankan di Docker (Railway/Fly). Dipisah dari Next.js supaya penjadwal settle berjalan terus dan tepat waktu.
