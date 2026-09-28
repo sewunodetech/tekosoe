@@ -1,0 +1,66 @@
+# Draf dari docs/03-spesifikasi-teknis.md › Event & skema indexer Envio.
+# Semua nominal dalam unit AUSD (6 desimal).
+
+enum GroupStatus {
+  Active
+  Settled
+}
+
+enum SpendStatus {
+  Pending
+  Executed
+  Rejected
+}
+
+type Group {
+  id: ID! # groupId
+  name: String!
+  creator: String!
+  endsAt: BigInt!
+  approvalThreshold: BigInt!
+  pool: BigInt!
+  status: GroupStatus!
+}
+
+type Member {
+  id: ID! # `${groupId}-${address}`
+  group_id: String!
+  address: String!
+  deposited: BigInt!
+  used: BigInt!
+  net: BigInt! # deposited − used, aturan sama persis dengan kontrak
+  pullCap: BigInt!
+  debt: BigInt!
+  credit: BigInt!
+}
+
+type Spend {
+  id: ID! # `${groupId}-${spendId}`
+  group_id: String!
+  spender: String!
+  to: String!
+  amount: BigInt!
+  status: SpendStatus!
+  executedAt: BigInt
+  noteHash: String
+  receiptCount: Int!
+}
+
+type SpendShare {
+  id: ID! # `${groupId}-${spendId}-${participant}`
+  spend_id: String!
+  participant: String!
+  share: BigInt!
+  disputed: Boolean!
+}
+
+type Activity {
+  id: ID! # `${txHash}-${logIndex}`
+  group_id: String!
+  type: String! # nama event
+  actor: String!
+  counterparty: String
+  amount: BigInt
+  timestamp: BigInt!
+  txHash: String!
+}

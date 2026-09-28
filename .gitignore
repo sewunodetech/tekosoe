@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# env — hanya .env.example yang di-commit
+.env
+.env.*
+!.env.example
+
+# build output
+dist/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# expo
+.expo/
+apps/mobile/ios/
+apps/mobile/android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# foundry
+packages/contracts/out/
+packages/contracts/cache/
+packages/contracts/broadcast/*/31337/
+packages/contracts/lib/
+
+# envio
+packages/indexer/generated/
+
+# supabase
+supabase/.branches/
+supabase/.temp/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.log
+.vercel
