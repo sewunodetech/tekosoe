@@ -1,32 +1,210 @@
 @import "tailwindcss";
 
-@theme {
-  --font-display: var(--font-display), "Bricolage Grotesque", -apple-system, sans-serif;
-  --font-body: var(--font-body), "Manrope", -apple-system, sans-serif;
+/*
+ * Token desain — salinan dari apps/mobile/src/constants/theme.ts (palette, colors, radius, type).
+ * Kalau token di app berubah, ubah di sini juga. Jangan tulis hex langsung di komponen.
+ */
+@theme inline {
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* palette mentah */
+  --color-ivory: #faf8f3;
+  --color-white: #ffffff;
+  --color-ink: #1d2426;
+  --color-ink-soft: #2a3436;
+  --color-slate: #5f6b6d;
+  --color-slate-light: #7c8789;
+  --color-teal: #1f7a6e;
+  --color-teal-deep: #16574e;
+  --color-teal-ink: #234a44;
+  --color-teal-muted: #3f5b56;
+  --color-mint: #dcf0ea;
+  --color-mint-card: #cfe9e1;
+  --color-mint-card-deco: #b8dfd3;
+  --color-mint-deep: #bfe4da;
+  --color-mint-bright: #8ed8c6;
+  --color-green: #1c7a4f;
+  --color-green-deep: #145c3b;
+  --color-green-soft: #cdeedd;
+  --color-orange: #ff9a62;
+  --color-peach: #ffe8da;
+  --color-peach-soft: #ffe0cc;
+  --color-cream: #fff4ec;
+  --color-apricot: #ffdccb;
+  --color-coin: #ffd66b;
+  --color-butter: #fff0c2;
+  --color-sky: #d6e4ff;
+  --color-sky-soft: #e6eefc;
+  --color-mist: #eef1f6;
+  --color-mist-ink: #56627a;
+  --color-lavender: #b9aef5;
+  --color-lilac: #cfc6ff;
+  --color-line: #e6e2d8;
+  --color-line-strong: #cfcabd;
+  --color-sand: #f1eee6;
+  --color-skeleton: #eceae4;
+  --color-camera-bg: #e9efec;
+  --color-violet: #ece8ff;
+  --color-violet-deep: #ddd6ff;
+  --color-violet-ink: #4d4870;
+  --color-violet-soft: #e3ddff;
+  --color-navy: #1f3f7a;
+  --color-cocoa: #6b5e55;
+  --color-honey: #ffc56b;
+  --color-brown: #a4561f;
+  --color-rust: #8a3b12;
+  --color-error-bg: #fffcfb;
+
+  /* radius dari theme.ts */
+  --radius-input: 16px;
+  --radius-button: 18px;
+  --radius-row: 18px;
+  --radius-card: 22px;
+  --radius-tile: 14px;
+  --radius-trip: 26px;
+  --radius-hero: 28px;
+  --radius-invite: 30px;
 }
 
 :root {
-  --background: #faf8f3;
-  --foreground: #1d2426;
-  --primary: #1f7a6e;
-  --primary-deep: #16574e;
-  --accent: #ff9a62;
-  --mint: #dcf0ea;
-  --cream: #fff4ec;
-  --sand: #f1eee6;
-  --line: #e6e2d8;
-  --slate: #5f6b6d;
+  color-scheme: light;
+  --shell-bg: #e9e5da;
+}
+
+html {
+  background: var(--shell-bg);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: #faf8f3;
-  color: #1d2426;
-  font-family: var(--font-body), -apple-system, sans-serif;
   margin: 0;
-  padding: 0;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
-h1, h2, h3, .font-display {
-  font-family: var(--font-display), -apple-system, sans-serif;
+@media (min-width: 768px) {
+  body {
+    background: var(--shell-bg);
+  }
+}
+
+/* skala tipe dari theme.ts `type` */
+@utility type-amount-xl {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 46px;
+  letter-spacing: -1px;
+}
+@utility type-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 38px;
+  letter-spacing: -1px;
+}
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.5px;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+}
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 24px;
+}
+@utility type-body {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+@utility type-body-strong {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 700;
+}
+@utility type-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+@utility type-caption {
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 400;
+}
+@utility type-small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+/* --- animasi (port dari decor.tsx / Teko.dc.html) --- */
+@keyframes tk-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(var(--bob, 6px) * -1)); }
+}
+@keyframes tk-sway {
+  0%, 100% { transform: rotate(calc(var(--sway, 2.5deg) * -1)); }
+  50% { transform: rotate(var(--sway, 2.5deg)); }
+}
+@keyframes tk-sparkle {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.55; transform: scale(0.72) rotate(90deg); }
+}
+@keyframes tk-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes tk-pulse {
+  0% { opacity: 0.45; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+@keyframes tk-fall {
+  0% { transform: translateY(-60px) rotate(0deg); }
+  100% { transform: translateY(960px) rotate(540deg); }
+}
+@keyframes tk-sheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes tk-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tk-bob { animation: tk-bob var(--bob-ms, 3200ms) ease-in-out infinite; animation-delay: var(--delay, 0ms); }
+.tk-sway { transform-origin: 50% 88%; animation: tk-sway var(--sway-ms, 3600ms) ease-in-out infinite; }
+.tk-sparkle { animation: tk-sparkle 1300ms ease-in-out infinite alternate; animation-delay: var(--delay, 0ms); }
+.tk-pop { animation: tk-pop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tk-pulse-ring { animation: tk-pulse 1600ms ease-out infinite; }
+.tk-fall { animation: tk-fall var(--fall-ms, 5200ms) linear infinite; animation-delay: var(--delay, 0ms); }
+.tk-sheet { animation: tk-sheet 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tk-fade { animation: tk-fade 200ms ease-out both; }
+
+.tk-still { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-motion { display: none; }
+  .tk-still { display: block; }
+  .tk-bob, .tk-sway, .tk-sparkle, .tk-pop, .tk-pulse-ring, .tk-fall, .tk-sheet, .tk-fade {
+    animation: none !important;
+  }
+  .tk-fall { display: none; }
 }
