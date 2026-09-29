@@ -1,0 +1,25 @@
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_DATA_SOURCE": "demo"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_DATA_SOURCE": "live"
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_DATA_SOURCE": "live"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

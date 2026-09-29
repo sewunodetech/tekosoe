@@ -91,7 +91,14 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; em
 
           {trip.settleToday.length > 0 && (
             <Surface style={{ gap: 10 }}>
-              <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
+                <Link href={`/trip/${trip.id}/settled`}>
+                  <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
+                    Preview settle-up →
+                  </Text>
+                </Link>
+              </View>
               {trip.settleToday.map((row) => (
                 <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
               ))}
