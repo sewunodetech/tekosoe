@@ -8,9 +8,11 @@
     "scheme": "tekosoe",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.tekosoe.xyz"
     },
     "android": {
+      "package": "com.tekosoe.xyz",
       "adaptiveIcon": {
         "backgroundColor": "#faf8f3",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,7 +35,8 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": false,

@@ -10,16 +10,17 @@ type Props = {
   /** "back" untuk layar biasa, "close" untuk modal (Add money, Pay, Approval). */
   action?: 'back' | 'close';
   right?: React.ReactNode;
+  onPress?: () => void;
 };
 
 /** Header layar: tombol bulat putih 44px + judul Bricolage 20px, seperti di desain. */
-export function ScreenHeader({ title, action = 'back', right }: Props) {
+export function ScreenHeader({ title, action = 'back', right, onPress }: Props) {
   return (
     <View style={styles.row}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={action === 'back' ? 'Back' : 'Close'}
-        onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+        onPress={onPress ?? (() => (router.canGoBack() ? router.back() : router.replace('/')))}
         style={styles.circle}>
         <Icon name={action} />
       </Pressable>

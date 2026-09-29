@@ -7,7 +7,7 @@ export const env = {
   groupVaultAddress: process.env.EXPO_PUBLIC_GROUP_VAULT_ADDRESS,
   envioGraphqlUrl: process.env.EXPO_PUBLIC_ENVIO_GRAPHQL_URL,
   apiUrl: process.env.EXPO_PUBLIC_API_URL,
-  passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN ?? 'tekosoe.app',
+  passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN ?? 'tekosoe.xyz',
   /** Sumber data layar: `demo` (src/data/demo) atau `live` (Envio + api). Adapter live dibuat di M6. */
   dataSource: (process.env.EXPO_PUBLIC_DATA_SOURCE ?? 'demo') as 'demo' | 'live',
   /**

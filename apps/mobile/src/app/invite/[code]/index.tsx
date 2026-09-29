@@ -31,7 +31,7 @@ function InviteView({ trip }: { trip: Trip }) {
       footer={
         <>
           <Link href={`/invite/${trip.id}/join`} asChild>
-            <Button label="Join with Face ID" />
+            <Button label="Join with Passkey" />
           </Link>
           <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
             New here? Your account is created as you join.

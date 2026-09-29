@@ -1,3 +1,4 @@
+import 'react-native-get-random-values';
 import {
   BricolageGrotesque_500Medium,
   BricolageGrotesque_700Bold,

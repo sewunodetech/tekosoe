@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, type PropsWithChildren } from 'react';
 import { SessionProvider } from './session-provider';
+import { NotificationProvider } from './notification-provider';
 
 export function AppProviders({ children }: PropsWithChildren) {
   const [queryClient] = useState(
@@ -15,7 +16,9 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+        <NotificationProvider>{children}</NotificationProvider>
+      </SessionProvider>
     </QueryClientProvider>
   );
 }

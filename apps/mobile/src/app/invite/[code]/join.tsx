@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -12,6 +12,11 @@ import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
+import { useJoinTrip } from '@/features/trips/useJoinTrip';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 06 Join + put in — canvas "Final UI" › F06Join
 // TODO: satu signing session Mera: joinGroup(groupId, inviteSecret, pullCap) + approve AUSD (pullCap) + deposit.
@@ -24,15 +29,35 @@ function JoinView({ trip }: { trip: Trip }) {
   const [putIn, setPutIn] = useState<number>(100);
   const [safetyNet, setSafetyNet] = useState<number>(50);
 
+  const isDirty = putIn !== 100 || safetyNet !== 50;
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: '/trips',
+  });
+
+  const joinTrip = useJoinTrip(trip.id);
+  const joinTx = useTx(joinTrip.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}`);
+    },
+  });
+
+  const handleJoin = () => {
+    joinTx.execute({ putIn, safetyNet });
+  };
+
   return (
-    <Screen
-      gap={18}
-      footer={
-        <Link href={`/trip/${trip.id}`} asChild>
-          <Button label={`Join and put in $${putIn}`} />
-        </Link>
-      }>
-      <ScreenHeader title={`Join ${trip.name}`} />
+    <>
+      <Screen
+        gap={18}
+        footer={
+          <Button
+            label={`Join and put in $${putIn}`}
+            onPress={handleJoin}
+            disabled={joinTx.isProcessing}
+          />
+        }>
+      <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
 
       <Surface style={styles.amountCard}>
         <Text variant="label" color={colors.textMuted}>
@@ -65,7 +90,14 @@ function JoinView({ trip }: { trip: Trip }) {
         <KeyValue label="Your balance" value="$420.00" />
       </Surface>
     </Screen>
-  );
+    <TxOverlay status={joinTx.status} />
+    <DiscardModal
+      visible={showDiscardModal}
+      onCancel={() => setShowDiscardModal(false)}
+      onConfirm={confirmExit}
+    />
+  </>
+);
 }
 
 const styles = StyleSheet.create({

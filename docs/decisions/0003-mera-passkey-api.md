@@ -19,7 +19,7 @@ Kita menggunakan API resmi dari SDK `@category-labs/mera` dengan pengaturan khus
    import { reactNativeWebAuthnClient } from '@category-labs/mera/react-native-webauthn-client';
 
    const { prfOutput, credentialId, transports } = await createPasskeyWithPrfOutput({
-     rp: { id: 'tekosoe.app', name: 'Tekosoe' },
+     rp: { id: 'tekosoe.xyz', name: 'Tekosoe' },
      user: { name: 'user', displayName: 'User' },
      webAuthnClient: reactNativeWebAuthnClient,
    });
@@ -30,7 +30,7 @@ Kita menggunakan API resmi dari SDK `@category-labs/mera` dengan pengaturan khus
    import { getPasskeyPrfOutput } from '@category-labs/mera';
    
    const { prfOutput, credentialId } = await getPasskeyPrfOutput({
-     rpId: 'tekosoe.app',
+     rpId: 'tekosoe.xyz',
      credential: { credentialId, transports }, // opsional
      webAuthnClient: reactNativeWebAuthnClient,
    });
