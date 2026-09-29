@@ -1,5 +1,4 @@
 import { Link } from 'expo-router';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { combine, QueryState } from '@/components/query-state';
@@ -12,6 +11,7 @@ import type { Profile } from '@/data/types';
 import { useProfile } from '@/features/profile/useProfile';
 import { useTrips } from '@/features/trips/useTrips';
 import { useSession } from '@/providers/session-provider';
+import { useNotifications } from '@/providers/notification-provider';
 
 // P2 Profile — canvas "Final UI" › P02Profile. Tab ketiga.
 // TODO (M11): toggle notifikasi → expo-notifications + api → push_subs. "Past trips" & "Help" → layar sendiri.
@@ -36,7 +36,7 @@ function ProfileView({
   settled: { name: string; returnAmount: string }[];
 }) {
   const { signOut } = useSession();
-  const [notif, setNotif] = useState(true);
+  const { enabled: notifEnabled, toggleNotifications } = useNotifications();
   const name = profile?.name ?? 'You';
 
   return (
@@ -86,8 +86,8 @@ function ProfileView({
       <View style={styles.list}>
         <Row icon="bell" tint={palette.cream} title="Notifications" sub="Approvals, new payments, invoices">
           <Switch
-            value={notif}
-            onValueChange={setNotif}
+            value={notifEnabled}
+            onValueChange={toggleNotifications}
             accessibilityLabel="Notifications"
             trackColor={{ true: colors.primary, false: colors.borderStrong }}
             thumbColor={colors.surface}

@@ -20,6 +20,7 @@ import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
+import { useNotifications } from '@/providers/notification-provider';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
@@ -80,12 +81,23 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
     isValid = isValid && totalIncluded > 0;
   }
 
+  const { notify } = useNotifications();
   const createSpend = useCreateSpend(trip.id);
   const tx = useTx(createSpend.mutateAsync, {
     onSuccess: () => {
       if (overLimit) {
+        notify({
+          title: 'Approval requested',
+          body: `Jack requested approval to pay $${amountNumber} for ${spend.title}.`,
+          data: { url: `/trip/${trip.id}/spend/new-spend/waiting` },
+        });
         router.replace(`/trip/${trip.id}/spend/new-spend/waiting`);
       } else {
+        notify({
+          title: 'Payment sent',
+          body: `Paid $${amountNumber} from ${trip.name} pot.`,
+          data: { url: `/trip/${trip.id}` },
+        });
         router.replace(`/trip/${trip.id}`);
       }
     }

@@ -16,6 +16,7 @@ import { useTrip } from '@/features/trips/useTrip';
 import { money } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
+import { useNotifications } from '@/providers/notification-provider';
 
 // 10 Approval — canvas "Final UI" › F10Approve. Di demo dibuka "di HP Rina".
 // TODO (M4): approveSpend / rejectSpend. Peringatan kalau pengeluaran besar belum punya struk (FR-20).
@@ -29,6 +30,7 @@ export default function ApprovalScreen() {
 }
 
 function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  const { notify } = useNotifications();
   // Demo multi-HP: layar ini dilihat anggota pertama selain pembayar. Live: user yang login.
   const reviewer = trip.members.find((m) => m.id !== spend.paidBy.id) ?? trip.members[0];
   const share = spend.shares.find((s) => s.member.id === reviewer.id)?.share ?? 0n;
@@ -37,6 +39,11 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const approveSpend = useApproveSpend(trip.id, spend.id);
   const approveTx = useTx(approveSpend.mutateAsync, {
     onSuccess: () => {
+      notify({
+        title: 'Payment approved',
+        body: `Approved $${money(spend.amount).replace('.00', '')} for ${spend.title}.`,
+        data: { url: `/trip/${trip.id}` },
+      });
       router.replace(`/trip/${trip.id}?state=empty`);
     },
   });
@@ -44,6 +51,11 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const rejectSpend = useRejectSpend(trip.id, spend.id);
   const rejectTx = useTx(rejectSpend.mutateAsync, {
     onSuccess: () => {
+      notify({
+        title: 'Payment declined',
+        body: `Declined ${spend.paidBy.name}'s payment request.`,
+        data: { url: `/trip/${trip.id}/spend/${spend.id}/declined` },
+      });
       router.replace(`/trip/${trip.id}/spend/${spend.id}/declined`);
     },
   });

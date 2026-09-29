@@ -19,6 +19,7 @@ import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
+import { useNotifications } from '@/providers/notification-provider';
 
 // 08 Add money — canvas "Final UI" › F08AddMoney
 // TODO (M4): deposit(groupId, amount).
@@ -33,6 +34,7 @@ export default function AddMoneyScreen() {
 
 function AddMoneyView({ trip }: { trip: Trip }) {
   const [amount, setAmount] = useState<number>(50);
+  const { notify } = useNotifications();
 
   const isDirty = amount !== 50;
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
@@ -43,6 +45,11 @@ function AddMoneyView({ trip }: { trip: Trip }) {
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {
     onSuccess: () => {
+      notify({
+        title: 'Pot topped up',
+        body: `Added $${amount} to ${trip.name} pot.`,
+        data: { url: `/trip/${trip.id}` },
+      });
       router.replace(`/trip/${trip.id}`);
     },
   });
