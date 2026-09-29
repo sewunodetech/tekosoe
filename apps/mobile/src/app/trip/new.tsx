@@ -1,5 +1,5 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
@@ -12,10 +12,14 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { colors, fonts, radius } from '@/constants/theme';
+import { useCreateTrip } from '@/features/trips/useCreateTrip';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // 04 New trip — canvas "Final UI" › F04Create
 // TODO: createGroup(name, inviteHash, endsAt, disputeWindow, approvalThreshold) + api → group_meta.
 export default function NewTripScreen() {
+  const router = useRouter();
   const [name, setName] = useState('Japan Trip');
   const [date, setDate] = useState(new Date('2026-10-14T00:00:00Z'));
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -24,12 +28,27 @@ export default function NewTripScreen() {
   const parsedLimit = parseInt(limitStr, 10);
   const isValid = name.trim().length > 0 && !isNaN(parsedLimit) && parsedLimit > 0;
 
+  const createTrip = useCreateTrip();
+  const tx = useTx(createTrip.mutateAsync, {
+    onSuccess: (data) => {
+      router.replace(`/trip/${data.id}`);
+    }
+  });
+
   return (
+    <>
     <Screen
       gap={18}
       footer={
         <Link href="/trip/japan" asChild>
-          <Button label="Create trip" disabled={!isValid} />
+          <Button 
+            label="Create trip" 
+            disabled={!isValid || tx.isProcessing} 
+            onPress={(e) => {
+              e.preventDefault();
+              tx.execute({ name, endsAt: date, limit: parsedLimit });
+            }} 
+          />
         </Link>
       }>
       <ScreenHeader title="New trip" />
@@ -100,6 +119,8 @@ export default function NewTripScreen() {
         </View>
       </View>
     </Screen>
+    <TxOverlay status={tx.status} />
+    </>
   );
 }
 
