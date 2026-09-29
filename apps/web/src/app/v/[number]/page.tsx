@@ -1,0 +1,108 @@
+'use client';
+
+import { use } from 'react';
+import Link from 'next/link';
+import { Logo } from '@/components/Logo';
+
+export default function InvoiceVerifyPage({ params }: { params: Promise<{ number: string }> }) {
+  const { number } = use(params);
+
+  return (
+    <div className="min-h-screen bg-[#faf8f3] text-[#1d2426] flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-[#dcf0ea]">
+      <div className="max-w-[420px] w-full flex flex-col gap-4">
+        
+        {/* Top Header */}
+        <div className="flex items-center justify-between px-1">
+          <Logo size={20} />
+          <span className="text-xs font-bold text-[#5f6b6d] px-3 py-1 bg-[#f1eee6] rounded-full">
+            Trip invoice
+          </span>
+        </div>
+
+        {/* Verification Status Pill */}
+        <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-[#cdeedd] border border-[#b8dfd3]">
+          <div className="w-5 h-5 rounded-full bg-[#1c7a4f] text-white flex items-center justify-center font-bold text-xs">
+            ✓
+          </div>
+          <span className="text-xs font-extrabold text-[#145c3b]">
+            Cryptographically verified on Monad testnet
+          </span>
+        </div>
+
+        {/* Summary Card matching S10Invoice */}
+        <div className="bg-white rounded-3xl p-5 border border-[#e6e2d8] shadow-sm flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-xs font-bold text-[#5f6b6d]">
+              {number}
+            </span>
+            <span className="px-3 py-0.5 rounded-full bg-[#cdeedd] text-[#145c3b] text-xs font-extrabold">
+              Refunded
+            </span>
+          </div>
+
+          <div className="font-display text-4xl font-extrabold text-[#1c7a4f] tracking-tight pt-1">
+            +$20.00
+          </div>
+          <span className="text-xs text-[#5f6b6d]">
+            Refunded to Jack at settle-up · Japan Trip
+          </span>
+        </div>
+
+        {/* Lines Breakdown Surface */}
+        <div className="bg-white rounded-3xl p-5 border border-[#e6e2d8] shadow-sm flex flex-col">
+          {/* Line 1 */}
+          <div className="flex items-center gap-3 py-3 border-b border-[#f1eee6]">
+            <span className="w-12 text-xs font-bold text-[#5f6b6d]">Oct 10</span>
+            <div className="flex-1 flex flex-col">
+              <span className="font-bold text-sm text-[#1d2426]">Deposit to pot</span>
+              <span className="text-xs text-[#5f6b6d]">Initial contribution</span>
+            </div>
+            <span className="font-extrabold text-sm text-[#1c7a4f]">+$100.00</span>
+          </div>
+
+          {/* Line 2 */}
+          <div className="flex items-center gap-3 py-3 border-b border-[#f1eee6]">
+            <span className="w-12 text-xs font-bold text-[#5f6b6d]">Oct 11</span>
+            <div className="flex-1 flex flex-col">
+              <span className="font-bold text-sm text-[#1d2426]">Shinkansen ticket</span>
+              <span className="text-xs text-[#5f6b6d]">Tokyo → Kyoto</span>
+            </div>
+            <span className="font-extrabold text-sm text-[#1d2426]">-$80.00</span>
+          </div>
+
+          {/* Totals */}
+          <div className="flex flex-col gap-2 pt-4">
+            <div className="flex justify-between text-xs text-[#5f6b6d]">
+              <span>Put in</span>
+              <span className="font-bold text-[#1d2426]">$100.00</span>
+            </div>
+            <div className="flex justify-between text-xs text-[#5f6b6d]">
+              <span>Used</span>
+              <span className="font-bold text-[#1d2426]">$80.00</span>
+            </div>
+            <div className="flex justify-between text-sm font-extrabold pt-2 border-t border-[#f1eee6]">
+              <span>Balance refund</span>
+              <span className="text-[#1c7a4f]">+$20.00</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Proof Info Box */}
+        <div className="bg-[#fff4ec] rounded-2xl p-4 border border-[#ffdccb] text-xs text-[#6b5e55] flex flex-col gap-1">
+          <span className="font-extrabold text-[#1d2426]">GroupVault Proof</span>
+          <span>
+            Computed on-chain with AUSD digital dollars. This invoice cannot be altered or falsified.
+          </span>
+        </div>
+
+        {/* Back Link */}
+        <div className="text-center pt-2">
+          <Link href="/" className="text-xs font-bold text-[#1f7a6e] hover:underline">
+            ← Back to Tekosoe
+          </Link>
+        </div>
+
+      </div>
+    </div>
+  );
+}
