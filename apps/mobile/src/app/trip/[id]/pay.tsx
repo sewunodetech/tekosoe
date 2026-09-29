@@ -18,6 +18,8 @@ import { useTrip } from '@/features/trips/useTrip';
 import { money, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
@@ -44,8 +46,19 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const [included, setIncluded] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(trip.members.map((m) => [m.id, true])),
   );
-  
+
   const [customShares, setCustomShares] = useState<Record<string, string>>({});
+
+  const isDirty =
+    amountStr !== '150' ||
+    split !== 'equal' ||
+    trip.members.some((m) => included[m.id] === false) ||
+    Object.keys(customShares).length > 0;
+
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: `/trip/${trip.id}`,
+  });
 
   const overLimit = amountVal > trip.approvalLimit;
   const amountExceedsPot = amountVal > trip.pot;
@@ -83,119 +96,124 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
       <Screen
         gap={16}
         footer={
-          <Button 
-            label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`} 
-            disabled={!isValid || tx.isProcessing} 
+          <Button
+            label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`}
+            disabled={!isValid || tx.isProcessing}
             onPress={() => tx.execute({ amount: amountNumber, splits: {} })} // splits dicatat di backend
           />
         }>
-      <ScreenHeader title="Pay from the pot" action="close" />
+        <ScreenHeader title="Pay from the pot" action="close" onPress={handleBack} />
 
-      <Surface style={styles.amountCard}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={styles.amount}>$</Text>
-          <TextInput 
-            style={styles.amount}
-            value={amountStr}
-            onChangeText={setAmountStr}
-            keyboardType="numeric"
-            placeholder="0"
-            placeholderTextColor={colors.textMuted}
-          />
-        </View>
-        {amountExceedsPot && (
-          <Text variant="caption" color={colors.danger}>
-            Cannot exceed pot balance ({money(trip.pot)})
-          </Text>
-        )}
-        <View style={styles.what}>
-          <Icon name="train" size={16} strokeWidth={2} />
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>{spend.title}</Text>
-        </View>
-        <Text variant="caption" color={colors.textMuted}>
-          To JR Ticket Office (demo shop)
-        </Text>
-      </Surface>
-
-      <Surface style={{ gap: 12 }}>
-        <View style={styles.splitHeader}>
-          <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Who is this for?</Text>
-          <View style={styles.segment} accessibilityRole="radiogroup">
-            {(['equal', 'custom'] as const).map((mode) => (
-              <Pressable
-                key={mode}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: split === mode }}
-                onPress={() => setSplit(mode)}
-                style={[styles.segmentItem, split === mode && styles.segmentOn]}>
-                <Text
-                  style={{ fontFamily: split === mode ? fonts.bodyExtraBold : fonts.bodyBold, fontSize: 12 }}
-                  color={split === mode ? colors.text : colors.textMuted}>
-                  {mode === 'equal' ? 'Equal' : 'Custom'}
-                </Text>
-              </Pressable>
-            ))}
+        <Surface style={styles.amountCard}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.amount}>$</Text>
+            <TextInput
+              style={styles.amount}
+              value={amountStr}
+              onChangeText={setAmountStr}
+              keyboardType="numeric"
+              placeholder="0"
+              placeholderTextColor={colors.textMuted}
+            />
           </View>
-        </View>
-        
-        {split === 'custom' && (
-          <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.danger}>
-            Custom split total: ${customSum} / ${amountNumber}
+          {amountExceedsPot && (
+            <Text variant="caption" color={colors.danger}>
+              Cannot exceed pot balance ({money(trip.pot)})
+            </Text>
+          )}
+          <View style={styles.what}>
+            <Icon name="train" size={16} strokeWidth={2} />
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>{spend.title}</Text>
+          </View>
+          <Text variant="caption" color={colors.textMuted}>
+            To JR Ticket Office (demo shop)
           </Text>
-        )}
+        </Surface>
 
-        {trip.members.map((member) => {
-          const on = included[member.id];
-          const equalShareAmount = Math.floor(amountNumber / Math.max(1, Object.values(included).filter(Boolean).length));
-          
-          return (
-            <View key={member.id} style={styles.shareRow}>
-              <Avatar name={member.name} tint={member.tint} size={30} />
-              <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14 }}>{member.label}</Text>
-              
-              {split === 'equal' ? (
-                <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(usd(equalShareAmount)) : '—'}</Text>
-              ) : (
-                on ? (
-                  <TextInput
-                    style={styles.customInput}
-                    value={customShares[member.id] || ''}
-                    onChangeText={(val) => setCustomShares(prev => ({ ...prev, [member.id]: val }))}
-                    keyboardType="numeric"
-                    placeholder="$0"
-                  />
-                ) : (
-                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
-                )
-              )}
-
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: on }}
-                accessibilityLabel={`Include ${member.label}`}
-                onPress={() => setIncluded((prev) => ({ ...prev, [member.id]: !prev[member.id] }))}
-                style={[styles.check, !on && styles.checkOff]}>
-                {on && <Icon name="check" size={14} color={colors.textOnPrimary} strokeWidth={3} />}
-              </Pressable>
+        <Surface style={{ gap: 12 }}>
+          <View style={styles.splitHeader}>
+            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Who is this for?</Text>
+            <View style={styles.segment} accessibilityRole="radiogroup">
+              {(['equal', 'custom'] as const).map((mode) => (
+                <Pressable
+                  key={mode}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: split === mode }}
+                  onPress={() => setSplit(mode)}
+                  style={[styles.segmentItem, split === mode && styles.segmentOn]}>
+                  <Text
+                    style={{ fontFamily: split === mode ? fonts.bodyExtraBold : fonts.bodyBold, fontSize: 12 }}
+                    color={split === mode ? colors.text : colors.textMuted}>
+                    {mode === 'equal' ? 'Equal' : 'Custom'}
+                  </Text>
+                </Pressable>
+              ))}
             </View>
-          );
-        })}
-      </Surface>
+          </View>
 
-      <Link href={`/trip/${trip.id}/add-receipt`} asChild>
-        <Button label="Add receipt photo · only your group can see it" variant="dashed" icon={<Icon name="camera" size={18} strokeWidth={2} />} />
-      </Link>
+          {split === 'custom' && (
+            <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.danger}>
+              Custom split total: ${customSum} / ${amountNumber}
+            </Text>
+          )}
 
-      {overLimit && (
-        <View style={styles.warn}>
-          <Teko mood="worry" size={60} bob={false} />
-          <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 13, lineHeight: 19 }}>
-            This is over {money(trip.approvalLimit).replace('.00', '')}, so one friend needs to say yes first.
-          </Text>
-        </View>
-      )}
-    </Screen>
-    <TxOverlay status={tx.status} />
+          {trip.members.map((member) => {
+            const on = included[member.id];
+            const equalShareAmount = Math.floor(amountNumber / Math.max(1, Object.values(included).filter(Boolean).length));
+
+            return (
+              <View key={member.id} style={styles.shareRow}>
+                <Avatar name={member.name} tint={member.tint} size={30} />
+                <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14 }}>{member.label}</Text>
+
+                {split === 'equal' ? (
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(usd(equalShareAmount)) : '—'}</Text>
+                ) : (
+                  on ? (
+                    <TextInput
+                      style={styles.customInput}
+                      value={customShares[member.id] || ''}
+                      onChangeText={(val) => setCustomShares(prev => ({ ...prev, [member.id]: val }))}
+                      keyboardType="numeric"
+                      placeholder="$0"
+                    />
+                  ) : (
+                    <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
+                  )
+                )}
+
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: on }}
+                  accessibilityLabel={`Include ${member.label}`}
+                  onPress={() => setIncluded((prev) => ({ ...prev, [member.id]: !prev[member.id] }))}
+                  style={[styles.check, !on && styles.checkOff]}>
+                  {on && <Icon name="check" size={14} color={colors.textOnPrimary} strokeWidth={3} />}
+                </Pressable>
+              </View>
+            );
+          })}
+        </Surface>
+
+        <Link href={`/trip/${trip.id}/add-receipt`} asChild>
+          <Button label="Add receipt photo · only your group can see it" variant="dashed" icon={<Icon name="camera" size={18} strokeWidth={2} />} />
+        </Link>
+
+        {overLimit && (
+          <View style={styles.warn}>
+            <Teko mood="worry" size={60} bob={false} />
+            <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 13, lineHeight: 19 }}>
+              This is over {money(trip.approvalLimit).replace('.00', '')}, so one friend needs to say yes first.
+            </Text>
+          </View>
+        )}
+      </Screen>
+      <TxOverlay status={tx.status} />
+      <DiscardModal
+        visible={showDiscardModal}
+        onCancel={() => setShowDiscardModal(false)}
+        onConfirm={confirmExit}
+      />
     </View>
   );
 }

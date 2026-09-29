@@ -15,6 +15,8 @@ import { useTrip } from '@/features/trips/useTrip';
 import { useJoinTrip } from '@/features/trips/useJoinTrip';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 06 Join + put in — canvas "Final UI" › F06Join
 // TODO: satu signing session Mera: joinGroup(groupId, inviteSecret, pullCap) + approve AUSD (pullCap) + deposit.
@@ -26,6 +28,12 @@ export default function JoinScreen() {
 function JoinView({ trip }: { trip: Trip }) {
   const [putIn, setPutIn] = useState<number>(100);
   const [safetyNet, setSafetyNet] = useState<number>(50);
+
+  const isDirty = putIn !== 100 || safetyNet !== 50;
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: '/trips',
+  });
 
   const joinTrip = useJoinTrip(trip.id);
   const joinTx = useTx(joinTrip.mutateAsync, {
@@ -49,7 +57,7 @@ function JoinView({ trip }: { trip: Trip }) {
             disabled={joinTx.isProcessing}
           />
         }>
-      <ScreenHeader title={`Join ${trip.name}`} />
+      <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
 
       <Surface style={styles.amountCard}>
         <Text variant="label" color={colors.textMuted}>
@@ -83,6 +91,11 @@ function JoinView({ trip }: { trip: Trip }) {
       </Surface>
     </Screen>
     <TxOverlay status={joinTx.status} />
+    <DiscardModal
+      visible={showDiscardModal}
+      onCancel={() => setShowDiscardModal(false)}
+      onConfirm={confirmExit}
+    />
   </>
 );
 }

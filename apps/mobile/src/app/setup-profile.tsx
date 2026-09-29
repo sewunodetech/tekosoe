@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams, type Href } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, BackHandler, Pressable, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Bob } from '@/components/decor';
 import { Teko } from '@/components/teko';
@@ -20,101 +20,48 @@ import { useProfile, useSaveProfile } from '@/features/profile/useProfile';
 
 import { COUNTRIES, LOCATIONS } from '@/data/locations';
 
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
+
 export default function SetupProfileScreen() {
   const { next, mode } = useLocalSearchParams<{ next?: string; mode?: string }>();
   const editing = mode === 'edit';
   const existing = useProfile().data;
   const save = useSaveProfile();
 
-  const defaultCountry = existing?.country ?? 'Australia';
-  const defaultCities = LOCATIONS[defaultCountry] ?? ['Sydney'];
-
-  const [name, setName] = useState(existing?.name ?? '');
-  const [country, setCountry] = useState(defaultCountry);
-  const [city, setCity] = useState(existing?.city ?? defaultCities[0]);
-  const [tint, setTint] = useState<string>(existing?.tint ?? avatarColors[2]);
+  const [name, setName] = useState<string | null>(null);
+  const [country, setCountry] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [tint, setTint] = useState<string | null>(null);
   const [pickingCountry, setPickingCountry] = useState(false);
   const [pickingCity, setPickingCity] = useState(false);
 
-  const initialRef = useRef({
-    name: existing?.name ?? '',
-    country: defaultCountry,
-    city: existing?.city ?? defaultCities[0],
-    tint: existing?.tint ?? avatarColors[2],
-    hasExisting: !!existing,
-  });
-
-  useEffect(() => {
-    if (existing && !initialRef.current.hasExisting) {
-      const c = existing.country ?? 'Australia';
-      const cities = LOCATIONS[c] ?? ['Sydney'];
-      const ci = existing.city ?? cities[0];
-      const t = existing.tint ?? avatarColors[2];
-      initialRef.current = {
-        name: existing.name ?? '',
-        country: c,
-        city: ci,
-        tint: t,
-        hasExisting: true,
-      };
-      setName(existing.name ?? '');
-      setCountry(c);
-      setCity(ci);
-      setTint(t);
-    }
-  }, [existing]);
+  const initialCountry = existing?.country ?? 'Australia';
+  const currentCountry = country ?? initialCountry;
+  const defaultCities = LOCATIONS[currentCountry] ?? ['Sydney'];
+  const initialCity = existing?.city ?? defaultCities[0];
+  const currentCity = city ?? initialCity;
+  const initialName = existing?.name ?? '';
+  const currentName = name ?? initialName;
+  const initialTint = existing?.tint ?? avatarColors[2];
+  const currentTint = tint ?? initialTint;
 
   const isDirty =
-    name.trim() !== initialRef.current.name.trim() ||
-    country !== initialRef.current.country ||
-    city !== initialRef.current.city ||
-    tint !== initialRef.current.tint;
+    (name !== null && name.trim() !== initialName.trim()) ||
+    (country !== null && country !== initialCountry) ||
+    (city !== null && city !== initialCity) ||
+    (tint !== null && tint !== initialTint);
 
-  const exit = useCallback(() => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace((next as Href | undefined) ?? '/trips');
-    }
-  }, [next]);
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: (next as Href | undefined) ?? '/trips',
+  });
 
-  const handleBack = useCallback(() => {
-    if (isDirty) {
-      Alert.alert(
-        'Discard changes?',
-        'You have unsaved changes. Are you sure you want to discard them?',
-        [
-          { text: 'Keep editing', style: 'cancel' },
-          {
-            text: 'Discard',
-            style: 'destructive',
-            onPress: exit,
-          },
-        ],
-      );
-    } else {
-      exit();
-    }
-  }, [isDirty, exit]);
-
-  useEffect(() => {
-    const onBackPress = () => {
-      if (isDirty) {
-        handleBack();
-        return true;
-      }
-      return false;
-    };
-
-    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    return () => sub.remove();
-  }, [isDirty, handleBack]);
-
-  const valid = name.trim().length > 0 && city.trim().length > 0 && country.trim().length > 0;
+  const valid = currentName.trim().length > 0 && currentCity.trim().length > 0 && currentCountry.trim().length > 0;
 
   const submit = async () => {
     if (!valid) return;
-    await save.mutateAsync({ name: name.trim(), city: city.trim(), country, tint });
+    await save.mutateAsync({ name: currentName.trim(), city: currentCity.trim(), country: currentCountry, tint: currentTint });
     if (editing && router.canGoBack()) router.back();
     else router.replace((next as Href | undefined) ?? '/trips');
   };
@@ -127,134 +74,141 @@ export default function SetupProfileScreen() {
   };
 
   return (
-    <Screen
-      gap={18}
-      footer={
-        <Button
-          label={save.isPending ? 'Saving…' : editing ? 'Save' : 'Continue'}
-          disabled={!valid || save.isPending}
-          style={!valid ? { opacity: 0.5 } : undefined}
-          onPress={submit}
+    <>
+      <Screen
+        gap={18}
+        footer={
+          <Button
+            label={save.isPending ? 'Saving…' : editing ? 'Save' : 'Continue'}
+            disabled={!valid || save.isPending}
+            style={!valid ? { opacity: 0.5 } : undefined}
+            onPress={submit}
+          />
+        }>
+        <ScreenHeader
+          onPress={handleBack}
+          right={editing ? undefined : <Pill label="Passkey is set" bg={colors.positiveBg} color={colors.positiveText} />}
         />
-      }>
-      <ScreenHeader
-        onPress={handleBack}
-        right={editing ? undefined : <Pill label="Passkey is set" bg={colors.positiveBg} color={colors.positiveText} />}
-      />
 
-      <View style={styles.hero}>
-        <View style={styles.avatarWrap}>
-          <View style={[styles.avatar, { backgroundColor: tint }]}>
-            <Text style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 42 }}>{(name.trim()[0] ?? '?').toUpperCase()}</Text>
+        <View style={styles.hero}>
+          <View style={styles.avatarWrap}>
+            <View style={[styles.avatar, { backgroundColor: currentTint }]}>
+              <Text style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 42 }}>{(currentName.trim()[0] ?? '?').toUpperCase()}</Text>
+            </View>
+            <Bob style={styles.teko}>
+              <Teko mood="wink" size={56} bob={false} />
+            </Bob>
           </View>
-          <Bob style={styles.teko}>
-            <Teko mood="wink" size={56} bob={false} />
-          </Bob>
-        </View>
-        <View style={{ flex: 1, gap: 4, paddingLeft: 12 }}>
-          <Text variant="h1">{editing ? 'Edit your profile' : 'Say hi to your friends'}</Text>
-          <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-            This is how you show up in every trip.
-          </Text>
-        </View>
-      </View>
-
-      <TextField label="Your name" value={name} onChangeText={setName} placeholder="Jack" autoCapitalize="words" />
-
-      {/* Country and City select dropdowns */}
-      <View style={styles.twoCol}>
-        <View style={{ flex: 1, gap: 8 }}>
-          <Text variant="label">Country</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Country, ${country}`}
-            onPress={() => {
-              setPickingCountry((p) => !p);
-              setPickingCity(false);
-            }}
-            style={styles.select}>
-            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
-              {country}
+          <View style={{ flex: 1, gap: 4, paddingLeft: 12 }}>
+            <Text variant="h1">{editing ? 'Edit your profile' : 'Say hi to your friends'}</Text>
+            <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
+              This is how you show up in every trip.
             </Text>
-            <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
-          </Pressable>
+          </View>
         </View>
 
-        <View style={{ flex: 1, gap: 8 }}>
-          <Text variant="label">City</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`City, ${city}`}
-            onPress={() => {
-              setPickingCity((p) => !p);
-              setPickingCountry(false);
-            }}
-            style={styles.select}>
-            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
-              {city || 'Select city'}
-            </Text>
-            <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
-          </Pressable>
-        </View>
-      </View>
+        <TextField label="Your name" value={currentName} onChangeText={setName} placeholder="Jack" autoCapitalize="words" />
 
-      {pickingCountry && (
-        <View style={styles.countryList}>
-          {COUNTRIES.map((c) => (
+        {/* Country and City select dropdowns */}
+        <View style={styles.twoCol}>
+          <View style={{ flex: 1, gap: 8 }}>
+            <Text variant="label">Country</Text>
             <Pressable
-              key={c}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: c === country }}
-              onPress={() => handleSelectCountry(c)}
-              style={[styles.countryRow, c === country && { backgroundColor: colors.hero }]}>
-              <Text style={{ fontFamily: c === country ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>{c}</Text>
-              {c === country && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
-            </Pressable>
-          ))}
-        </View>
-      )}
-
-      {pickingCity && (
-        <View style={styles.countryList}>
-          {(LOCATIONS[country] ?? []).map((cityName) => (
-            <Pressable
-              key={cityName}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: cityName === city }}
+              accessibilityRole="button"
+              accessibilityLabel={`Country, ${currentCountry}`}
               onPress={() => {
-                setCity(cityName);
+                setPickingCountry((p) => !p);
                 setPickingCity(false);
               }}
-              style={[styles.countryRow, cityName === city && { backgroundColor: colors.hero }]}>
-              <Text style={{ fontFamily: cityName === city ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>
-                {cityName}
+              style={styles.select}>
+              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
+                {currentCountry}
               </Text>
-              {cityName === city && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
+              <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
             </Pressable>
-          ))}
-        </View>
-      )}
+          </View>
 
-      <View style={{ gap: 10 }}>
-        <Text variant="label">Your color</Text>
-        <View style={styles.swatches} accessibilityRole="radiogroup">
-          {avatarColors.map((c) => (
+          <View style={{ flex: 1, gap: 8 }}>
+            <Text variant="label">City</Text>
             <Pressable
-              key={c}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: c === tint }}
-              accessibilityLabel="Avatar color"
-              onPress={() => setTint(c)}
-              style={[styles.swatch, { backgroundColor: c }, c === tint ? styles.swatchOn : styles.swatchOff]}
-            />
-          ))}
+              accessibilityRole="button"
+              accessibilityLabel={`City, ${currentCity}`}
+              onPress={() => {
+                setPickingCity((p) => !p);
+                setPickingCountry(false);
+              }}
+              style={styles.select}>
+              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
+                {currentCity || 'Select city'}
+              </Text>
+              <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
+            </Pressable>
+          </View>
         </View>
-      </View>
 
-      <InfoBox icon={<Icon name="lock" size={18} color={colors.primary} strokeWidth={2} />}>
-        Only people in your trips see this. You can change it any time in Profile.
-      </InfoBox>
-    </Screen>
+        {pickingCountry && (
+          <View style={styles.countryList}>
+            {COUNTRIES.map((c) => (
+              <Pressable
+                key={c}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: c === currentCountry }}
+                onPress={() => handleSelectCountry(c)}
+                style={[styles.countryRow, c === currentCountry && { backgroundColor: colors.hero }]}>
+                <Text style={{ fontFamily: c === currentCountry ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>{c}</Text>
+                {c === currentCountry && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {pickingCity && (
+          <View style={styles.countryList}>
+            {(LOCATIONS[currentCountry] ?? []).map((cityName) => (
+              <Pressable
+                key={cityName}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: cityName === currentCity }}
+                onPress={() => {
+                  setCity(cityName);
+                  setPickingCity(false);
+                }}
+                style={[styles.countryRow, cityName === currentCity && { backgroundColor: colors.hero }]}>
+                <Text style={{ fontFamily: cityName === currentCity ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>
+                  {cityName}
+                </Text>
+                {cityName === currentCity && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        <View style={{ gap: 10 }}>
+          <Text variant="label">Your color</Text>
+          <View style={styles.swatches} accessibilityRole="radiogroup">
+            {avatarColors.map((c) => (
+              <Pressable
+                key={c}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: c === currentTint }}
+                accessibilityLabel="Avatar color"
+                onPress={() => setTint(c)}
+                style={[styles.swatch, { backgroundColor: c }, c === currentTint ? styles.swatchOn : styles.swatchOff]}
+              />
+            ))}
+          </View>
+        </View>
+
+        <InfoBox icon={<Icon name="lock" size={18} color={colors.primary} strokeWidth={2} />}>
+          Only people in your trips see this. You can change it any time in Profile.
+        </InfoBox>
+      </Screen>
+      <DiscardModal
+        visible={showDiscardModal}
+        onCancel={() => setShowDiscardModal(false)}
+        onConfirm={confirmExit}
+      />
+    </>
   );
 }
 

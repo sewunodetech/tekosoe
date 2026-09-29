@@ -15,6 +15,8 @@ import { colors, fonts, radius } from '@/constants/theme';
 import { useCreateTrip } from '@/features/trips/useCreateTrip';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 04 New trip — canvas "Final UI" › F04Create
 // TODO: createGroup(name, inviteHash, endsAt, disputeWindow, approvalThreshold) + api → group_meta.
@@ -27,6 +29,12 @@ export default function NewTripScreen() {
 
   const parsedLimit = parseInt(limitStr, 10);
   const isValid = name.trim().length > 0 && !isNaN(parsedLimit) && parsedLimit > 0;
+
+  const isDirty = name !== 'Japan Trip' || limitStr !== '100' || date.toISOString().slice(0, 10) !== '2026-10-14';
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: '/trips',
+  });
 
   const createTrip = useCreateTrip();
   const tx = useTx(createTrip.mutateAsync, {
@@ -51,7 +59,7 @@ export default function NewTripScreen() {
             />
           </Link>
         }>
-        <ScreenHeader title="New trip" />
+        <ScreenHeader title="New trip" onPress={handleBack} />
 
         <TextField label="Trip name" value={name} onChangeText={setName} />
 
@@ -122,6 +130,11 @@ export default function NewTripScreen() {
         </View>
       </Screen>
       <TxOverlay status={tx.status} />
+      <DiscardModal
+        visible={showDiscardModal}
+        onCancel={() => setShowDiscardModal(false)}
+        onConfirm={confirmExit}
+      />
     </View>
   );
 }

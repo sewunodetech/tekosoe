@@ -17,6 +17,8 @@ import { useTrip } from '@/features/trips/useTrip';
 import { money, signed, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 08 Add money — canvas "Final UI" › F08AddMoney
 // TODO (M4): deposit(groupId, amount).
@@ -31,6 +33,12 @@ export default function AddMoneyScreen() {
 
 function AddMoneyView({ trip }: { trip: Trip }) {
   const [amount, setAmount] = useState<number>(50);
+
+  const isDirty = amount !== 50;
+  const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
+    isDirty,
+    fallbackRoute: `/trip/${trip.id}`,
+  });
 
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {
@@ -54,45 +62,50 @@ function AddMoneyView({ trip }: { trip: Trip }) {
             disabled={depositTx.isProcessing}
           />
         }>
-        <ScreenHeader title="Add money" action="close" />
+        <ScreenHeader title="Add money" action="close" onPress={handleBack} />
 
-      <View style={styles.stage}>
-        <View style={styles.halo} />
-        <View style={styles.teko}>
-          <Teko mood="fill" size={130} />
+        <View style={styles.stage}>
+          <View style={styles.halo} />
+          <View style={styles.teko}>
+            <Teko mood="fill" size={130} />
+          </View>
+          <Bob duration={3800} delay={500} style={{ position: 'absolute', left: 60, top: 40 }}>
+            <Coin size={32} style={{ position: 'relative' }} />
+          </Bob>
+          <Bob duration={4200} delay={1000} style={{ position: 'absolute', right: 64, top: 20 }}>
+            <Coin size={26} style={{ position: 'relative' }} />
+          </Bob>
+          <Bob style={{ position: 'absolute', right: 80, top: 130 }}>
+            <Coin size={22} style={{ position: 'relative' }} />
+          </Bob>
         </View>
-        <Bob duration={3800} delay={500} style={{ position: 'absolute', left: 60, top: 40 }}>
-          <Coin size={32} style={{ position: 'relative' }} />
-        </Bob>
-        <Bob duration={4200} delay={1000} style={{ position: 'absolute', right: 64, top: 20 }}>
-          <Coin size={26} style={{ position: 'relative' }} />
-        </Bob>
-        <Bob style={{ position: 'absolute', right: 80, top: 130 }}>
-          <Coin size={22} style={{ position: 'relative' }} />
-        </Bob>
-      </View>
 
-      <View style={{ alignItems: 'center', gap: 6 }}>
-        <Text style={styles.amount}>${amount}</Text>
-        <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-          From your balance of $320.00
+        <View style={{ alignItems: 'center', gap: 6 }}>
+          <Text style={styles.amount}>${amount}</Text>
+          <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
+            From your balance of $320.00
+          </Text>
+        </View>
+
+        <ChoiceChips options={[20, 50, 100] as const} value={amount} onChange={setAmount} format={(v) => `$${v}`} center />
+
+        <Surface style={{ gap: 10 }}>
+          <KeyValue label="Pot after" value={money(trip.pot + usd(amount))} />
+          <KeyValue label="Your balance in trip" value={signed(trip.myBalance + usd(amount))} valueColor={colors.positive} />
+        </Surface>
+
+        <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
+          Anything you don&apos;t use comes back to you at settle-up.
         </Text>
-      </View>
-
-      <ChoiceChips options={[20, 50, 100] as const} value={amount} onChange={setAmount} format={(v) => `$${v}`} center />
-
-      <Surface style={{ gap: 10 }}>
-        <KeyValue label="Pot after" value={money(trip.pot + usd(amount))} />
-        <KeyValue label="Your balance in trip" value={signed(trip.myBalance + usd(amount))} valueColor={colors.positive} />
-      </Surface>
-
-      <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
-        Anything you don&apos;t use comes back to you at settle-up.
-      </Text>
-    </Screen>
-    <TxOverlay status={depositTx.status} />
-  </>
-);
+      </Screen>
+      <TxOverlay status={depositTx.status} />
+      <DiscardModal
+        visible={showDiscardModal}
+        onCancel={() => setShowDiscardModal(false)}
+        onConfirm={confirmExit}
+      />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
