@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -14,8 +14,11 @@ import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
+import { useCreateSpend } from '@/features/spends/useCreateSpend';
 import { useTrip } from '@/features/trips/useTrip';
 import { money, usd } from '@/lib/money';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
@@ -33,6 +36,7 @@ export default function PayScreen() {
 
 
 function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  const router = useRouter();
   const [amountStr, setAmountStr] = useState<string>('150');
   const amountNumber = parseInt(amountStr, 10) || 0;
   const amountVal = usd(amountNumber);
@@ -64,14 +68,28 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
     isValid = isValid && totalIncluded > 0;
   }
 
+  const createSpend = useCreateSpend(trip.id);
+  const tx = useTx(createSpend.mutateAsync, {
+    onSuccess: () => {
+      if (overLimit) {
+        router.replace(`/trip/${trip.id}/spend/new-spend/waiting`);
+      } else {
+        router.replace(`/trip/${trip.id}`);
+      }
+    }
+  });
+
   return (
-    <Screen
-      gap={16}
-      footer={
-        <Link href={overLimit ? `/trip/${trip.id}/spend/${spend.id}/waiting` : `/trip/${trip.id}`} asChild>
-          <Button label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`} disabled={!isValid} />
-        </Link>
-      }>
+    <View style={{ flex: 1 }}>
+      <Screen
+        gap={16}
+        footer={
+          <Button 
+            label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`} 
+            disabled={!isValid || tx.isProcessing} 
+            onPress={() => tx.execute({ amount: amountNumber, splits: {} })} // splits dicatat di backend
+          />
+        }>
       <ScreenHeader title="Pay from the pot" action="close" />
 
       <Surface style={styles.amountCard}>
@@ -178,6 +196,8 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
         </View>
       )}
     </Screen>
+    <TxOverlay status={tx.status} />
+    </View>
   );
 }
 
