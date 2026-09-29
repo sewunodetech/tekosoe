@@ -11,8 +11,11 @@ import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette } from '@/constants/theme';
 import type { Invoice, InvoiceStatus, Trip } from '@/data/types';
 import { useInvoice } from '@/features/invoices/useInvoice';
+import { usePayDebt } from '@/features/trips/usePayDebt';
 import { useTrip } from '@/features/trips/useTrip';
 import { money, signed } from '@/lib/money';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // I1 Refunded · I2 Due · I3 Paid — canvas "Final UI" › S10Invoice, S11InvoiceDue, S12InvoicePaid.
 // `?who=jack|wei|rina` memilih invoice anggota (demo multi-HP).
@@ -39,21 +42,37 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
   const verifyUrl = `tekosoe.app/v/${invoice.number}`;
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
 
+  const payDebt = usePayDebt(trip.id);
+  const payTx = useTx(payDebt.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}/invoice?who=rina`);
+    },
+  });
+
+  const handlePay = () => {
+    payTx.execute({ amount: due });
+  };
+
   const share = () => Share.share({ message: `${trip.name} invoice ${invoice.number}: https://${verifyUrl}` });
 
   return (
-    <Screen
-      gap={12}
-      footer={
-        invoice.status === 'due' ? (
-          <Button label={`Pay ${money(due)}`} onPress={() => router.replace(`/trip/${trip.id}/invoice?who=rina`)} />
-        ) : (
-          <View style={styles.footer}>
-            <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} />
-            <Button label="Share" style={{ flex: 1, height: 52 }} onPress={share} />
-          </View>
-        )
-      }>
+    <>
+      <Screen
+        gap={12}
+        footer={
+          invoice.status === 'due' ? (
+            <Button
+              label={`Pay ${money(due)}`}
+              onPress={handlePay}
+              disabled={payTx.isProcessing}
+            />
+          ) : (
+            <View style={styles.footer}>
+              <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} />
+              <Button label="Share" style={{ flex: 1, height: 52 }} onPress={share} />
+            </View>
+          )
+        }>
       <ScreenHeader title="Trip invoice" right={invoice.device ? <Pill label={invoice.device} weight="bold" color={colors.textMuted} /> : undefined} />
 
       <Surface style={styles.summary}>
@@ -109,7 +128,9 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
         </View>
       </Surface>
     </Screen>
-  );
+    <TxOverlay status={payTx.status} />
+  </>
+);
 }
 
 const styles = StyleSheet.create({

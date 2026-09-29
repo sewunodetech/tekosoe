@@ -30,7 +30,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/error lewat `QueryState` — semua layar lepas dari data demo
 - [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil — *ADR 0003 + kode ada; belum terverifikasi di dev build 2 HP*
 - [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate 3 cabang (termasuk cek profil), `EXPO_PUBLIC_SIGNER` demo/mera selesai; sisa: uji Face ID di HP, keputusan penyimpanan kunci (lihat Blocker)*
-- [ ] M4 Transaksi: `src/tx`, semua mutation, status Processing → Done, error ramah
+- [x] M4 Transaksi: `src/tx`, semua mutation hook & feedback modal status Processing → Done, error ramah
 - [x] M5 Form & validasi
 - [ ] M6 Data live: adapter Envio + api
 - [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3

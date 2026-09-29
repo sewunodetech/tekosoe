@@ -9,7 +9,6 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { TextField } from '@/components/ui/text-field';
 import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
@@ -105,7 +104,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
           />
         </View>
         {amountExceedsPot && (
-          <Text variant="caption" color={colors.negative}>
+          <Text variant="caption" color={colors.danger}>
             Cannot exceed pot balance ({money(trip.pot)})
           </Text>
         )}
@@ -140,7 +139,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
         </View>
         
         {split === 'custom' && (
-          <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.negative}>
+          <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.danger}>
             Custom split total: ${customSum} / ${amountNumber}
           </Text>
         )}

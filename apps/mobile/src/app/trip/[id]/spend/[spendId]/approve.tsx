@@ -9,9 +9,13 @@ import { Text } from '@/components/ui/text';
 import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
+import { useApproveSpend } from '@/features/spends/useApproveSpend';
+import { useRejectSpend } from '@/features/spends/useRejectSpend';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
 import { money } from '@/lib/money';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // 10 Approval — canvas "Final UI" › F10Approve. Di demo dibuka "di HP Rina".
 // TODO (M4): approveSpend / rejectSpend. Peringatan kalau pengeluaran besar belum punya struk (FR-20).
@@ -30,18 +34,45 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const share = spend.shares.find((s) => s.member.id === reviewer.id)?.share ?? 0n;
   const others = trip.members.filter((m) => m.id !== spend.paidBy.id).map((m) => m.name);
 
+  const approveSpend = useApproveSpend(trip.id, spend.id);
+  const approveTx = useTx(approveSpend.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}?state=empty`);
+    },
+  });
+
+  const rejectSpend = useRejectSpend(trip.id, spend.id);
+  const rejectTx = useTx(rejectSpend.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}/spend/${spend.id}/declined`);
+    },
+  });
+
+  const activeStatus = approveTx.status !== 'idle' ? approveTx.status : rejectTx.status;
+  const isBusy = approveTx.isProcessing || rejectTx.isProcessing;
+
   return (
-    <Screen
-      gap={18}
-      footer={
-        <View style={styles.footer}>
-          <Link href={`/trip/${trip.id}/spend/${spend.id}/declined`} asChild>
-            <Button label="Decline" variant="outline" style={{ flex: 1, height: 56 }} />
-          </Link>
-          <Button label="Approve" style={{ flex: 1 }} onPress={() => router.replace(`/trip/${trip.id}?state=empty`)} />
-        </View>
-      }>
-      <ScreenHeader action="close" right={<Pill label={`${reviewer.name}'s phone`} weight="bold" color={colors.textMuted} />} />
+    <>
+      <Screen
+        gap={18}
+        footer={
+          <View style={styles.footer}>
+            <Button
+              label="Decline"
+              variant="outline"
+              style={{ flex: 1, height: 56 }}
+              onPress={() => rejectTx.execute()}
+              disabled={isBusy}
+            />
+            <Button
+              label="Approve"
+              style={{ flex: 1 }}
+              onPress={() => approveTx.execute()}
+              disabled={isBusy}
+            />
+          </View>
+        }>
+        <ScreenHeader action="close" right={<Pill label={`${reviewer.name}'s phone`} weight="bold" color={colors.textMuted} />} />
 
       <View style={styles.center}>
         <View style={styles.halo}>
@@ -72,7 +103,9 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
 
       <InfoBox>One yes from {others.join(' or ')} is enough. Nothing moves until then.</InfoBox>
     </Screen>
-  );
+    <TxOverlay status={activeStatus} />
+  </>
+);
 }
 
 const styles = StyleSheet.create({

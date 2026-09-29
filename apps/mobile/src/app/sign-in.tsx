@@ -39,7 +39,7 @@ export default function SignInScreen() {
         <View style={{ gap: 16 }}>
           <Button label="Continue with Passkey" onPress={handlePasskeySignIn} />
           <Text variant="caption" color={colors.textMuted} style={styles.textCenter}>
-            Whether you're new or returning, just use your passkey. 
+            Whether you&apos;re new or returning, just use your passkey. 
             New phone? Same passkey, same account.
           </Text>
         </View>

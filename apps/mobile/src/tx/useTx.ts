@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 
+import { mapTxError } from './errors';
+
 export type TxStatus = 'idle' | 'processing' | 'done' | 'error';
 
 export function useTx<TArgs, TResult>(
@@ -27,11 +29,11 @@ export function useTx<TArgs, TResult>(
         return result;
       } catch (err: any) {
         setStatus('error');
-        const message = err?.message || 'Transaction failed. Please try again.';
+        const message = mapTxError(err);
         setError(message);
         
         // Show friendly error
-        Alert.alert('Error', message);
+        Alert.alert('Unable to complete', message);
         options?.onError?.(err);
         
         // Reset status

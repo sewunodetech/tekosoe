@@ -12,8 +12,11 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors, fonts } from '@/constants/theme';
 import type { Trip } from '@/data/types';
+import { useDeposit } from '@/features/trips/useDeposit';
 import { useTrip } from '@/features/trips/useTrip';
 import { money, signed, usd } from '@/lib/money';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // 08 Add money — canvas "Final UI" › F08AddMoney
 // TODO (M4): deposit(groupId, amount).
@@ -29,11 +32,29 @@ export default function AddMoneyScreen() {
 function AddMoneyView({ trip }: { trip: Trip }) {
   const [amount, setAmount] = useState<number>(50);
 
+  const deposit = useDeposit(trip.id);
+  const depositTx = useTx(deposit.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}`);
+    },
+  });
+
+  const handleAddMoney = () => {
+    depositTx.execute({ amount });
+  };
+
   return (
-    <Screen
-      gap={18}
-      footer={<Button label={`Add $${amount} to the pot`} onPress={() => router.replace(`/trip/${trip.id}`)} />}>
-      <ScreenHeader title="Add money" action="close" />
+    <>
+      <Screen
+        gap={18}
+        footer={
+          <Button
+            label={`Add $${amount} to the pot`}
+            onPress={handleAddMoney}
+            disabled={depositTx.isProcessing}
+          />
+        }>
+        <ScreenHeader title="Add money" action="close" />
 
       <View style={styles.stage}>
         <View style={styles.halo} />
@@ -69,7 +90,9 @@ function AddMoneyView({ trip }: { trip: Trip }) {
         Anything you don&apos;t use comes back to you at settle-up.
       </Text>
     </Screen>
-  );
+    <TxOverlay status={depositTx.status} />
+  </>
+);
 }
 
 const styles = StyleSheet.create({

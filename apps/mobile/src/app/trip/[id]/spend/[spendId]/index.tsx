@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { MemberAmountRow } from '@/components/trip-rows';
@@ -10,9 +10,12 @@ import { Text } from '@/components/ui/text';
 import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
+import { useDisputeSpend } from '@/features/spends/useDisputeSpend';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
 import { money } from '@/lib/money';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // 11 Payment details — canvas "Final UI" › F11Detail
 // TODO: Envio SpendExecuted + api (judul, struk). "I wasn't part of this" → disputeShare(groupId, spendId).
@@ -28,19 +31,34 @@ export default function PaymentDetailsScreen() {
 function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const myShare = spend.shares.find((s) => s.member.label === 'You')?.share ?? 0n;
 
+  const disputeSpend = useDisputeSpend(trip.id, spend.id);
+  const disputeTx = useTx(disputeSpend.mutateAsync, {
+    onSuccess: () => {
+      router.replace(`/trip/${trip.id}`);
+    },
+  });
+
+  const handleDispute = () => {
+    disputeTx.execute();
+  };
+
   return (
-    <Screen
-      footer={
-        <>
-          <Link href={`/trip/${trip.id}`} asChild>
-            <Button label="I wasn't part of this" variant="outline" />
-          </Link>
-          <Text variant="small" color={colors.textMuted} style={{ textAlign: 'center', fontFamily: fonts.body }}>
-            Moves your {money(myShare)} share back to {spend.paidBy.name}. Open for 24 hours.
-          </Text>
-        </>
-      }>
-      <ScreenHeader title="Payment details" />
+    <>
+      <Screen
+        footer={
+          <>
+            <Button
+              label="I wasn't part of this"
+              variant="outline"
+              onPress={handleDispute}
+              disabled={disputeTx.isProcessing}
+            />
+            <Text variant="small" color={colors.textMuted} style={{ textAlign: 'center', fontFamily: fonts.body }}>
+              Moves your {money(myShare)} share back to {spend.paidBy.name}. Open for 24 hours.
+            </Text>
+          </>
+        }>
+        <ScreenHeader title="Payment details" />
 
       <View style={styles.hero}>
         <View style={styles.heroIcon}>
@@ -89,7 +107,9 @@ function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
         </Text>
       </View>
     </Screen>
-  );
+    <TxOverlay status={disputeTx.status} />
+  </>
+);
 }
 
 const styles = StyleSheet.create({
