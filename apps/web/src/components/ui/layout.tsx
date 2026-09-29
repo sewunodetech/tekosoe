@@ -65,7 +65,8 @@ export function Pill({
   return (
     <span
       className={cn(
-        "inline-block self-start rounded-full px-3 py-[5px] text-xs",
+        "inline-block rounded-full px-3 py-[5px] text-xs",
+        !className?.includes("self-") && "self-start",
         weight === "bold" ? "font-bold" : "font-extrabold",
         tone,
         className,

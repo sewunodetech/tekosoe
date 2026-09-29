@@ -1,31 +1,36 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-/** Kontrol segmen berbasis tautan (state di query string) — track sand, pil aktif teal. */
+/** Pemilih anggota di invoice: pil putih bergaris, yang aktif teal. State ada di URL (tautan). */
 export function Segmented({
   options,
   activeId,
+  label = "View as",
 }: {
   options: { id: string; label: string; href: string }[];
   activeId: string;
+  label?: string;
 }) {
   return (
-    <nav aria-label="View as" className="flex gap-1 rounded-[18px] bg-sand p-1">
-      {options.map((o) => (
-        <Link
-          key={o.id}
-          href={o.href}
-          replace
-          scroll={false}
-          aria-current={o.id === activeId ? "true" : undefined}
-          className={cn(
-            "flex h-10 flex-1 items-center justify-center rounded-[14px] px-2 text-center text-[13px] font-bold transition-colors",
-            o.id === activeId ? "bg-teal text-white" : "text-slate hover:text-ink",
-          )}
-        >
-          {o.label}
-        </Link>
-      ))}
+    <nav aria-label={label} className="flex gap-1.5 py-0.5">
+      {options.map((o) => {
+        const active = o.id === activeId;
+        return (
+          <Link
+            key={o.id}
+            href={o.href}
+            replace
+            scroll={false}
+            aria-current={active ? "true" : undefined}
+            className={cn(
+              "flex flex-1 items-center justify-center rounded-2xl border px-1 py-2 text-center text-xs transition-colors",
+              active ? "border-teal bg-teal font-extrabold text-white" : "border-line bg-white font-bold text-slate hover:bg-sand",
+            )}
+          >
+            {o.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

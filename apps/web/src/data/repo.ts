@@ -1,5 +1,5 @@
 import * as demo from "./demo";
-import type { Invoice, Profile, SettledTrip, Spend, Trip, TripCardInfo } from "./types";
+import type { Invoice, Profile, SettledTrip, Settlement, Spend, Trip, TripCardInfo } from "./types";
 
 /**
  * Titik sambung data untuk web. Sekarang hanya ada implementasi demo (read-only, tanpa login).
@@ -12,6 +12,7 @@ export interface TripRepository {
   listSettledTrips(): Promise<SettledTrip[]>;
   getTrip(id: string): Promise<Trip | null>;
   getSpend(tripId: string, spendId: string): Promise<Spend | null>;
+  getSettlement(tripId: string): Promise<Settlement | null>;
   listInvoices(tripId: string): Promise<Invoice[]>;
   getInvoiceByNumber(number: string): Promise<Invoice | null>;
   getProfile(): Promise<Profile>;
@@ -32,6 +33,9 @@ const demoRepo: TripRepository = {
     const spend = demo.spends[spendId];
     return spend && spend.tripId === tripId ? spend : null;
   },
+  async getSettlement(tripId) {
+    return demo.settlement.tripId === tripId ? demo.settlement : null;
+  },
   async listInvoices(tripId) {
     return Object.values(demo.invoices).filter((i) => i.tripId === tripId);
   },
@@ -50,5 +54,6 @@ export const repo: TripRepository = demoRepo;
 
 /** ID trip yang di-prerender (halaman tetap statis). */
 export const DEMO_TRIP_IDS = Object.keys(demo.trips);
-export const DEMO_SPEND_IDS = Object.keys(demo.spends);
+/** Pasangan (trip, spend) yang valid di data demo. */
+export const DEMO_SPEND_PARAMS = Object.values(demo.spends).map((s) => ({ id: s.tripId, spendId: s.id }));
 export const DEMO_INVOICE_NUMBERS = Object.values(demo.invoices).map((i) => i.number);

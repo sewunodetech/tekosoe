@@ -22,6 +22,11 @@ const variants: Record<ButtonVariant, string> = {
   pill: "h-11 rounded-[22px] bg-white px-[18px] text-sm text-ink hover:bg-sand active:bg-sand",
 };
 
+/** Kelas tombol untuk elemen yang bukan <Button> (mis. pemicu AppAction). */
+export function buttonClass(variant: ButtonVariant = "primary", className?: string) {
+  return cn(base, variants[variant], className);
+}
+
 type Common = {
   label: string;
   variant?: ButtonVariant;

@@ -79,3 +79,10 @@ export type TripCardInfo = {
   tapLimit: bigint;
   shops: CardShop[];
 };
+
+/** Ringkasan per anggota setelah settle. */
+export type Settlement = {
+  tripId: string;
+  date: string;
+  rows: { member: Member; put: bigint; used: bigint; net: bigint }[];
+};

@@ -1,11 +1,23 @@
-'use client';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { InvoiceLines, InvoiceQr, InvoiceSummary, VerifyCard } from "@/components/invoice";
+import { Logo } from "@/components/Logo";
+import { Teko } from "@/components/Teko";
+import { Button } from "@/components/ui/button";
+import { InfoBox, Pill, Screen } from "@/components/ui/layout";
+import { DEMO_INVOICE_NUMBERS, repo } from "@/data/repo";
+import { GET_APP_HREF } from "@/lib/links";
 
-import { use } from 'react';
-import Link from 'next/link';
-import { Logo } from '@/components/Logo';
+export const metadata: Metadata = { title: "Verify invoice", robots: { index: false } };
+export const generateStaticParams = () => DEMO_INVOICE_NUMBERS.map((number) => ({ number }));
 
-export default function InvoiceVerifyPage({ params }: { params: Promise<{ number: string }> }) {
-  const { number } = use(params);
+// Halaman tujuan QR invoice (tekosoe.xyz/v/<nomor>).
+// TODO (W-3): hitung ulang invoice dari data trip (Envio) dan cocokkan dengan sidik jari invoice dari api.
+// Sekarang hanya menampilkan invoice demo — jangan dipakai sebagai bukti apa pun.
+export default async function VerifyPage({ params }: { params: Promise<{ number: string }> }) {
+  const { number } = await params;
+  const invoice = await repo.getInvoiceByNumber(decodeURIComponent(number));
+  if (!invoice) notFound();
 
   return (
     <div className="min-h-screen bg-[#faf8f3] text-[#1d2426] flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-[#dcf0ea]">
@@ -101,8 +113,17 @@ export default function InvoiceVerifyPage({ params }: { params: Promise<{ number
             ← Back to Tekosoe
           </Link>
         </div>
-
       </div>
-    </div>
+
+      <InvoiceSummary invoice={invoice} />
+      <InvoiceLines invoice={invoice} />
+      <VerifyCard invoice={invoice}>
+        <InvoiceQr number={invoice.number} />
+      </VerifyCard>
+
+      <InfoBox>
+        This is a preview with demo data. Real invoices will be rebuilt from the trip record and checked against the invoice here.
+      </InfoBox>
+    </Screen>
   );
 }
