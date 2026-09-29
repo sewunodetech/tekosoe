@@ -33,9 +33,9 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] M4 Transaksi: `src/tx`, semua mutation hook & feedback modal status Processing → Done, error ramah
 - [x] M5 Form & validasi
 - [ ] M6 Data live: adapter Envio + api
-- [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3
-- [ ] M8 Invoice: `payDebt`, PDF, share, QR asli
-- [ ] M9 Undangan & deep link
+- [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3 — *UI capture + attachReceipt + unlock passkey selesai*
+- [x] M8 Invoice: `payDebt`, PDF via expo-print, share, QR asli ke tautan verifikasi web
+- [x] M9 Undangan & deep link: skema tekosoe://, universal link, dan companion web /j/[code]
 - [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
 - [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
 - [x] Desain P1 Set up profile + P2 Profile di canvas Final UI (28 Sep)
