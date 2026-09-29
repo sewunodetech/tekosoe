@@ -1,5 +1,7 @@
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Bob } from '@/components/decor';
@@ -12,16 +14,10 @@ import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { avatarColors, colors, fonts, radius } from '@/constants/theme';
 import { useProfile, useSaveProfile } from '@/features/profile/useProfile';
-
-// P1 Set up profile — canvas "Final UI" › P01SetupProfile.
-// Muncul sekali tepat setelah passkey pertama dibuat (gate di app/_layout.tsx), dan dari "Edit" di P2 (`?mode=edit`).
-// `?next=/invite/<code>/join` = kembali ke layar Join setelah selesai (akun baru dari link undangan).
-// TODO (M12 live): simpan ke api → `profiles` (display_name, city, country_code, avatar_color).
-
 import { COUNTRIES, LOCATIONS } from '@/data/locations';
-
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
+import { profileFormSchema, type ProfileFormData } from '@/lib/form-schemas';
 
 export default function SetupProfileScreen() {
   const { next, mode } = useLocalSearchParams<{ next?: string; mode?: string }>();
@@ -29,60 +25,53 @@ export default function SetupProfileScreen() {
   const existing = useProfile().data;
   const save = useSaveProfile();
 
-  const [name, setName] = useState<string | null>(null);
-  const [country, setCountry] = useState<string | null>(null);
-  const [city, setCity] = useState<string | null>(null);
-  const [tint, setTint] = useState<string | null>(null);
   const [pickingCountry, setPickingCountry] = useState(false);
   const [pickingCity, setPickingCity] = useState(false);
 
-  const initialCountry = existing?.country ?? 'Australia';
-  const currentCountry = country ?? initialCountry;
-  const defaultCities = LOCATIONS[currentCountry] ?? ['Sydney'];
-  const initialCity = existing?.city ?? defaultCities[0];
-  const currentCity = city ?? initialCity;
-  const initialName = existing?.name ?? '';
-  const currentName = name ?? initialName;
-  const initialTint = existing?.tint ?? avatarColors[2];
-  const currentTint = tint ?? initialTint;
+  const defaultCountry = existing?.country ?? 'Australia';
+  const defaultCities = LOCATIONS[defaultCountry] ?? ['Sydney'];
 
-  const isDirty =
-    (name !== null && name.trim() !== initialName.trim()) ||
-    (country !== null && country !== initialCountry) ||
-    (city !== null && city !== initialCity) ||
-    (tint !== null && tint !== initialTint);
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors, isValid, isDirty },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: existing?.name ?? '',
+      country: defaultCountry,
+      city: existing?.city ?? defaultCities[0],
+      tint: existing?.tint ?? avatarColors[2],
+    },
+  });
 
-  const [nameTouched, setNameTouched] = useState(false);
+  const currentName = useWatch({ control, name: 'name' }) || '';
+  const currentCountry = useWatch({ control, name: 'country' }) || defaultCountry;
+  const currentCity = useWatch({ control, name: 'city' }) || '';
+  const currentTint = useWatch({ control, name: 'tint' }) || avatarColors[2];
 
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: (next as Href | undefined) ?? '/trips',
   });
 
-  const nameTrimmed = currentName.trim();
-  const nameError =
-    nameTouched && nameTrimmed.length === 0
-      ? 'Name is required'
-      : nameTouched && nameTrimmed.length < 2
-      ? 'At least 2 characters'
-      : nameTouched && nameTrimmed.length > 30
-      ? 'Max 30 characters'
-      : undefined;
-
-  const valid = nameTrimmed.length >= 2 && nameTrimmed.length <= 30 && currentCity.trim().length > 0 && currentCountry.trim().length > 0;
-
-  const submit = async () => {
-    setNameTouched(true);
-    if (!valid) return;
-    await save.mutateAsync({ name: currentName.trim(), city: currentCity.trim(), country: currentCountry, tint: currentTint });
+  const onSubmit = async (data: ProfileFormData) => {
+    await save.mutateAsync({
+      name: data.name.trim(),
+      city: data.city.trim(),
+      country: data.country,
+      tint: data.tint,
+    });
     if (editing && router.canGoBack()) router.back();
     else router.replace((next as Href | undefined) ?? '/trips');
   };
 
   const handleSelectCountry = (c: string) => {
-    setCountry(c);
+    setValue('country', c, { shouldValidate: true, shouldDirty: true });
     const cities = LOCATIONS[c] ?? [];
-    setCity(cities[0] ?? '');
+    setValue('city', cities[0] ?? '', { shouldValidate: true, shouldDirty: true });
     setPickingCountry(false);
   };
 
@@ -93,9 +82,9 @@ export default function SetupProfileScreen() {
         footer={
           <Button
             label={save.isPending ? 'Saving…' : editing ? 'Save' : 'Continue'}
-            disabled={!valid || save.isPending}
-            style={!valid ? { opacity: 0.5 } : undefined}
-            onPress={submit}
+            disabled={!isValid || save.isPending}
+            style={!isValid ? { opacity: 0.5 } : undefined}
+            onPress={handleSubmit(onSubmit)}
           />
         }>
         <ScreenHeader
@@ -120,17 +109,20 @@ export default function SetupProfileScreen() {
           </View>
         </View>
 
-        <TextField
-          label="Your name"
-          value={currentName}
-          onChangeText={(val) => {
-            setNameTouched(true);
-            setName(val);
-          }}
-          onBlur={() => setNameTouched(true)}
-          error={nameError}
-          placeholder="Jack"
-          autoCapitalize="words"
+        <Controller
+          control={control}
+          name="name"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              label="Your name"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.name?.message}
+              placeholder="Jack"
+              autoCapitalize="words"
+            />
+          )}
         />
 
         {/* Country and City select dropdowns */}
@@ -194,7 +186,7 @@ export default function SetupProfileScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: cityName === currentCity }}
                 onPress={() => {
-                  setCity(cityName);
+                  setValue('city', cityName, { shouldValidate: true, shouldDirty: true });
                   setPickingCity(false);
                 }}
                 style={[styles.countryRow, cityName === currentCity && { backgroundColor: colors.hero }]}>
@@ -216,7 +208,7 @@ export default function SetupProfileScreen() {
                 accessibilityRole="radio"
                 accessibilityState={{ selected: c === currentTint }}
                 accessibilityLabel="Avatar color"
-                onPress={() => setTint(c)}
+                onPress={() => setValue('tint', c, { shouldValidate: true, shouldDirty: true })}
                 style={[styles.swatch, { backgroundColor: c }, c === currentTint ? styles.swatchOn : styles.swatchOff]}
               />
             ))}

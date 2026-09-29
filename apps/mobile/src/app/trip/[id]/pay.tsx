@@ -1,5 +1,7 @@
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
@@ -21,6 +23,7 @@ import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
 import { useNotifications } from '@/providers/notification-provider';
+import { createPaySchema, type PayFormData } from '@/lib/form-schemas';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
@@ -36,25 +39,40 @@ export default function PayScreen() {
   );
 }
 
-
 function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const router = useRouter();
-  const [amountStr, setAmountStr] = useState<string>('150');
-  const amountNumber = parseInt(amountStr, 10) || 0;
-  const amountVal = usd(amountNumber);
+  const potMax = Number(trip.pot) / 1e6;
 
-  const [split, setSplit] = useState<'equal' | 'custom'>('equal');
-  const [included, setIncluded] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(trip.members.map((m) => [m.id, true])),
+  const paySchema = useMemo(() => createPaySchema(potMax), [potMax]);
+
+  const defaultIncluded: Record<string, boolean> = useMemo(
+    () => Object.fromEntries(trip.members.map((m) => [m.id, true])),
+    [trip.members],
   );
 
-  const [customShares, setCustomShares] = useState<Record<string, string>>({});
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors, isValid, isDirty },
+  } = useForm<PayFormData>({
+    resolver: zodResolver(paySchema),
+    mode: 'onChange',
+    defaultValues: {
+      amountStr: '150',
+      split: 'equal',
+      included: defaultIncluded,
+      customShares: {},
+    },
+  });
 
-  const isDirty =
-    amountStr !== '150' ||
-    split !== 'equal' ||
-    trip.members.some((m) => included[m.id] === false) ||
-    Object.keys(customShares).length > 0;
+  const amountStr = useWatch({ control, name: 'amountStr' }) ?? '150';
+  const split = useWatch({ control, name: 'split' }) ?? 'equal';
+  const included = useWatch({ control, name: 'included' }) ?? defaultIncluded;
+  const customShares = useWatch({ control, name: 'customShares' }) ?? {};
+
+  const amountNumber = parseInt(amountStr, 10) || 0;
+  const amountVal = usd(amountNumber);
 
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
@@ -62,8 +80,6 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   });
 
   const overLimit = amountVal > trip.approvalLimit;
-  const amountExceedsPot = amountVal > trip.pot;
-  const totalIncluded = Object.values(included).filter(Boolean).length;
 
   let customSum = 0;
   if (split === 'custom') {
@@ -73,19 +89,6 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
       }
     }
   }
-
-  let validationError: string | null = null;
-  if (amountNumber <= 0) {
-    validationError = 'Enter an amount greater than $0';
-  } else if (amountExceedsPot) {
-    validationError = `Cannot exceed pot balance (${money(trip.pot)})`;
-  } else if (totalIncluded === 0) {
-    validationError = 'Select at least 1 person to include';
-  } else if (split === 'custom' && customSum !== amountNumber) {
-    validationError = `Custom split total ($${customSum}) must equal $${amountNumber}`;
-  }
-
-  const isValid = !validationError;
 
   const { notify } = useNotifications();
   const createSpend = useCreateSpend(trip.id);
@@ -106,8 +109,17 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
         });
         router.replace(`/trip/${trip.id}`);
       }
-    }
+    },
   });
+
+  const onSubmit = (data: PayFormData) => {
+    tx.execute({ amount: Number(data.amountStr), splits: {} });
+  };
+
+  const validationErrorMessage =
+    errors.amountStr?.message ??
+    (typeof errors.included?.message === 'string' ? errors.included.message : undefined) ??
+    (typeof errors.split?.message === 'string' ? errors.split.message : undefined);
 
   return (
     <View style={{ flex: 1 }}>
@@ -118,7 +130,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
             label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`}
             disabled={!isValid || tx.isProcessing}
             style={!isValid ? { opacity: 0.5 } : undefined}
-            onPress={() => tx.execute({ amount: amountNumber, splits: {} })} // splits dicatat di backend
+            onPress={handleSubmit(onSubmit)}
           />
         }>
         <ScreenHeader title="Pay from the pot" action="close" onPress={handleBack} />
@@ -126,18 +138,24 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
         <Surface style={styles.amountCard}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={styles.amount}>$</Text>
-            <TextInput
-              style={styles.amount}
-              value={amountStr}
-              onChangeText={setAmountStr}
-              keyboardType="numeric"
-              placeholder="0"
-              placeholderTextColor={colors.textMuted}
+            <Controller
+              control={control}
+              name="amountStr"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.amount}
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  placeholderTextColor={colors.textMuted}
+                />
+              )}
             />
           </View>
-          {validationError ? (
+          {validationErrorMessage ? (
             <Text variant="caption" color={colors.danger} style={{ fontFamily: fonts.bodyBold }}>
-              {validationError}
+              {validationErrorMessage}
             </Text>
           ) : null}
           <View style={styles.what}>
@@ -158,7 +176,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
                   key={mode}
                   accessibilityRole="radio"
                   accessibilityState={{ selected: split === mode }}
-                  onPress={() => setSplit(mode)}
+                  onPress={() => setValue('split', mode, { shouldValidate: true, shouldDirty: true })}
                   style={[styles.segmentItem, split === mode && styles.segmentOn]}>
                   <Text
                     style={{ fontFamily: split === mode ? fonts.bodyExtraBold : fonts.bodyBold, fontSize: 12 }}
@@ -177,8 +195,9 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
           )}
 
           {trip.members.map((member) => {
-            const on = included[member.id];
-            const equalShareAmount = Math.floor(amountNumber / Math.max(1, Object.values(included).filter(Boolean).length));
+            const on = included[member.id] ?? false;
+            const includedCount = Math.max(1, Object.values(included).filter(Boolean).length);
+            const equalShareAmount = Math.floor(amountNumber / includedCount);
 
             return (
               <View key={member.id} style={styles.shareRow}>
@@ -187,25 +206,29 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
 
                 {split === 'equal' ? (
                   <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(usd(equalShareAmount)) : '—'}</Text>
+                ) : on ? (
+                  <TextInput
+                    style={styles.customInput}
+                    value={customShares[member.id] || ''}
+                    onChangeText={(val) => {
+                      const updated = { ...customShares, [member.id]: val };
+                      setValue('customShares', updated, { shouldValidate: true, shouldDirty: true });
+                    }}
+                    keyboardType="numeric"
+                    placeholder="$0"
+                  />
                 ) : (
-                  on ? (
-                    <TextInput
-                      style={styles.customInput}
-                      value={customShares[member.id] || ''}
-                      onChangeText={(val) => setCustomShares(prev => ({ ...prev, [member.id]: val }))}
-                      keyboardType="numeric"
-                      placeholder="$0"
-                    />
-                  ) : (
-                    <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
-                  )
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
                 )}
 
                 <Pressable
                   accessibilityRole="checkbox"
-                  accessibilityState={{ checked: on }}
+                  accessibilityState={{ checked: Boolean(on) }}
                   accessibilityLabel={`Include ${member.label}`}
-                  onPress={() => setIncluded((prev) => ({ ...prev, [member.id]: !prev[member.id] }))}
+                  onPress={() => {
+                    const updated = { ...included, [member.id]: !on };
+                    setValue('included', updated, { shouldValidate: true, shouldDirty: true });
+                  }}
                   style={[styles.check, !on && styles.checkOff]}>
                   {on && <Icon name="check" size={14} color={colors.textOnPrimary} strokeWidth={3} />}
                 </Pressable>

@@ -1,7 +1,10 @@
 import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform } from 'react-native';
 
 import { colors } from '@/constants/theme';
+
+export const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
 // Konfigurasi bagaimana notifikasi ditampilkan saat aplikasi aktif di latar depan (foreground)
 Notifications.setNotificationHandler({
@@ -19,13 +22,17 @@ Notifications.setNotificationHandler({
  */
 export async function setupNotificationChannels() {
   if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('tekosoe-default', {
-      name: 'Tekosoe Notifications',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: colors.primary,
-      sound: 'default',
-    });
+    try {
+      await Notifications.setNotificationChannelAsync('tekosoe-default', {
+        name: 'Tekosoe Notifications',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: colors.primary,
+        sound: 'default',
+      });
+    } catch (e) {
+      console.warn('Channel setup skipped (Expo Go / unsupported):', e);
+    }
   }
 }
 
@@ -35,22 +42,31 @@ export async function setupNotificationChannels() {
 export async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS === 'web') return false;
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+  try {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    return finalStatus === 'granted';
+  } catch (err) {
+    console.warn('Permission request skipped (Expo Go):', err);
+    return true; // di Expo Go anggap true untuk in-app notification
   }
-
-  return finalStatus === 'granted';
 }
 
 /**
  * Ambil token push Expo untuk disimpan ke backend (tabel `push_subs`).
+ * Aman dari error Expo Go SDK 53+ (remote push dihapus dari Expo Go, butuh dev build).
  */
 export async function getExpoPushToken(): Promise<string | null> {
-  if (Platform.OS === 'web') return null;
+  if (Platform.OS === 'web' || isExpoGo) {
+    // Di Expo Go atau Web, remote push notification dinonaktifkan oleh Expo SDK 53+
+    return 'ExponentPushToken[expo-go-demo]';
+  }
 
   try {
     const hasPermission = await requestNotificationPermission();

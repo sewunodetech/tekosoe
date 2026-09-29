@@ -1,6 +1,8 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
@@ -17,49 +19,33 @@ import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
+import { newTripFormSchema, type NewTripFormData } from '@/lib/form-schemas';
 
 // 04 New trip — canvas "Final UI" › F04Create
 // TODO: createGroup(name, inviteHash, endsAt, disputeWindow, approvalThreshold) + api → group_meta.
 export default function NewTripScreen() {
   const router = useRouter();
-  const [name, setName] = useState('Japan Trip');
-  const [nameTouched, setNameTouched] = useState(false);
-  const [date, setDate] = useState(new Date('2026-10-14T00:00:00Z'));
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [limitStr, setLimitStr] = useState<string>('100');
-  const [limitTouched, setLimitTouched] = useState(false);
 
-  const parsedLimit = parseInt(limitStr, 10);
-  const nameTrimmed = name.trim();
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors, isValid, isDirty },
+  } = useForm<NewTripFormData>({
+    resolver: zodResolver(newTripFormSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: 'Japan Trip',
+      limitStr: '100',
+      endsAt: new Date('2026-10-14T00:00:00Z'),
+    },
+  });
 
-  const nameError =
-    nameTouched && nameTrimmed.length === 0
-      ? 'Trip name is required'
-      : nameTouched && nameTrimmed.length < 3
-      ? 'At least 3 characters'
-      : undefined;
+  const tripName = useWatch({ control, name: 'name' });
+  const limitStr = useWatch({ control, name: 'limitStr' });
+  const endsAt = useWatch({ control, name: 'endsAt' }) ?? new Date('2026-10-14T00:00:00Z');
 
-  const limitError =
-    limitTouched && (isNaN(parsedLimit) || parsedLimit <= 0)
-      ? 'Enter a valid amount'
-      : limitTouched && parsedLimit < 10
-      ? 'Minimum limit is $10'
-      : limitTouched && parsedLimit > 5000
-      ? 'Maximum limit is $5,000'
-      : undefined;
-
-  const [todayTimestamp] = useState(() => new Date().setHours(0, 0, 0, 0));
-  const isFutureDate = date.getTime() >= todayTimestamp;
-  const dateError = !isFutureDate ? 'End date must be in the future' : undefined;
-
-  const isValid =
-    nameTrimmed.length >= 3 &&
-    !isNaN(parsedLimit) &&
-    parsedLimit >= 10 &&
-    parsedLimit <= 5000 &&
-    isFutureDate;
-
-  const isDirty = name !== 'Japan Trip' || limitStr !== '100' || date.toISOString().slice(0, 10) !== '2026-10-14';
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: '/trips',
@@ -69,15 +55,15 @@ export default function NewTripScreen() {
   const tx = useTx(createTrip.mutateAsync, {
     onSuccess: (data) => {
       router.replace(`/trip/${data.id}`);
-    }
+    },
   });
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    setNameTouched(true);
-    setLimitTouched(true);
-    if (!isValid) return;
-    tx.execute({ name: nameTrimmed, endsAt: date, limit: parsedLimit });
+  const onSubmit = (data: NewTripFormData) => {
+    tx.execute({
+      name: data.name.trim(),
+      endsAt: data.endsAt,
+      limit: parseInt(data.limitStr, 10),
+    });
   };
 
   return (
@@ -89,30 +75,33 @@ export default function NewTripScreen() {
             label="Create trip"
             disabled={!isValid || tx.isProcessing}
             style={!isValid ? { opacity: 0.5 } : undefined}
-            onPress={handleSubmit}
+            onPress={handleSubmit(onSubmit)}
           />
         }>
         <ScreenHeader title="New trip" onPress={handleBack} />
 
-        <TextField
-          label="Trip name"
-          value={name}
-          onChangeText={(val) => {
-            setNameTouched(true);
-            setName(val);
-          }}
-          onBlur={() => setNameTouched(true)}
-          error={nameError}
-          placeholder="e.g. Japan Trip"
+        <Controller
+          control={control}
+          name="name"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              label="Trip name"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.name?.message}
+              placeholder="e.g. Japan Trip"
+            />
+          )}
         />
 
         <Pressable onPress={() => setShowDatePicker(true)}>
           <View pointerEvents="none">
             <TextField
               label="Trip ends"
-              value={date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              value={endsAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               editable={false}
-              error={dateError}
+              error={errors.endsAt?.message}
               icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
               hint="On this day Teko settles everyone up automatically."
             />
@@ -121,13 +110,13 @@ export default function NewTripScreen() {
 
         {showDatePicker && (
           <DateTimePicker
-            value={date}
+            value={endsAt}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onValueChange={(event, selectedDate) => {
+            onValueChange={(_event, selectedDate) => {
               setShowDatePicker(Platform.OS === 'ios');
               if (selectedDate) {
-                setDate(selectedDate);
+                setValue('endsAt', selectedDate, { shouldValidate: true, shouldDirty: true });
               }
             }}
             onDismiss={() => setShowDatePicker(false)}
@@ -135,24 +124,26 @@ export default function NewTripScreen() {
         )}
 
         <View style={{ gap: 8 }}>
-          <TextField
-            label="Approval limit"
-            value={limitStr}
-            onChangeText={(val) => {
-              setLimitTouched(true);
-              setLimitStr(val);
-            }}
-            onBlur={() => setLimitTouched(true)}
-            error={limitError}
-            keyboardType="numeric"
-            placeholder="100"
+          <Controller
+            control={control}
+            name="limitStr"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextField
+                label="Approval limit"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.limitStr?.message}
+                keyboardType="numeric"
+                placeholder="100"
+              />
+            )}
           />
           <ChoiceChips
             options={[50, 100, 200] as const}
-            value={parsedLimit}
+            value={parseInt(limitStr, 10) || 100}
             onChange={(v) => {
-              setLimitTouched(true);
-              setLimitStr(String(v));
+              setValue('limitStr', String(v), { shouldValidate: true, shouldDirty: true });
             }}
             format={(v) => `$${v}`}
             height={44}
@@ -174,7 +165,7 @@ export default function NewTripScreen() {
             <Button
               label="Share link"
               variant="pill"
-              onPress={() => Share.share({ message: `Join our trip "${name}" on Tekosoe: https://tekosoe.app/j/japan` })}
+              onPress={() => Share.share({ message: `Join our trip "${tripName}" on Tekosoe: https://tekosoe.app/j/japan` })}
             />
             <Link href="/invite/japan" asChild>
               <Button label="Preview" variant="pill" />

@@ -42,27 +42,32 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     setupNotificationChannels();
 
-    // Cek izin awal
-    if (Platform.OS !== 'web') {
-      Notifications.getPermissionsAsync().then(({ status }) => {
-        setEnabled(status === 'granted');
-      });
+    let responseSub: Notifications.EventSubscription | null = null;
+    try {
+      if (Platform.OS !== 'web') {
+        Notifications.getPermissionsAsync()
+          .then(({ status }) => {
+            setEnabled(status === 'granted');
+          })
+          .catch(() => {});
+
+        responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+          const url = response.notification.request.content.data?.url as string | undefined;
+          if (url) {
+            try {
+              router.push(url as Href);
+            } catch (e) {
+              console.warn('Could not navigate to notification URL:', e);
+            }
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Notification listener skipped (Expo Go):', e);
     }
 
-    // Listener saat notifikasi ditekan oleh pengguna di status bar OS
-    const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
-      const url = response.notification.request.content.data?.url as string | undefined;
-      if (url) {
-        try {
-          router.push(url as Href);
-        } catch (e) {
-          console.warn('Could not navigate to notification URL:', e);
-        }
-      }
-    });
-
     return () => {
-      responseSub.remove();
+      responseSub?.remove();
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, []);
