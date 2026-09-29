@@ -6,7 +6,7 @@ import { Text } from './text';
 
 type Props = TextInputProps & { label: string; hint?: string; error?: string; icon?: ReactNode };
 
-/** Input dengan label di atas, petunjuk di kiri bawah, dan pesan error di kanan bawah. */
+/** Input dengan label di atas dan petunjuk/pesan error di bawah rata kiri. */
 export function TextField({ label, hint, error, icon, style, ...rest }: Props) {
   return (
     <View style={styles.wrap}>
@@ -25,21 +25,14 @@ export function TextField({ label, hint, error, icon, style, ...rest }: Props) {
           {...rest}
         />
       </View>
-      {hint || error ? (
-        <View style={styles.footerRow}>
-          {hint ? (
-            <Text variant="caption" color={colors.textMuted} style={styles.hintText}>
-              {hint}
-            </Text>
-          ) : (
-            <View style={{ flex: 1 }} />
-          )}
-          {error ? (
-            <Text variant="caption" color={colors.danger} style={styles.errorText}>
-              {error}
-            </Text>
-          ) : null}
-        </View>
+      {error ? (
+        <Text variant="caption" color={colors.danger} style={styles.errorText}>
+          {error}
+        </Text>
+      ) : hint ? (
+        <Text variant="caption" color={colors.textMuted} style={styles.hintText}>
+          {hint}
+        </Text>
       ) : null}
     </View>
   );
@@ -70,19 +63,13 @@ const styles = StyleSheet.create({
     top: 17,
     zIndex: 1,
   },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginTop: -2,
-  },
-  hintText: {
-    flex: 1,
-  },
   errorText: {
     fontFamily: fonts.bodyBold,
     textAlign: 'left',
-    marginLeft: 'auto',
+    marginTop: -2,
+  },
+  hintText: {
+    textAlign: 'left',
+    marginTop: -2,
   },
 });
