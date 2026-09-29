@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Tekosoe — web
 
-Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel. Dashboard **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah, `components/Frame.tsx` lewat route group `(phone)`). Landing `/` adalah hero satu layar full-bleed (`components/landing/`, CSS module) — pengecualian yang disengaja.
+Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel. Dashboard **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah, `components/Frame.tsx` lewat route group `(phone)`). Landing `/` adalah hero satu layar full-bleed dan responsif (`components/landing/`, CSS module; Inter, sudut tajam, biru `#006cd2`) — pengecualian yang disengaja dari tema kartun; jangan campurkan token kartun ke sana.
 
 Tugasnya:
 
@@ -23,7 +23,7 @@ Bukan tempat backend: penjadwal, gas, dan database ada di `apps/api`. Web tidak 
 
 ## Aturan lokal
 
-- **Desain = app.** Token ada di `src/app/globals.css` (`@theme`, salinan `apps/mobile/src/constants/theme.ts`); jangan tulis hex di JSX, pakai utilitas (`bg-mint`, `text-teal`, `type-h1`, `rounded-card`, …). Ikon di `components/icons.tsx`, maskot di `components/Teko.tsx` (10 mood), komponen dasar di `components/ui/`. Jangan mengubah tampilan; kalau app berubah, ikuti app. Hanya mode terang.
+- **Desain dashboard = app** (landing punya gaya sendiri, lihat atas). Token ada di `src/app/globals.css` (`@theme`, salinan `apps/mobile/src/constants/theme.ts`); jangan tulis hex di JSX, pakai utilitas (`bg-mint`, `text-teal`, `type-h1`, `rounded-card`, …). Ikon di `components/icons.tsx`, maskot di `components/Teko.tsx` (10 mood), komponen dasar di `components/ui/`. Jangan mengubah tampilan; kalau app berubah, ikuti app. Hanya mode terang.
 - **Tanpa istilah kripto** di teks yang terlihat user: wallet, gas, seed phrase, blockchain, token, hash, transaction. Dijaga oleh `npm test -w @tekosoe/web` (`scripts/copy-guard.test.mjs`). Nominal selalu lewat `money()`/`signed()` (`src/lib/money.ts`, membungkus `formatDollars` dari `@tekosoe/shared`).
 - **Data lewat `repo`** (`src/data/repo.ts`, antarmuka `TripRepository`). Halaman tidak meng-import `src/data/demo.ts` langsung. Fixture demo adalah salinan dari `apps/mobile/src/data/demo` — jaga tetap sama.
 - **Tetap statis**: rute dinamis memakai `generateStaticParams`; jangan memakai `searchParams` untuk state tampilan (jadikan rute). Di Next 16 `params` adalah `Promise`.

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Logo } from "@/components/Logo";
 import { GET_APP_HREF } from "@/lib/links";
 import s from "./landing.module.css";
 
@@ -46,7 +45,7 @@ export function Nav() {
         </nav>
 
         <Link href="/" className={s.logo} aria-label="Tekosoe">
-          <Logo size={30} />
+          tekosoe
         </Link>
 
         <Link href="/trips" className={`${s.btn} ${s.btnPrimary} ${s.btnNav}`}>

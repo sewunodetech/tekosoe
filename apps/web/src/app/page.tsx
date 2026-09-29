@@ -1,12 +1,13 @@
 import Link from "next/link";
+import { Inter } from "next/font/google";
 import type { CSSProperties } from "react";
-import { Coin, Sparkle } from "@/components/decor";
 import { Nav } from "@/components/landing/nav";
 import s from "@/components/landing/landing.module.css";
-import { Teko } from "@/components/Teko";
 
 const VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_075824_7c8a2ef3-826c-43ca-81a1-162429faa306.mp4";
+
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 const d = (v: string) => ({ "--d": v }) as CSSProperties;
 
@@ -18,10 +19,10 @@ function Arrow() {
   );
 }
 
-// Landing satu layar (tanpa scroll di desktop). Tata letak dari spesifikasi hero; komponen kartun dari dashboard.
+// Landing satu layar (tanpa scroll di desktop), mengikuti spesifikasi hero 1:1. Responsif: menu burger di ≤820px.
 export default function LandingPage() {
   return (
-    <div className={s.page}>
+    <div className={`${s.page} ${inter.variable}`}>
       <div className={s.bg} aria-hidden="true">
         <video className={s.bgVideo} autoPlay muted loop playsInline>
           <source src={VIDEO_SRC} type="video/mp4" />
@@ -32,7 +33,7 @@ export default function LandingPage() {
 
       <section className={s.hero} aria-labelledby="hero-title">
         <p className={`${s.badge} ${s.wipe}`} style={d("0.18s")}>
-          <span className={s.badgeDot} />
+          <span className={s.badgeMark} />
           Shared pot for group trips
         </p>
 
@@ -64,19 +65,7 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        <div className={s.mascotMobile} aria-hidden="true">
-          <Teko mood="cheer" size={140} />
-        </div>
       </section>
-
-      <div className={s.mascot} aria-hidden="true">
-        <div className="relative">
-          <Teko mood="cheer" size={220} />
-          <Coin size={30} className="-top-2 -left-6" />
-          <Sparkle size={26} className="top-2 -right-4" />
-          <Sparkle size={16} color="var(--color-lavender)" className="bottom-10 -left-10" delay={800} />
-        </div>
-      </div>
 
       <div className={s.lede}>
         <p className={s.ledeRise}>
