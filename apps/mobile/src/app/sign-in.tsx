@@ -36,13 +36,13 @@ export default function SignInScreen() {
     <Screen
       gap={24}
       footer={
-        <>
+        <View style={{ gap: 16 }}>
           <Button label="Continue with Passkey" onPress={handlePasskeySignIn} />
-          <Button label="I already have an account" variant="ghost" onPress={handlePasskeySignIn} />
           <Text variant="caption" color={colors.textMuted} style={styles.textCenter}>
+            Whether you're new or returning, just use your passkey. 
             New phone? Same passkey, same account.
           </Text>
-        </>
+        </View>
       }>
       <ScreenHeader />
 

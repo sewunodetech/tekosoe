@@ -56,9 +56,6 @@ export default function WelcomeScreen() {
         <Link href="/sign-in" asChild>
           <Button label="Get started" />
         </Link>
-        <Link href="/sign-in" asChild>
-          <Button label="I already have an account" variant="ghost" />
-        </Link>
       </View>
     </View>
   );
