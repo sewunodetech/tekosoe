@@ -6,16 +6,27 @@ import { Button } from '@/components/ui/button';
 import { InfoBox, KeyValue, Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette } from '@/constants/theme';
-import { getSpend, getTrip, members, money } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // 10 Approval — canvas "Final UI" › F10Approve. Di demo dibuka "di HP Rina".
-// TODO: approveSpend / rejectSpend. Peringatan kalau pengeluaran besar belum punya struk (FR-20).
+// TODO (M4): approveSpend / rejectSpend. Peringatan kalau pengeluaran besar belum punya struk (FR-20).
 export default function ApprovalScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
-  const trip = getTrip(id);
-  const spend = getSpend(spendId);
-  const reviewer = members.rina;
+  return (
+    <QueryState query={combine(useTrip(id), useSpend(spendId))} headerAction="close">
+      {([trip, spend]) => <ApprovalView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  // Demo multi-HP: layar ini dilihat anggota pertama selain pembayar. Live: user yang login.
+  const reviewer = trip.members.find((m) => m.id !== spend.paidBy.id) ?? trip.members[0];
   const share = spend.shares.find((s) => s.member.id === reviewer.id)?.share ?? 0n;
   const others = trip.members.filter((m) => m.id !== spend.paidBy.id).map((m) => m.name);
 

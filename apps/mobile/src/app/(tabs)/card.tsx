@@ -6,14 +6,24 @@ import { Teko } from '@/components/teko';
 import { Icon } from '@/components/ui/icon';
 import { Pill, Screen, SectionLabel } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { money, trips } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrips } from '@/features/trips/useTrips';
+import { money } from '@/lib/money';
 
 // 12 Card (simulated) — canvas "Final UI" › F12Card.
 // Tiap tap = spend nyata dari pot ke alamat toko demo (FR-16). Tokyo Taxi mendemokan S4 (offline).
 export default function CardScreen() {
-  const trip = trips.japan;
+  return (
+    <QueryState query={useTrips()} tab headerAction="none">
+      {/* Kartu memakai pot trip aktif pertama. TODO: pilih trip aktif bila lebih dari satu. */}
+      {({ list }) => <CardView trip={list[0]} />}
+    </QueryState>
+  );
+}
 
+function CardView({ trip }: { trip: Trip }) {
   return (
     <Screen
       tab

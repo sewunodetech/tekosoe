@@ -8,14 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { InfoBox, Pill, Screen, Surface } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, radius } from '@/constants/theme';
-import { getTrip, money, settlement } from '@/lib/demo';
+import type { Settlement, Trip } from '@/data/types';
+import { useSettlement } from '@/features/trips/useSettlement';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // 13 Settled — canvas "Final UI" › F13Settled
 // TODO: settle(groupId) oleh penjadwal; angka dari Envio Settled, Pulled, Refunded.
 export default function SettledScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
+  const query = combine(useTrip(id), useSettlement(id));
+  return (
+    <QueryState query={query} headerAction="none">
+      {([trip, settlement]) => <SettledView trip={trip} settlement={settlement} />}
+    </QueryState>
+  );
+}
+
+function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement }) {
   const mine = settlement.rows.find((r) => r.member.label === 'You');
   const short = settlement.rows.filter((r) => r.net < 0n).map((r) => r.member.name);
 

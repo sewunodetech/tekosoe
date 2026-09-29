@@ -33,7 +33,7 @@ Prinsip utama: **mobile tidak boleh macet menunggu backend.** Layar dipisahkan d
 
 | Lapisan | Masuk | Keluar |
 | --- | --- | --- |
-| **P0** (wajib) | Lapisan data demo/live · sesi Mera + Face ID · semua aksi uang (create/join/deposit/spend/approve/reject/dispute/payDebt) · status transaksi & error · form lengkap (validasi nominal, tanggal, split custom) · struk (kamera/PDF → enkripsi → upload → `attachReceipt` → buka dengan Face ID) · invoice (PDF lewat expo-print, share) · deep link undangan · build EAS | Redesign layar (desain sudah final) · dark mode · multi-bahasa · pengaturan/profil lengkap |
+| **P0** (wajib) | Lapisan data demo/live · sesi Mera + Face ID · profil (P1 Set up profile, P2 Profile) · semua aksi uang (create/join/deposit/spend/approve/reject/dispute/payDebt) · status transaksi & error · form lengkap (validasi nominal, tanggal, split custom) · struk (kamera/PDF → enkripsi → upload → `attachReceipt` → buka dengan Face ID) · invoice (PDF lewat expo-print, share) · deep link undangan · build EAS | Redesign layar (desain sudah final) · dark mode · multi-bahasa · pengaturan lanjutan di luar P2 (ganti bahasa, mata uang, dll.) |
 | **P1** | Feed real-time (polling/subscription) · push notification (approval, invoice) | OCR struk |
 | **P2** | Kartu simulasi bayar ke toko demo · kunci enkripsi turunan PRF | Kartu sungguhan · on/off-ramp fiat |
 
@@ -84,7 +84,7 @@ Kerjakan berurutan sesuai dependensi. Centang di `docs/STATUS.md` › Mobile saa
 | **M0 Setup** | Fondasi rilis | Merge `mobile-dev` → `main` · pindah Home ke `/trips` (sekarang bentrok URL `/` dengan Welcome) · `eas.json` (development/preview/production) · dev build iOS & Android · ikon app & splash dari Teko | Dev build jalan di 2 HP; `/` = Welcome, `/trips` = Home | — |
 | **M1 Lapisan data** | Layar lepas dari `src/lib/demo.ts` | Buat `src/data` (types + adapter demo) dan hook `src/features/*` dengan TanStack Query · ganti semua import `@/lib/demo` di layar · state loading (skeleton), kosong, dan error per layar | Tidak ada layar yang meng-import `lib/demo`; mode demo tampil identik dengan sekarang | M0 |
 | **M2 Spike Mera** | Tahu cara passkey + signing di React Native | `npx expo install @category-labs/mera` · baca source di `node_modules` (jangan menebak API) · buat akun passkey dan tanda tangani 1 transaksi di dev build · cek dukungan PRF | 1 transaksi tertanda tangan; alamat sama di 2 HP; API yang dipakai dicatat di ADR. Kalau gagal: ADR cadangan "Mera lewat in-app browser" | M0 |
-| **M3 Sesi & akun** | Login nyata | `src/wallet` (Signer, MeraSigner, DemoSigner) · `SessionProvider` di `app-providers.tsx` · gate route (belum login → Welcome) · splash menunggu sesi · layar 02 memakai Face ID nyata | Buka ulang app langsung ke Home; ganti HP dengan passkey yang sama → akun sama | M2 |
+| **M3 Sesi & akun** | Login nyata | `src/wallet` (Signer, MeraSigner, DemoSigner) · `SessionProvider` di `app-providers.tsx` · gate route: belum login → Welcome; login tapi profil belum ada → P1 Set up profile; sudah lengkap → Home · splash menunggu sesi · layar 02 memakai Face ID nyata | Akun baru: passkey → langsung P1 → Home. Buka ulang app langsung ke Home; ganti HP dengan passkey yang sama → akun sama | M2 |
 | **M4 Transaksi** | Semua aksi uang bisa dikirim | `src/tx` (kirim, tunggu, status) · mutation hook: createGroup, joinGroup + approve + deposit dalam satu sesi, deposit, spend (+`computeNoteHash`), approve/reject, dispute, payDebt · komponen status "Processing → Done" · peta error ke teks ramah · S4 untuk offline | Mode live dengan kontrak testnet: tiap aksi berhasil dan UI ter-update. Mode demo: aksi disimulasikan | M1, M3, kontrak ter-deploy (untuk live) |
 | **M5 Form & validasi** | Input benar | Input nominal (≤ isi pot), date picker tanggal akhir, split Custom (jumlah = nominal), peserta minimal 1, batas approval | Nilai tidak valid tidak bisa dikirim; pesan error sesuai gaya desain | M1 |
 | **M6 Data live** | Angka asli | Adapter `live`: query Envio + api · invalidasi query setelah transaksi · fallback label | Jalur demo juri lolos di mode live | M4, indexer + api tersedia |
@@ -93,8 +93,9 @@ Kerjakan berurutan sesuai dependensi. Centang di `docs/STATUS.md` › Mobile saa
 | **M9 Undangan & deep link** | Gabung dari link | `tekosoe://invite/<code>` + universal link (butuh `.well-known` dari `apps/web`) · share sheet di layar 04 | Link dari HP A membuka layar 05 di HP B | M4 |
 | **M10 Rilis & QA** | Siap juri | Skrip cek kata terlarang di UI · aksesibilitas dasar · reduce motion · uji 3 HP end-to-end · EAS build APK + TestFlight | Definisi selesai di bagian 1 terpenuhi | M4–M9 |
 | **M11 P1/P2** | Tambahan | Feed real-time · push (expo-notifications) · kartu simulasi ke toko demo · kunci PRF | Sesuai FR-14, FR-15, FR-16, FR-17, FR-18 | M10 aman |
+| **M12 Profil & akun** | Layar P1 Set up profile + P2 Profile (desain: canvas Final UI › `P01SetupProfile`, `P02Profile`) | Route `setup-profile.tsx` + tab `(tabs)/profile.tsx` (tab ketiga, ikon `profile` sudah ada di `Icon`) · data demo dulu, lalu simpan/baca `profiles` lewat api · **P1 wajib muncul tepat setelah passkey pertama dibuat**, sebelum Home — gate di `app/_layout.tsx` saat ini langsung mengarahkan akun yang login ke `/trips`, jadi harus ditambah cek "profil sudah ada" (flag `hasProfile` di sesi, sumber: api `profiles`; mode demo: simpan lokal) · alur dari link undangan: passkey → P1 → kembali ke layar 06 Join · Sign out mengakhiri sesi Mera · toggle notifikasi (aktif penuh di M11) | Akun baru melewati P1 lalu ke Home; nama/kota tampil di Invite & Members; Sign out kembali ke Welcome | M1 (UI demo), M3 (live) |
 
-**Bisa dikerjakan sambil menunggu backend:** M0, M1, M2, M3, M5. M4 dan M6 memakai adapter demo sampai kontrak dan indexer siap.
+**Bisa dikerjakan sambil menunggu backend:** M0, M1, M2, M3, M5, dan UI M12. M4 dan M6 memakai adapter demo sampai kontrak dan indexer siap.
 
 ### Peta dependensi
 
@@ -113,7 +114,7 @@ M4..M9 ─> M10 ─> M11
 | Tanggal | WP |
 | --- | --- |
 | 28–29 Sep | M0, M1, M2 (spike Mera di hari pertama) |
-| 30 Sep – 2 Okt | M3, M5, M4 di mode demo |
+| 30 Sep – 2 Okt | M3, M5, M12 (UI demo), M4 di mode demo |
 | 3–6 Okt | M4 + M6 di mode live (setelah kontrak & indexer siap), M7, M8, M9 |
 | 7–8 Okt | M11, hanya kalau P0 aman |
 | 9–11 Okt | M10: uji 3 HP, build EAS, rekam video |

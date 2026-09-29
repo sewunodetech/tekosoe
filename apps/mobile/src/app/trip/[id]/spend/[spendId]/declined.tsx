@@ -7,16 +7,28 @@ import { Button } from '@/components/ui/button';
 import { InfoBox, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts } from '@/constants/theme';
-import { getSpend, getTrip, members, money } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // S3 Request declined — canvas "Final UI" › S03Declined
 // TODO: Envio SpendRejected + api → spend_reviews (catatan penolak).
 export default function RequestDeclinedScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
-  const trip = getTrip(id);
-  const spend = getSpend(spendId);
-  const by = members.wei;
+  return (
+    <QueryState query={combine(useTrip(id), useSpend(spendId))} headerAction="close">
+      {([trip, spend]) => <DeclinedView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function DeclinedView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  // Demo: penolak = anggota terakhir selain pembayar (Wei). Live: dari spend_reviews.
+  const others = trip.members.filter((m) => m.id !== spend.paidBy.id);
+  const by = others[others.length - 1] ?? trip.members[0];
 
   return (
     <Screen
