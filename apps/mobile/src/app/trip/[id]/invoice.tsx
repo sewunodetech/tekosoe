@@ -68,7 +68,7 @@ function InvoiceView({
   const headline = locallyPaid ? 'Paid in full' : invoice.headline;
   const subline = locallyPaid ? 'All debts settled with the group vault' : invoice.subline;
 
-  const verifyUrl = `tekosoe.app/v/${invoice.number}`;
+  const verifyUrl = `tekosoe.xyz/v/${invoice.number}`;
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
 
   const payDebt = usePayDebt(trip.id);
@@ -116,8 +116,8 @@ function InvoiceView({
             
             <div class="lines">
               ${invoice.lines
-                .map(
-                  (line) => `
+          .map(
+            (line) => `
                 <div class="line">
                   <div>
                     <strong>${line.title}</strong><br/>
@@ -128,25 +128,25 @@ function InvoiceView({
                   </div>
                 </div>
               `
-                )
-                .join('')}
+          )
+          .join('')}
             </div>
 
             <div class="totals">
               ${invoice.totals
-                .map(
-                  (t) => `
+          .map(
+            (t) => `
                 <div class="line" style="${t.strong ? 'font-weight: 800; font-size: 18px;' : ''}">
                   <div>${t.label}</div>
                   <div>$${(Number(t.value) / 1000000).toFixed(2)}</div>
                 </div>
               `
-                )
-                .join('')}
+          )
+          .join('')}
             </div>
 
             <div class="footer">
-              Verified on Monad Metropolis Testnet · tekosoe.app/v/${invoice.number}
+              Verified on Monad Metropolis Testnet · tekosoe.xyz/v/${invoice.number}
             </div>
           </body>
         </html>
@@ -221,47 +221,47 @@ function InvoiceView({
           </Text>
         </Surface>
 
-      <Surface style={{ paddingVertical: 0 }}>
-        {invoice.lines.map((line) => (
-          <Pressable key={line.date + line.title} accessibilityRole="link" style={styles.line}>
-            <Text style={styles.date} color={colors.textMuted}>
-              {line.date}
-            </Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{line.title}</Text>
-              <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-                {line.sub}
+        <Surface style={{ paddingVertical: 0 }}>
+          {invoice.lines.map((line) => (
+            <Pressable key={line.date + line.title} accessibilityRole="link" style={styles.line}>
+              <Text style={styles.date} color={colors.textMuted}>
+                {line.date}
               </Text>
-            </View>
-            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }} color={line.positive ? colors.positive : colors.text}>
-              {line.positive ? signed(line.amount) : money(line.amount)}
-            </Text>
-            <Icon name="external" size={14} color={colors.primary} />
-          </Pressable>
-        ))}
-        <View style={styles.totals}>
-          {invoice.totals.map((t) => (
-            <KeyValue key={t.label} label={t.label} value={money(t.value)} strong={t.strong} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{line.title}</Text>
+                <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
+                  {line.sub}
+                </Text>
+              </View>
+              <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }} color={line.positive ? colors.positive : colors.text}>
+                {line.positive ? signed(line.amount) : money(line.amount)}
+              </Text>
+              <Icon name="external" size={14} color={colors.primary} />
+            </Pressable>
           ))}
-        </View>
-      </Surface>
+          <View style={styles.totals}>
+            {invoice.totals.map((t) => (
+              <KeyValue key={t.label} label={t.label} value={money(t.value)} strong={t.strong} />
+            ))}
+          </View>
+        </Surface>
 
-      <Surface style={styles.verify}>
-        <QrCode />
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Scan to verify</Text>
-          <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body, lineHeight: 17 }}>
-            Rebuilds this invoice from Monad and checks it was not changed.
-          </Text>
-          <Text variant="small" color={colors.primary}>
-            {verifyUrl}
-          </Text>
-        </View>
-      </Surface>
-    </Screen>
-    <TxOverlay status={payTx.status} />
-  </>
-);
+        <Surface style={styles.verify}>
+          <QrCode />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Scan to verify</Text>
+            <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body, lineHeight: 17 }}>
+              Rebuilds this invoice from Monad and checks it was not changed.
+            </Text>
+            <Text variant="small" color={colors.primary}>
+              {verifyUrl}
+            </Text>
+          </View>
+        </Surface>
+      </Screen>
+      <TxOverlay status={payTx.status} />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({

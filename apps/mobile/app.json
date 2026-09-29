@@ -9,10 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.tekosoe.app"
+      "bundleIdentifier": "com.tekosoe.xyz"
     },
     "android": {
-      "package": "com.tekosoe.app",
+      "package": "com.tekosoe.xyz",
       "adaptiveIcon": {
         "backgroundColor": "#faf8f3",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
