@@ -52,14 +52,27 @@ export default function SetupProfileScreen() {
     (city !== null && city !== initialCity) ||
     (tint !== null && tint !== initialTint);
 
+  const [nameTouched, setNameTouched] = useState(false);
+
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: (next as Href | undefined) ?? '/trips',
   });
 
-  const valid = currentName.trim().length > 0 && currentCity.trim().length > 0 && currentCountry.trim().length > 0;
+  const nameTrimmed = currentName.trim();
+  const nameError =
+    nameTouched && nameTrimmed.length === 0
+      ? 'Name is required'
+      : nameTouched && nameTrimmed.length < 2
+      ? 'At least 2 characters'
+      : nameTouched && nameTrimmed.length > 30
+      ? 'Max 30 characters'
+      : undefined;
+
+  const valid = nameTrimmed.length >= 2 && nameTrimmed.length <= 30 && currentCity.trim().length > 0 && currentCountry.trim().length > 0;
 
   const submit = async () => {
+    setNameTouched(true);
     if (!valid) return;
     await save.mutateAsync({ name: currentName.trim(), city: currentCity.trim(), country: currentCountry, tint: currentTint });
     if (editing && router.canGoBack()) router.back();
@@ -107,7 +120,18 @@ export default function SetupProfileScreen() {
           </View>
         </View>
 
-        <TextField label="Your name" value={currentName} onChangeText={setName} placeholder="Jack" autoCapitalize="words" />
+        <TextField
+          label="Your name"
+          value={currentName}
+          onChangeText={(val) => {
+            setNameTouched(true);
+            setName(val);
+          }}
+          onBlur={() => setNameTouched(true)}
+          error={nameError}
+          placeholder="Jack"
+          autoCapitalize="words"
+        />
 
         {/* Country and City select dropdowns */}
         <View style={styles.twoCol}>

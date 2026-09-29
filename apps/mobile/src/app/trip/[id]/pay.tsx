@@ -63,23 +63,29 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
 
   const overLimit = amountVal > trip.approvalLimit;
   const amountExceedsPot = amountVal > trip.pot;
+  const totalIncluded = Object.values(included).filter(Boolean).length;
 
-  let isValid = amountNumber > 0 && !amountExceedsPot;
   let customSum = 0;
-
-  if (split === 'equal') {
-    const totalIncluded = Object.values(included).filter(Boolean).length;
-    isValid = isValid && totalIncluded > 0;
-  } else {
+  if (split === 'custom') {
     for (const m of trip.members) {
       if (included[m.id]) {
         customSum += parseInt(customShares[m.id] || '0', 10);
       }
     }
-    isValid = isValid && customSum === amountNumber;
-    const totalIncluded = Object.values(included).filter(Boolean).length;
-    isValid = isValid && totalIncluded > 0;
   }
+
+  let validationError: string | null = null;
+  if (amountNumber <= 0) {
+    validationError = 'Enter an amount greater than $0';
+  } else if (amountExceedsPot) {
+    validationError = `Cannot exceed pot balance (${money(trip.pot)})`;
+  } else if (totalIncluded === 0) {
+    validationError = 'Select at least 1 person to include';
+  } else if (split === 'custom' && customSum !== amountNumber) {
+    validationError = `Custom split total ($${customSum}) must equal $${amountNumber}`;
+  }
+
+  const isValid = !validationError;
 
   const { notify } = useNotifications();
   const createSpend = useCreateSpend(trip.id);
@@ -111,6 +117,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
           <Button
             label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`}
             disabled={!isValid || tx.isProcessing}
+            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={() => tx.execute({ amount: amountNumber, splits: {} })} // splits dicatat di backend
           />
         }>
@@ -128,11 +135,11 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
               placeholderTextColor={colors.textMuted}
             />
           </View>
-          {amountExceedsPot && (
-            <Text variant="caption" color={colors.danger}>
-              Cannot exceed pot balance ({money(trip.pot)})
+          {validationError ? (
+            <Text variant="caption" color={colors.danger} style={{ fontFamily: fonts.bodyBold }}>
+              {validationError}
             </Text>
-          )}
+          ) : null}
           <View style={styles.what}>
             <Icon name="train" size={16} strokeWidth={2} />
             <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>{spend.title}</Text>

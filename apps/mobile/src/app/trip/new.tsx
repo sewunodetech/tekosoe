@@ -23,12 +23,41 @@ import { DiscardModal } from '@/components/ui/discard-modal';
 export default function NewTripScreen() {
   const router = useRouter();
   const [name, setName] = useState('Japan Trip');
+  const [nameTouched, setNameTouched] = useState(false);
   const [date, setDate] = useState(new Date('2026-10-14T00:00:00Z'));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [limitStr, setLimitStr] = useState<string>('100');
+  const [limitTouched, setLimitTouched] = useState(false);
 
   const parsedLimit = parseInt(limitStr, 10);
-  const isValid = name.trim().length > 0 && !isNaN(parsedLimit) && parsedLimit > 0;
+  const nameTrimmed = name.trim();
+
+  const nameError =
+    nameTouched && nameTrimmed.length === 0
+      ? 'Trip name is required'
+      : nameTouched && nameTrimmed.length < 3
+      ? 'At least 3 characters'
+      : undefined;
+
+  const limitError =
+    limitTouched && (isNaN(parsedLimit) || parsedLimit <= 0)
+      ? 'Enter a valid amount'
+      : limitTouched && parsedLimit < 10
+      ? 'Minimum limit is $10'
+      : limitTouched && parsedLimit > 5000
+      ? 'Maximum limit is $5,000'
+      : undefined;
+
+  const [todayTimestamp] = useState(() => new Date().setHours(0, 0, 0, 0));
+  const isFutureDate = date.getTime() >= todayTimestamp;
+  const dateError = !isFutureDate ? 'End date must be in the future' : undefined;
+
+  const isValid =
+    nameTrimmed.length >= 3 &&
+    !isNaN(parsedLimit) &&
+    parsedLimit >= 10 &&
+    parsedLimit <= 5000 &&
+    isFutureDate;
 
   const isDirty = name !== 'Japan Trip' || limitStr !== '100' || date.toISOString().slice(0, 10) !== '2026-10-14';
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
@@ -43,25 +72,39 @@ export default function NewTripScreen() {
     }
   });
 
+  const handleSubmit = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    setNameTouched(true);
+    setLimitTouched(true);
+    if (!isValid) return;
+    tx.execute({ name: nameTrimmed, endsAt: date, limit: parsedLimit });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <Screen
         gap={18}
         footer={
-          <Link href="/trip/japan" asChild>
-            <Button
-              label="Create trip"
-              disabled={!isValid || tx.isProcessing}
-              onPress={(e) => {
-                e.preventDefault();
-                tx.execute({ name, endsAt: date, limit: parsedLimit });
-              }}
-            />
-          </Link>
+          <Button
+            label="Create trip"
+            disabled={!isValid || tx.isProcessing}
+            style={!isValid ? { opacity: 0.5 } : undefined}
+            onPress={handleSubmit}
+          />
         }>
         <ScreenHeader title="New trip" onPress={handleBack} />
 
-        <TextField label="Trip name" value={name} onChangeText={setName} />
+        <TextField
+          label="Trip name"
+          value={name}
+          onChangeText={(val) => {
+            setNameTouched(true);
+            setName(val);
+          }}
+          onBlur={() => setNameTouched(true)}
+          error={nameError}
+          placeholder="e.g. Japan Trip"
+        />
 
         <Pressable onPress={() => setShowDatePicker(true)}>
           <View pointerEvents="none">
@@ -69,6 +112,7 @@ export default function NewTripScreen() {
               label="Trip ends"
               value={date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               editable={false}
+              error={dateError}
               icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
               hint="On this day Teko settles everyone up automatically."
             />
@@ -94,13 +138,22 @@ export default function NewTripScreen() {
           <TextField
             label="Approval limit"
             value={limitStr}
-            onChangeText={setLimitStr}
+            onChangeText={(val) => {
+              setLimitTouched(true);
+              setLimitStr(val);
+            }}
+            onBlur={() => setLimitTouched(true)}
+            error={limitError}
             keyboardType="numeric"
+            placeholder="100"
           />
           <ChoiceChips
             options={[50, 100, 200] as const}
             value={parsedLimit}
-            onChange={(v) => setLimitStr(String(v))}
+            onChange={(v) => {
+              setLimitTouched(true);
+              setLimitStr(String(v));
+            }}
             format={(v) => `$${v}`}
             height={44}
           />
