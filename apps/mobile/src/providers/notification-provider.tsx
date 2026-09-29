@@ -1,5 +1,4 @@
 import { router, type Href } from 'expo-router';
-import * as Notifications from 'expo-notifications';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +7,9 @@ import { Teko } from '@/components/teko';
 import { Text } from '@/components/ui/text';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import {
+  addNotificationResponseListener,
   getExpoPushToken,
+  getNotificationPermissionStatus,
   requestNotificationPermission,
   sendNotification,
   setupNotificationChannels,
@@ -42,32 +43,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     setupNotificationChannels();
 
-    let responseSub: Notifications.EventSubscription | null = null;
-    try {
-      if (Platform.OS !== 'web') {
-        Notifications.getPermissionsAsync()
-          .then(({ status }) => {
-            setEnabled(status === 'granted');
-          })
-          .catch(() => {});
-
-        responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
-          const url = response.notification.request.content.data?.url as string | undefined;
-          if (url) {
-            try {
-              router.push(url as Href);
-            } catch (e) {
-              console.warn('Could not navigate to notification URL:', e);
-            }
-          }
-        });
-      }
-    } catch (e) {
-      console.warn('Notification listener skipped (Expo Go):', e);
+    if (Platform.OS !== 'web') {
+      getNotificationPermissionStatus().then((status) => {
+        setEnabled(status);
+      });
     }
 
+    const cleanupSubscription = addNotificationResponseListener((url) => {
+      if (url) {
+        try {
+          router.push(url as Href);
+        } catch (e) {
+          console.warn('Could not navigate to notification URL:', e);
+        }
+      }
+    });
+
     return () => {
-      responseSub?.remove();
+      cleanupSubscription?.();
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, []);
