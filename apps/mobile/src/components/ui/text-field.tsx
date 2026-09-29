@@ -6,18 +6,11 @@ import { Text } from './text';
 
 type Props = TextInputProps & { label: string; hint?: string; error?: string; icon?: ReactNode };
 
-/** Input dengan label di atas dan petunjuk di bawah (F04 New trip). */
+/** Input dengan label di atas, petunjuk di kiri bawah, dan pesan error di kanan bawah. */
 export function TextField({ label, hint, error, icon, style, ...rest }: Props) {
   return (
     <View style={styles.wrap}>
-      <View style={styles.labelRow}>
-        <Text variant="label">{label}</Text>
-        {error ? (
-          <Text variant="caption" color={colors.danger} style={{ fontFamily: fonts.bodyBold }}>
-            {error}
-          </Text>
-        ) : null}
-      </View>
+      <Text variant="label">{label}</Text>
       <View>
         {icon ? <View style={styles.icon}>{icon}</View> : null}
         <TextInput
@@ -32,10 +25,21 @@ export function TextField({ label, hint, error, icon, style, ...rest }: Props) {
           {...rest}
         />
       </View>
-      {hint && !error ? (
-        <Text variant="caption" color={colors.textMuted}>
-          {hint}
-        </Text>
+      {hint || error ? (
+        <View style={styles.footerRow}>
+          {hint ? (
+            <Text variant="caption" color={colors.textMuted} style={styles.hintText}>
+              {hint}
+            </Text>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {error ? (
+            <Text variant="caption" color={colors.danger} style={styles.errorText}>
+              {error}
+            </Text>
+          ) : null}
+        </View>
       ) : null}
     </View>
   );
@@ -44,11 +48,6 @@ export function TextField({ label, hint, error, icon, style, ...rest }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     gap: 8,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   input: {
     height: 54,
@@ -70,5 +69,20 @@ const styles = StyleSheet.create({
     left: 16,
     top: 17,
     zIndex: 1,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginTop: -2,
+  },
+  hintText: {
+    flex: 1,
+  },
+  errorText: {
+    fontFamily: fonts.bodyBold,
+    textAlign: 'left',
+    marginLeft: 'auto',
   },
 });
