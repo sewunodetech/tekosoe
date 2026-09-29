@@ -35,7 +35,7 @@ export default function NewTripScreen() {
       <ScreenHeader title="New trip" />
 
       <TextField label="Trip name" value={name} onChangeText={setName} />
-      
+
       <Pressable onPress={() => setShowDatePicker(true)}>
         <View pointerEvents="none">
           <TextField
@@ -53,29 +53,29 @@ export default function NewTripScreen() {
           value={date}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event, selectedDate) => {
+          onValueChange={(event, selectedDate) => {
             setShowDatePicker(Platform.OS === 'ios');
             if (selectedDate) {
               setDate(selectedDate);
             }
           }}
+          onDismiss={() => setShowDatePicker(false)}
         />
       )}
 
       <View style={{ gap: 8 }}>
-        <Text variant="label">Approval limit</Text>
         <TextField
           label="Approval limit"
           value={limitStr}
           onChangeText={setLimitStr}
           keyboardType="numeric"
         />
-        <ChoiceChips 
-          options={[50, 100, 200] as const} 
-          value={parsedLimit} 
-          onChange={(v) => setLimitStr(String(v))} 
-          format={(v) => `$${v}`} 
-          height={44} 
+        <ChoiceChips
+          options={[50, 100, 200] as const}
+          value={parsedLimit}
+          onChange={(v) => setLimitStr(String(v))}
+          format={(v) => `$${v}`}
+          height={44}
         />
         <Text variant="caption" color={colors.textMuted}>
           Anything above this needs one friend to approve.
