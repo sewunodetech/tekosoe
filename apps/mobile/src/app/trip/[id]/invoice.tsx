@@ -1,3 +1,4 @@
+import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
 
@@ -55,6 +56,79 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
 
   const share = () => Share.share({ message: `${trip.name} invoice ${invoice.number}: https://${verifyUrl}` });
 
+  const handleSavePdf = async () => {
+    try {
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #faf8f3; color: #1d2426; padding: 36px; }
+              .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e6e2d8; padding-bottom: 18px; margin-bottom: 24px; }
+              .brand { font-size: 26px; font-weight: 800; color: #1f7a6e; }
+              .num { font-size: 14px; font-weight: bold; color: #5f6b6d; }
+              .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background: #cdeedd; color: #145c3b; font-weight: bold; font-size: 13px; margin-bottom: 12px; }
+              .title { font-size: 32px; font-weight: 800; margin: 0 0 6px 0; }
+              .subtitle { color: #5f6b6d; margin-bottom: 24px; font-size: 15px; }
+              .lines { margin-top: 16px; border-top: 1px solid #e6e2d8; }
+              .line { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f1eee6; }
+              .totals { margin-top: 24px; padding-top: 16px; border-top: 2px solid #1d2426; font-size: 16px; }
+              .footer { margin-top: 48px; font-size: 12px; color: #5f6b6d; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="brand">tekosoe</div>
+              <div class="num">${invoice.number}</div>
+            </div>
+            <div class="badge">${invoice.status.toUpperCase()}</div>
+            <h1 class="title">${trip.name}</h1>
+            <div class="subtitle">${invoice.headline} · ${invoice.subline}</div>
+            
+            <div class="lines">
+              ${invoice.lines
+                .map(
+                  (line) => `
+                <div class="line">
+                  <div>
+                    <strong>${line.title}</strong><br/>
+                    <small style="color: #5f6b6d">${line.date} · ${line.sub}</small>
+                  </div>
+                  <div style="font-weight: bold; color: ${line.positive ? '#1c7a4f' : '#1d2426'}">
+                    ${line.positive ? '+' : ''}${(Number(line.amount) / 1000000).toFixed(2)}
+                  </div>
+                </div>
+              `
+                )
+                .join('')}
+            </div>
+
+            <div class="totals">
+              ${invoice.totals
+                .map(
+                  (t) => `
+                <div class="line" style="${t.strong ? 'font-weight: 800; font-size: 18px;' : ''}">
+                  <div>${t.label}</div>
+                  <div>$${(Number(t.value) / 1000000).toFixed(2)}</div>
+                </div>
+              `
+                )
+                .join('')}
+            </div>
+
+            <div class="footer">
+              Verified on Monad Metropolis Testnet · tekosoe.app/v/${invoice.number}
+            </div>
+          </body>
+        </html>
+      `;
+      await Print.printAsync({ html });
+    } catch {
+      // user dismissed print modal
+    }
+  };
+
   return (
     <>
       <Screen
@@ -68,7 +142,7 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
             />
           ) : (
             <View style={styles.footer}>
-              <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} />
+              <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} onPress={handleSavePdf} />
               <Button label="Share" style={{ flex: 1, height: 52 }} onPress={share} />
             </View>
           )

@@ -19,7 +19,10 @@ import { Text } from '@/components/ui/text';
 import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
+import { useAttachReceipt } from '@/features/spends/useAttachReceipt';
 import { useTrip } from '@/features/trips/useTrip';
+import { TxOverlay } from '@/tx/tx-overlay';
+import { useTx } from '@/tx/useTx';
 
 // R1 Add receipt — canvas "Final UI" › S07ReceiptCapture
 // TODO (M7): expo-camera / expo-document-picker → kompres → AES-GCM kunci grup → keccak256(ciphertext)
@@ -36,15 +39,32 @@ export default function AddReceiptScreen() {
 function AddReceiptView({ trip }: { trip: Trip }) {
   const others = trip.members.filter((m) => m.label !== 'You').map((m) => m.name);
 
+  const attachReceipt = useAttachReceipt(trip.id);
+  const attachTx = useTx(attachReceipt.mutateAsync, {
+    onSuccess: () => {
+      router.back();
+    },
+  });
+
+  const handleUsePhoto = () => {
+    attachTx.execute({});
+  };
+
   return (
-    <Screen
-      gap={16}
-      footer={
-        <View style={styles.footer}>
-          <Button label="Retake" variant="outline" style={{ flex: 1 }} />
-          <Button label="Use photo" style={{ flex: 1 }} onPress={() => router.back()} />
-        </View>
-      }>
+    <>
+      <Screen
+        gap={16}
+        footer={
+          <View style={styles.footer}>
+            <Button label="Retake" variant="outline" style={{ flex: 1 }} />
+            <Button
+              label="Use photo"
+              style={{ flex: 1 }}
+              onPress={handleUsePhoto}
+              disabled={attachTx.isProcessing}
+            />
+          </View>
+        }>
       <ScreenHeader title="Add receipt" action="close" />
 
       <View style={styles.camera}>
@@ -86,7 +106,9 @@ function AddReceiptView({ trip }: { trip: Trip }) {
         Encrypted on this phone before upload. Only {others.join(', ').replace(/, ([^,]*)$/, ' and $1')} and you can open it.
       </InfoBox>
     </Screen>
-  );
+    <TxOverlay status={attachTx.status} />
+  </>
+);
 }
 
 function Corner({ style }: { style: object }) {

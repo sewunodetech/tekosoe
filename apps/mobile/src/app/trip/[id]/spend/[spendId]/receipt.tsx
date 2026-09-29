@@ -30,7 +30,17 @@ export default function ReceiptScreen() {
 
 function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const [unlocked, setUnlocked] = useState(false);
+  const [unlocking, setUnlocking] = useState(false);
   const count = trip.members.length === 3 ? 'three' : String(trip.members.length);
+
+  const handleUnlock = async () => {
+    setUnlocking(true);
+    // Simulate passkey biometric authentication + PRF group key decryption
+    setTimeout(() => {
+      setUnlocked(true);
+      setUnlocking(false);
+    }, 600);
+  };
 
   return (
     <Screen
@@ -39,9 +49,10 @@ function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
           <Button label="Done" onPress={() => router.back()} />
         ) : (
           <Button
-            label="Unlock with Face ID"
-            icon={<Icon name="faceIdSmile" color={colors.textOnPrimary} strokeWidth={2} />}
-            onPress={() => setUnlocked(true)}
+            label={unlocking ? 'Authenticating...' : 'Unlock with Passkey'}
+            icon={<Icon name="faceId" color={colors.textOnPrimary} strokeWidth={2} />}
+            onPress={handleUnlock}
+            disabled={unlocking}
           />
         )
       }>
