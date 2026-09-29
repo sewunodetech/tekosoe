@@ -1,0 +1,14 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.tekosoe.app",
+        "paths": ["/invite/*", "/j/*", "/v/*"]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAMID.com.tekosoe.app"]
+  }
+}
