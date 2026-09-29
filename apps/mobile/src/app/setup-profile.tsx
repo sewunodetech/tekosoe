@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams, type Href } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, BackHandler, Pressable, StyleSheet, View } from 'react-native';
 
 import { Bob } from '@/components/decor';
 import { Teko } from '@/components/teko';
@@ -36,6 +36,80 @@ export default function SetupProfileScreen() {
   const [pickingCountry, setPickingCountry] = useState(false);
   const [pickingCity, setPickingCity] = useState(false);
 
+  const initialRef = useRef({
+    name: existing?.name ?? '',
+    country: defaultCountry,
+    city: existing?.city ?? defaultCities[0],
+    tint: existing?.tint ?? avatarColors[2],
+    hasExisting: !!existing,
+  });
+
+  useEffect(() => {
+    if (existing && !initialRef.current.hasExisting) {
+      const c = existing.country ?? 'Australia';
+      const cities = LOCATIONS[c] ?? ['Sydney'];
+      const ci = existing.city ?? cities[0];
+      const t = existing.tint ?? avatarColors[2];
+      initialRef.current = {
+        name: existing.name ?? '',
+        country: c,
+        city: ci,
+        tint: t,
+        hasExisting: true,
+      };
+      setName(existing.name ?? '');
+      setCountry(c);
+      setCity(ci);
+      setTint(t);
+    }
+  }, [existing]);
+
+  const isDirty =
+    name.trim() !== initialRef.current.name.trim() ||
+    country !== initialRef.current.country ||
+    city !== initialRef.current.city ||
+    tint !== initialRef.current.tint;
+
+  const exit = useCallback(() => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace((next as Href | undefined) ?? '/trips');
+    }
+  }, [next]);
+
+  const handleBack = useCallback(() => {
+    if (isDirty) {
+      Alert.alert(
+        'Discard changes?',
+        'You have unsaved changes. Are you sure you want to discard them?',
+        [
+          { text: 'Keep editing', style: 'cancel' },
+          {
+            text: 'Discard',
+            style: 'destructive',
+            onPress: exit,
+          },
+        ],
+      );
+    } else {
+      exit();
+    }
+  }, [isDirty, exit]);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (isDirty) {
+        handleBack();
+        return true;
+      }
+      return false;
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [isDirty, handleBack]);
+
   const valid = name.trim().length > 0 && city.trim().length > 0 && country.trim().length > 0;
 
   const submit = async () => {
@@ -63,7 +137,10 @@ export default function SetupProfileScreen() {
           onPress={submit}
         />
       }>
-      <ScreenHeader right={editing ? undefined : <Pill label="Passkey is set" bg={colors.positiveBg} color={colors.positiveText} />} />
+      <ScreenHeader
+        onPress={handleBack}
+        right={editing ? undefined : <Pill label="Passkey is set" bg={colors.positiveBg} color={colors.positiveText} />}
+      />
 
       <View style={styles.hero}>
         <View style={styles.avatarWrap}>
