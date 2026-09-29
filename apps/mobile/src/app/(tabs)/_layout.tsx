@@ -15,7 +15,7 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.background },
       }}>
       <Tabs.Screen
-        name="index"
+        name="trips"
         options={{
           title: 'Trips',
           tabBarIcon: ({ color }) => <Icon name="home" size={22} color={color} />,
@@ -26,6 +26,13 @@ export default function TabsLayout() {
         options={{
           title: 'Card',
           tabBarIcon: ({ color }) => <Icon name="card" size={22} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <Icon name="profile" size={22} color={color} />,
         }}
       />
     </Tabs>

@@ -9,14 +9,19 @@ import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { MAX_GROUP_MEMBERS } from '@tekosoe/shared';
 
+import { QueryState } from '@/components/query-state';
 import { colors, fonts } from '@/constants/theme';
-import { getTrip } from '@/lib/demo';
+import type { Trip } from '@/data/types';
+import { useTrip } from '@/features/trips/useTrip';
 
 // S6 Trip members — canvas "Final UI" › S06Members
 // TODO: Envio MemberJoined + api → profiles. Batas 10 anggota ada di kontrak.
 export default function TripMembersScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
+  return <QueryState query={useTrip(id)}>{(trip) => <MembersView trip={trip} />}</QueryState>;
+}
+
+function MembersView({ trip }: { trip: Trip }) {
 
   const countries = new Map<string, number>();
   trip.members.forEach((m) => countries.set(m.country, (countries.get(m.country) ?? 0) + 1));

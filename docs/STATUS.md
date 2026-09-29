@@ -26,10 +26,10 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 ## Mobile (tim kita) — lihat `apps/mobile/ROADMAP.md`
 
 - [x] UI semua layar Final UI + maskot Teko + sistem desain (data demo) — branch `mobile-dev`
-- [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko
-- [ ] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/kosong/error
-- [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil
-- [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata
+- [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko — *Home di `/trips` ✅; sisa: merge, eas.json, dev build, ikon*
+- [x] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/error lewat `QueryState` — semua layar lepas dari data demo
+- [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil — *ADR 0003 + kode ada; belum terverifikasi di dev build 2 HP*
+- [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate 3 cabang (termasuk cek profil), `EXPO_PUBLIC_SIGNER` demo/mera selesai; sisa: uji Face ID di HP, keputusan penyimpanan kunci (lihat Blocker)*
 - [ ] M4 Transaksi: `src/tx`, semua mutation, status Processing → Done, error ramah
 - [ ] M5 Form & validasi
 - [ ] M6 Data live: adapter Envio + api
@@ -38,6 +38,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] M9 Undangan & deep link
 - [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
 - [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
+- [x] Desain P1 Set up profile + P2 Profile di canvas Final UI (28 Sep)
+- [ ] M12 Profil & akun: layar P1 + tab P2, simpan ke `profiles` lewat api, Sign out — *UI P1 + tab P2 + gate + Sign out + simpan lokal selesai; sisa: api `profiles` (live)*
 
 ## Gambaran semua tim (per lapisan) — lihat `docs/ROADMAP.md`
 
@@ -87,4 +89,4 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - Apakah SDK Mera + ekstensi PRF jalan di React Native? (spike hari pertama; cadangan: in-app browser dengan domain yang sama)
 - Kompatibilitas Alchemy Gas Manager dengan EOA Mera
 - Model bisnis untuk pitch belum dipilih
-- Provider database (Neon vs Supabase) dan object storage struk — lihat `docs/decisions/0002-database-provider.md`
+- **Keamanan (mobile, perlu keputusan):** `SessionProvider` menyimpan `prfOutput` (= private key akun) permanen di SecureStore tanpa `requireAuthentication`, jadi Face ID hanya diminta sekali. Opsi: minta Face ID tiap buka app (simpan hanya `credentialId`, turunkan kunci lewat `getPasskeyPrfOutput`), atau SecureStore dengan `requireAuthentication: true`. dan object storage struk — lihat `docs/decisions/0002-database-provider.md`

@@ -9,16 +9,28 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getTrip, money, spends } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
-// TODO: computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
+// TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
 // Di atas approvalThreshold jadi SpendRequested → S2 Waiting.
 export default function PayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const trip = getTrip(id);
-  const spend = spends.train;
+  // Draf demo: tiket kereta $150 (cerita desain). Diganti isian form di M5.
+  const query = combine(useTrip(id), useSpend('train'));
+  return (
+    <QueryState query={query} title="Pay from the pot" headerAction="close">
+      {([trip, spend]) => <PayView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const [split, setSplit] = useState<'equal' | 'custom'>('equal');
   const [included, setIncluded] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(trip.members.map((m) => [m.id, true])),

@@ -2,6 +2,7 @@ import { Link, router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Sparkle } from '@/components/decor';
+import { combine, QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,37 @@ import { Icon } from '@/components/ui/icon';
 import { AvatarStack, Pill, Screen } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { me, money, signed, trips, type Trip } from '@/lib/demo';
+import type { Profile, Trip } from '@/data/types';
+import { useProfile } from '@/features/profile/useProfile';
+import { useTrips } from '@/features/trips/useTrips';
+import { money, signed } from '@/lib/money';
 
 // 03 Home — canvas "Final UI" › F03Home, plus kartu grup besar dari S05BigGroup.
-// TODO: daftar trip dari Envio (pot, saldo) + api (nama trip).
 export default function HomeScreen() {
+  const query = combine(useTrips(), useProfile());
+  return (
+    <QueryState query={query} tab headerAction="none">
+      {([trips, profile]) => <HomeView list={trips.list} settled={trips.settled} profile={profile} />}
+    </QueryState>
+  );
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+function HomeView({
+  list,
+  settled,
+  profile,
+}: {
+  list: Trip[];
+  settled: { name: string; returnAmount: string }[];
+  profile: Profile | null;
+}) {
+  const me = { name: profile?.name ?? 'there', tint: profile?.tint ?? palette.sky };
+
   return (
     <Screen
       tab
@@ -27,7 +54,7 @@ export default function HomeScreen() {
         <Avatar name={me.name} tint={me.tint} size={42} />
         <View style={{ flex: 1 }}>
           <Text variant="caption" color={colors.textMuted}>
-            Good evening
+            {greeting()}
           </Text>
           <Text variant="h3">Hi, {me.name}</Text>
         </View>
@@ -39,21 +66,24 @@ export default function HomeScreen() {
 
       <Text variant="h2">Your trips</Text>
 
-      <TripCard trip={trips.japan} tone="mint" />
-      <TripCard trip={trips.euro} tone="violet" />
+      {list.map((trip, idx) => (
+        <TripCard key={trip.id} trip={trip} tone={idx % 2 === 0 ? 'mint' : 'violet'} />
+      ))}
 
-      <View style={styles.settledRow}>
-        <View style={styles.checkCircle}>
-          <Icon name="check" color={colors.positive} strokeWidth={2.6} />
+      {settled.map((s) => (
+        <View key={s.name} style={styles.settledRow}>
+          <View style={styles.checkCircle}>
+            <Icon name="check" color={colors.positive} strokeWidth={2.6} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">{s.name}</Text>
+            <Text variant="caption" color={colors.textMuted}>
+              Settled · you got {s.returnAmount} back
+            </Text>
+          </View>
+          <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
         </View>
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Bali Weekend</Text>
-          <Text variant="caption" color={colors.textMuted}>
-            Settled · you got $12.50 back
-          </Text>
-        </View>
-        <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
-      </View>
+      ))}
 
       <View style={styles.tip}>
         <Teko mood="idle" size={64} />

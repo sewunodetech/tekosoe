@@ -1,6 +1,5 @@
-import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -17,15 +16,20 @@ import { Screen } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
+import { useSession } from '@/providers/session-provider';
 
 // 02 Sign in — canvas "Final UI" › F02SignIn
 export default function SignInScreen() {
-  const router = useRouter();
+  const { signIn } = useSession();
 
-  const handleFaceIdSignIn = () => {
-    // TODO: Implement Mera passkey authentication here
-    // For now, directly navigate to Home
-    router.replace('/(tabs)');
+  const handleFaceIdSignIn = async () => {
+    try {
+      // Setelah sesi ada, gate di app/_layout.tsx mengarahkan: akun baru → P1 Set up profile, lainnya → Home.
+      await signIn();
+    } catch (err: any) {
+      console.error('Mera Auth Error:', err);
+      Alert.alert('Sign in failed', err?.message || 'Failed to authenticate');
+    }
   };
 
   return (

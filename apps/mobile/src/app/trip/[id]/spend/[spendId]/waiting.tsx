@@ -9,15 +9,28 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import { getSpend, getTrip, members, money } from '@/lib/demo';
+import type { Spend, Trip } from '@/data/types';
+import { useSpend } from '@/features/spends/useSpend';
+import { useTrip } from '@/features/trips/useTrip';
+import { money } from '@/lib/money';
 
 // S2 Waiting for approval — canvas "Final UI" › S02Waiting
 // TODO: Envio SpendRequested + api → spend_reviews (Seen). "Nudge" kirim push.
 export default function WaitingForApprovalScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
-  const trip = getTrip(id);
-  const spend = getSpend(spendId);
+  return (
+    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Waiting for a yes">
+      {([trip, spend]) => <WaitingView trip={trip} spend={spend} />}
+    </QueryState>
+  );
+}
+
+function WaitingView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  // Yang bisa menyetujui = anggota selain pembayar. Status "Seen" masih demo (TODO: spend_reviews).
+  const [seenBy, notYet] = trip.members.filter((m) => m.id !== spend.paidBy.id);
+  const members = { rina: seenBy, wei: notYet ?? seenBy };
 
   return (
     <Screen

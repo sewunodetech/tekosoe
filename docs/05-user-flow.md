@@ -4,7 +4,7 @@ App punya dua flow utama: masuk dan bergabung ke grup (termasuk setor dana dan m
 
 ## Flow 1 — Masuk dan bergabung ke grup
 
-Ada dua pintu masuk, dan keduanya melewati layar Face ID yang sama: membuka app langsung, atau membuka link undangan dari teman.
+Ada dua pintu masuk, dan keduanya melewati layar Face ID yang sama: membuka app langsung, atau membuka link undangan dari teman. Akun baru langsung mengisi profil (nama, kota, negara, warna avatar) di layar P1 tepat setelah passkey dibuat, lalu masuk Home atau lanjut ke layar gabung.
 
 &#91;embedded content: flow masuk dan bergabung · 7 layar\]
 
