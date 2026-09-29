@@ -88,7 +88,7 @@ function HomeView({
       <View style={styles.tip}>
         <Teko mood="idle" size={64} />
         <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, lineHeight: 20 }}>
-          Planning another trip? Start a pot and share the link. Friends join with Face ID.
+          Planning another trip? Start a pot and share the link. Friends join with passkey.
         </Text>
       </View>
     </Screen>

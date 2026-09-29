@@ -52,7 +52,7 @@ export default function SetupProfileScreen() {
           onPress={submit}
         />
       }>
-      <ScreenHeader right={editing ? undefined : <Pill label="Face ID is set" bg={colors.positiveBg} color={colors.positiveText} />} />
+      <ScreenHeader right={editing ? undefined : <Pill label="Passkey is set" bg={colors.positiveBg} color={colors.positiveText} />} />
 
       <View style={styles.hero}>
         <View style={styles.avatarWrap}>

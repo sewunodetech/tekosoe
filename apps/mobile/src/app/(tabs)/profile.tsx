@@ -76,9 +76,9 @@ function ProfileView({
           <Icon name="faceId" size={22} color={colors.primary} strokeWidth={2} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 15 }}>Signed in with Face ID</Text>
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 15 }}>Signed in with Passkey</Text>
           <Text variant="caption" color={colors.textMuted}>
-            Your account lives on this phone. Same Face ID opens it on a new phone.
+            Your account lives on this phone. Same passkey opens it on a new phone.
           </Text>
         </View>
       </View>
