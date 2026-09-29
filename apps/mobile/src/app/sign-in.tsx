@@ -22,7 +22,7 @@ import { useSession } from '@/providers/session-provider';
 export default function SignInScreen() {
   const { signIn } = useSession();
 
-  const handleFaceIdSignIn = async () => {
+  const handlePasskeySignIn = async () => {
     try {
       // Setelah sesi ada, gate di app/_layout.tsx mengarahkan: akun baru → P1 Set up profile, lainnya → Home.
       await signIn();
@@ -37,10 +37,10 @@ export default function SignInScreen() {
       gap={24}
       footer={
         <>
-          <Button label="Continue with Face ID" onPress={handleFaceIdSignIn} />
-          <Button label="I already have an account" variant="ghost" onPress={handleFaceIdSignIn} />
+          <Button label="Continue with Passkey" onPress={handlePasskeySignIn} />
+          <Button label="I already have an account" variant="ghost" onPress={handlePasskeySignIn} />
           <Text variant="caption" color={colors.textMuted} style={styles.textCenter}>
-            New phone? Same Face ID, same account.
+            New phone? Same passkey, same account.
           </Text>
         </>
       }>
@@ -58,7 +58,7 @@ export default function SignInScreen() {
           </View>
         </View>
         <Text variant="h1" style={[styles.textCenter, { fontSize: 30, lineHeight: 34 }]}>
-          Sign in with Face ID
+          Sign in with Passkey
         </Text>
         <Text variant="body" color={colors.textMuted} style={[styles.textCenter, { maxWidth: 300 }]}>
           Your account lives safely on this phone. No passwords, no secret words to remember.
