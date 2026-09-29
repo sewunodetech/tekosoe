@@ -1,7 +1,7 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
 import { Button } from '@/components/ui/button';
@@ -110,11 +110,13 @@ export default function NewTripScreen() {
             tekosoe.app/j/[invite-code]
           </Text>
           <View style={styles.inviteActions}>
+            <Button
+              label="Share link"
+              variant="pill"
+              onPress={() => Share.share({ message: `Join our trip "${name}" on Tekosoe: https://tekosoe.app/j/japan` })}
+            />
             <Link href="/invite/japan" asChild>
-              <Button label="Copy link" variant="pill" />
-            </Link>
-            <Link href="/invite/japan" asChild>
-              <Button label="Share" variant="pill" />
+              <Button label="Preview" variant="pill" />
             </Link>
           </View>
         </View>

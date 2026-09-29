@@ -8,9 +8,11 @@
     "scheme": "tekosoe",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.tekosoe.app"
     },
     "android": {
+      "package": "com.tekosoe.app",
       "adaptiveIcon": {
         "backgroundColor": "#faf8f3",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
