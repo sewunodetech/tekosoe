@@ -36,91 +36,91 @@ export default function NewTripScreen() {
   });
 
   return (
-    <>
-    <Screen
-      gap={18}
-      footer={
-        <Link href="/trip/japan" asChild>
-          <Button 
-            label="Create trip" 
-            disabled={!isValid || tx.isProcessing} 
-            onPress={(e) => {
-              e.preventDefault();
-              tx.execute({ name, endsAt: date, limit: parsedLimit });
-            }} 
+    <View style={{ flex: 1 }}>
+      <Screen
+        gap={18}
+        footer={
+          <Link href="/trip/japan" asChild>
+            <Button
+              label="Create trip"
+              disabled={!isValid || tx.isProcessing}
+              onPress={(e) => {
+                e.preventDefault();
+                tx.execute({ name, endsAt: date, limit: parsedLimit });
+              }}
+            />
+          </Link>
+        }>
+        <ScreenHeader title="New trip" />
+
+        <TextField label="Trip name" value={name} onChangeText={setName} />
+
+        <Pressable onPress={() => setShowDatePicker(true)}>
+          <View pointerEvents="none">
+            <TextField
+              label="Trip ends"
+              value={date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              editable={false}
+              icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
+              hint="On this day Teko settles everyone up automatically."
+            />
+          </View>
+        </Pressable>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onValueChange={(event, selectedDate) => {
+              setShowDatePicker(Platform.OS === 'ios');
+              if (selectedDate) {
+                setDate(selectedDate);
+              }
+            }}
+            onDismiss={() => setShowDatePicker(false)}
           />
-        </Link>
-      }>
-      <ScreenHeader title="New trip" />
+        )}
 
-      <TextField label="Trip name" value={name} onChangeText={setName} />
-
-      <Pressable onPress={() => setShowDatePicker(true)}>
-        <View pointerEvents="none">
+        <View style={{ gap: 8 }}>
           <TextField
-            label="Trip ends"
-            value={date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            editable={false}
-            icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
-            hint="On this day Teko settles everyone up automatically."
+            label="Approval limit"
+            value={limitStr}
+            onChangeText={setLimitStr}
+            keyboardType="numeric"
           />
+          <ChoiceChips
+            options={[50, 100, 200] as const}
+            value={parsedLimit}
+            onChange={(v) => setLimitStr(String(v))}
+            format={(v) => `$${v}`}
+            height={44}
+          />
+          <Text variant="caption" color={colors.textMuted}>
+            Anything above this needs one friend to approve.
+          </Text>
         </View>
-      </Pressable>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onValueChange={(event, selectedDate) => {
-            setShowDatePicker(Platform.OS === 'ios');
-            if (selectedDate) {
-              setDate(selectedDate);
-            }
-          }}
-          onDismiss={() => setShowDatePicker(false)}
-        />
-      )}
-
-      <View style={{ gap: 8 }}>
-        <TextField
-          label="Approval limit"
-          value={limitStr}
-          onChangeText={setLimitStr}
-          keyboardType="numeric"
-        />
-        <ChoiceChips
-          options={[50, 100, 200] as const}
-          value={parsedLimit}
-          onChange={(v) => setLimitStr(String(v))}
-          format={(v) => `$${v}`}
-          height={44}
-        />
-        <Text variant="caption" color={colors.textMuted}>
-          Anything above this needs one friend to approve.
-        </Text>
-      </View>
-
-      <View style={styles.invite}>
-        <View style={styles.inviteTeko}>
-          <Teko mood="wink" size={92} bob={false} />
+        <View style={styles.invite}>
+          <View style={styles.inviteTeko}>
+            <Teko mood="wink" size={92} bob={false} />
+          </View>
+          <Text variant="label">Invite link</Text>
+          <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14 }} color={colors.heroText}>
+            tekosoe.app/j/[invite-code]
+          </Text>
+          <View style={styles.inviteActions}>
+            <Link href="/invite/japan" asChild>
+              <Button label="Copy link" variant="pill" />
+            </Link>
+            <Link href="/invite/japan" asChild>
+              <Button label="Share" variant="pill" />
+            </Link>
+          </View>
         </View>
-        <Text variant="label">Invite link</Text>
-        <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14 }} color={colors.heroText}>
-          tekosoe.app/j/[invite-code]
-        </Text>
-        <View style={styles.inviteActions}>
-          <Link href="/invite/japan" asChild>
-            <Button label="Copy link" variant="pill" />
-          </Link>
-          <Link href="/invite/japan" asChild>
-            <Button label="Share" variant="pill" />
-          </Link>
-        </View>
-      </View>
-    </Screen>
-    <TxOverlay status={tx.status} />
-    </>
+      </Screen>
+      <TxOverlay status={tx.status} />
+    </View>
   );
 }
 

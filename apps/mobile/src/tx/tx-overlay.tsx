@@ -1,5 +1,4 @@
-import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Modal, StyleSheet, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
 import { Text } from '@/components/ui/text';
@@ -11,33 +10,32 @@ type Props = {
 };
 
 export function TxOverlay({ status }: Props) {
-  if (status === 'idle') return null;
-
   return (
-    <Animated.View style={styles.overlay} entering={FadeIn.duration(200)} exiting={FadeOut.duration(200)}>
-      <View style={styles.card}>
-        <View style={styles.tekoWrap}>
-          {status === 'processing' && <Teko mood="think" size={100} />}
-          {status === 'done' && <Teko mood="cheer" size={100} />}
-          {status === 'error' && <Teko mood="sad" size={100} />}
+    <Modal transparent visible={status !== 'idle'} animationType="fade" statusBarTranslucent>
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          <View style={styles.tekoWrap}>
+            {status === 'processing' && <Teko mood="think" size={100} />}
+            {status === 'done' && <Teko mood="cheer" size={100} />}
+            {status === 'error' && <Teko mood="sad" size={100} />}
+          </View>
+          <Text variant="h2" style={styles.text}>
+            {status === 'processing' && 'Processing...'}
+            {status === 'done' && 'Done!'}
+            {status === 'error' && 'Failed'}
+          </Text>
         </View>
-        <Text variant="h2" style={styles.text}>
-          {status === 'processing' && 'Processing...'}
-          {status === 'done' && 'Done!'}
-          {status === 'error' && 'Failed'}
-        </Text>
       </View>
-    </Animated.View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
     backgroundColor: 'rgba(29, 36, 38, 0.4)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
   },
   card: {
     backgroundColor: colors.surface,
