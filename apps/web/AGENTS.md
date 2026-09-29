@@ -10,13 +10,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Tekosoe — web
 
-Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel, **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah).
+Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel. Dashboard **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah, `components/Frame.tsx` lewat route group `(phone)`). Landing `/` adalah hero satu layar full-bleed (`components/landing/`, CSS module) — pengecualian yang disengaja.
 
 Tugasnya:
 
 1. **Landing page + dashboard pratinjau hanya-baca** dengan data demo (`/`, `/trips`, `/card`, `/profile`, …). Tanpa login, tanpa aksi uang — tombol aksi memakai `AppAction` (`components/ui/app-sheet.tsx`) yang membuka sheet "buka di app".
 2. **Verifikasi invoice dari QR** (`/v/[number]`) — target: hitung ulang invoice dari data on-chain (Envio) dan cocokkan sidik jari invoice. Sekarang masih data demo (WP W-3).
-3. **Link undangan** (`/j/[code]`) yang membuka app (deep link `tekosoe://`, fallback ke bagian "Get the app").
+3. **Link undangan** (`/j/[code]`) yang membuka app (deep link `tekosoe://`, fallback ke `/get-app`).
 4. **File asosiasi domain untuk passkey** — `/.well-known/apple-app-site-association` dan `/.well-known/assetlinks.json` di domain yang sama dengan `EXPO_PUBLIC_PASSKEY_DOMAIN`. Tanpa ini passkey native tidak jalan.
 
 Bukan tempat backend: penjadwal, gas, dan database ada di `apps/api`. Web tidak pernah menulis ke api/database.

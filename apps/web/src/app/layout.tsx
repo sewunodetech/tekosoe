@@ -31,8 +31,8 @@ export const viewport: Viewport = {
 };
 
 /**
- * Web ini mobile-only: semua halaman hidup di satu kolom ~430px.
- * Di layar lebar kolom itu tampil sebagai bingkai ponsel di tengah.
+ * Layout akar hanya memasang font dan body. Bingkai ponsel (mobile-only) ada di `(phone)/layout.tsx`;
+ * landing `/` sengaja full-bleed.
  */
 export default function RootLayout({
   children,
@@ -41,11 +41,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${bricolage.variable} ${manrope.variable}`}>
-      <body className="min-h-dvh font-body text-ink antialiased">
-        <div className="relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-ivory md:my-6 md:min-h-[min(880px,calc(100dvh-3rem))] md:rounded-[44px] md:border md:border-line md:shadow-[0_24px_60px_rgba(29,36,38,0.12)]">
-          {children}
-        </div>
-      </body>
+      <body className="min-h-dvh font-body text-ink antialiased">{children}</body>
     </html>
   );
 }

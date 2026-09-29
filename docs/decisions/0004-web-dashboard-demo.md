@@ -17,7 +17,7 @@ Tim memutuskan web perlu landing page dan dashboard, dengan desain persis dari a
 
 1. **Dashboard web adalah pratinjau hanya-baca dengan data demo**, tanpa login. Datanya sama dengan demo `apps/mobile` (cerita Rina/Wei/Jack di Jepang) dan diberi label "Demo preview" di layar.
 2. **Semua aksi uang** (Add money, Pay, Join, Pay invoice, New trip) tidak dijalankan di web. Tombolnya membuka bottom sheet "Do this in the Tekosoe app" dengan deep link `tekosoe://…` dan tautan "Get the app".
-3. **Mobile-only.** Semua halaman hidup di satu kolom maksimal 430px. Di layar lebar kolom itu tampil sebagai bingkai ponsel di tengah, bukan halaman desktop.
+3. **Mobile-only untuk dashboard.** Semua halaman app-like (dashboard, undangan, verifikasi, `/get-app`) hidup di satu kolom maksimal 430px; di layar lebar tampil sebagai bingkai ponsel di tengah (`components/Frame.tsx`, route group `(phone)`). **Pengecualian: landing `/`** adalah hero satu layar full-bleed yang responsif (tanpa scroll di desktop, menu burger di ≤820px) dengan video latar; komponennya tetap bergaya kartun dari app (sudut membulat, teal/oranye, Bricolage + Manrope, maskot Teko).
 4. **Desain mengikuti app.** Token (`apps/mobile/src/constants/theme.ts`), ikon, maskot Teko (10 ekspresi), dan komponen dasar dipindahkan apa adanya ke `apps/web`. Hanya mode terang, copy dalam bahasa Inggris seperti app, dan larangan istilah kripto berlaku di semua halaman (dijaga oleh `npm test -w @tekosoe/web`).
 5. **Lapisan data lewat `TripRepository`** (`apps/web/src/data/repo.ts`). Halaman tidak meng-import data demo langsung. Sumber live (saldo/aktivitas dari Envio, label dari `apps/api`) ditambahkan sebagai implementasi kedua dengan antarmuka yang sama setelah Envio dan kontrak ter-deploy.
 6. **Tetap statis.** Semua halaman di-prerender (`generateStaticParams`), sehingga "Next.js statis di Vercel" dari ADR 0001 tetap berlaku. State yang di app memakai query string (`?state=empty`, `?who=`) dijadikan rute (`/trips/[id]/empty`, `/trips/[id]/invoice/[who]`).
@@ -29,5 +29,6 @@ Tim memutuskan web perlu landing page dan dashboard, dengan desain persis dari a
 - Login passkey di web, daftar trip milik user sungguhan, dan aksi yang menandatangani uang **tidak** termasuk. Kalau nanti dibutuhkan, itu butuh spike Mera untuk browser dan ADR baru.
 - Fixture demo disalin ke `apps/web/src/data/demo.ts` supaya tidak menyentuh `apps/mobile`. Ini utang: ekstrak ke `packages/shared` agar mobile dan web memakai satu sumber.
 - Token desain diduplikasi di `apps/web/src/app/globals.css`. Kalau `theme.ts` berubah, ubah keduanya.
-- Tombol "Get the app" mengarah ke bagian `#get-app` di landing sampai ada halaman toko; atur `NEXT_PUBLIC_APP_DOWNLOAD_URL` untuk menggantinya.
+- Tombol "Get the app" mengarah ke halaman `/get-app` sampai ada halaman toko; atur `NEXT_PUBLIC_APP_DOWNLOAD_URL` untuk menggantinya.
+- Landing memakai video latar dari CloudFront (URL ada di `app/page.tsx`); teks lede putih bergantung pada bagian bawah video yang gelap.
 - Tidak menyentuh file `.well-known` (WP W-1). Temuan yang belum ditangani: `apple-app-site-association` masih memakai `TEAMID.com.tekosoe.app` (bundle app sebenarnya `com.tekosoe.xyz`) dan belum dilayani dengan `Content-Type: application/json`.
