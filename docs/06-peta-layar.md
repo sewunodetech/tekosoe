@@ -77,7 +77,7 @@ Bukan bagian dari alur app. Web adalah pintu masuk publik: landing, pratinjau da
 
 | Rute web | Setara layar app | Isi |
 | --- | --- | --- |
-| `/` | 01 Welcome | Landing hero satu layar full-bleed (video latar, nav, headline, dua tombol, lede); satu-satunya halaman web di luar bingkai ponsel |
+| `/` | 01 Welcome | Landing hero putih full-bleed: nav, headline, CTA, tab Plan/Chip in/Spend/Settle (auto-ganti) dengan video dan kartu overlay; satu-satunya halaman web di luar bingkai ponsel |
 | `/get-app` | — | Halaman unduh sementara |
 | `/trips` | 03 Home · S5 | Daftar trip (label "Demo preview") |
 | `/trips/[id]` | 07 Trip | Kartu pot, aksi (membuka sheet), "If we settled today", Activity |
