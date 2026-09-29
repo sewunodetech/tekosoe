@@ -1,6 +1,6 @@
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
 import { Avatar } from '@/components/ui/avatar';
@@ -9,12 +9,13 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { TextField } from '@/components/ui/text-field';
 import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
-import { money } from '@/lib/money';
+import { money, usd } from '@/lib/money';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
@@ -30,25 +31,66 @@ export default function PayScreen() {
   );
 }
 
+
 function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  const [amountStr, setAmountStr] = useState<string>('150');
+  const amountNumber = parseInt(amountStr, 10) || 0;
+  const amountVal = usd(amountNumber);
+
   const [split, setSplit] = useState<'equal' | 'custom'>('equal');
   const [included, setIncluded] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(trip.members.map((m) => [m.id, true])),
   );
-  const overLimit = spend.amount > trip.approvalLimit;
+  
+  const [customShares, setCustomShares] = useState<Record<string, string>>({});
+
+  const overLimit = amountVal > trip.approvalLimit;
+  const amountExceedsPot = amountVal > trip.pot;
+
+  let isValid = amountNumber > 0 && !amountExceedsPot;
+  let customSum = 0;
+
+  if (split === 'equal') {
+    const totalIncluded = Object.values(included).filter(Boolean).length;
+    isValid = isValid && totalIncluded > 0;
+  } else {
+    for (const m of trip.members) {
+      if (included[m.id]) {
+        customSum += parseInt(customShares[m.id] || '0', 10);
+      }
+    }
+    isValid = isValid && customSum === amountNumber;
+    const totalIncluded = Object.values(included).filter(Boolean).length;
+    isValid = isValid && totalIncluded > 0;
+  }
 
   return (
     <Screen
       gap={16}
       footer={
         <Link href={overLimit ? `/trip/${trip.id}/spend/${spend.id}/waiting` : `/trip/${trip.id}`} asChild>
-          <Button label={overLimit ? 'Request approval' : `Pay ${money(spend.amount)}`} />
+          <Button label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`} disabled={!isValid} />
         </Link>
       }>
       <ScreenHeader title="Pay from the pot" action="close" />
 
       <Surface style={styles.amountCard}>
-        <Text style={styles.amount}>$150</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.amount}>$</Text>
+          <TextInput 
+            style={styles.amount}
+            value={amountStr}
+            onChangeText={setAmountStr}
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor={colors.textMuted}
+          />
+        </View>
+        {amountExceedsPot && (
+          <Text variant="caption" color={colors.negative}>
+            Cannot exceed pot balance ({money(trip.pot)})
+          </Text>
+        )}
         <View style={styles.what}>
           <Icon name="train" size={16} strokeWidth={2} />
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>{spend.title}</Text>
@@ -78,13 +120,38 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
             ))}
           </View>
         </View>
-        {spend.shares.map(({ member, share }) => {
+        
+        {split === 'custom' && (
+          <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.negative}>
+            Custom split total: ${customSum} / ${amountNumber}
+          </Text>
+        )}
+
+        {trip.members.map((member) => {
           const on = included[member.id];
+          const equalShareAmount = Math.floor(amountNumber / Math.max(1, Object.values(included).filter(Boolean).length));
+          
           return (
             <View key={member.id} style={styles.shareRow}>
               <Avatar name={member.name} tint={member.tint} size={30} />
               <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14 }}>{member.label}</Text>
-              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(share) : '—'}</Text>
+              
+              {split === 'equal' ? (
+                <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(usd(equalShareAmount)) : '—'}</Text>
+              ) : (
+                on ? (
+                  <TextInput
+                    style={styles.customInput}
+                    value={customShares[member.id] || ''}
+                    onChangeText={(val) => setCustomShares(prev => ({ ...prev, [member.id]: val }))}
+                    keyboardType="numeric"
+                    placeholder="$0"
+                  />
+                ) : (
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
+                )
+              )}
+
               <Pressable
                 accessibilityRole="checkbox"
                 accessibilityState={{ checked: on }}
@@ -173,6 +240,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: palette.lineStrong,
+  },
+  customInput: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    color: colors.text,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.lineStrong,
+    width: 60,
+    textAlign: 'right',
+    paddingVertical: 2,
+    marginRight: 10,
   },
   warn: {
     paddingVertical: 14,

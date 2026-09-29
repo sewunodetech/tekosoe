@@ -1,6 +1,7 @@
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Teko } from '@/components/teko';
 import { Button } from '@/components/ui/button';
@@ -16,31 +17,66 @@ import { colors, fonts, radius } from '@/constants/theme';
 // TODO: createGroup(name, inviteHash, endsAt, disputeWindow, approvalThreshold) + api → group_meta.
 export default function NewTripScreen() {
   const [name, setName] = useState('Japan Trip');
-  const [endsOn, setEndsOn] = useState('Oct 14, 2026');
-  const [limit, setLimit] = useState<number>(100);
+  const [date, setDate] = useState(new Date('2026-10-14T00:00:00Z'));
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [limitStr, setLimitStr] = useState<string>('100');
+
+  const parsedLimit = parseInt(limitStr, 10);
+  const isValid = name.trim().length > 0 && !isNaN(parsedLimit) && parsedLimit > 0;
 
   return (
     <Screen
       gap={18}
       footer={
         <Link href="/trip/japan" asChild>
-          <Button label="Create trip" />
+          <Button label="Create trip" disabled={!isValid} />
         </Link>
       }>
       <ScreenHeader title="New trip" />
 
       <TextField label="Trip name" value={name} onChangeText={setName} />
-      <TextField
-        label="Trip ends"
-        value={endsOn}
-        onChangeText={setEndsOn}
-        icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
-        hint="On this day Teko settles everyone up automatically."
-      />
+      
+      <Pressable onPress={() => setShowDatePicker(true)}>
+        <View pointerEvents="none">
+          <TextField
+            label="Trip ends"
+            value={date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            editable={false}
+            icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
+            hint="On this day Teko settles everyone up automatically."
+          />
+        </View>
+      </Pressable>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(Platform.OS === 'ios');
+            if (selectedDate) {
+              setDate(selectedDate);
+            }
+          }}
+        />
+      )}
 
       <View style={{ gap: 8 }}>
         <Text variant="label">Approval limit</Text>
-        <ChoiceChips options={[50, 100, 200] as const} value={limit} onChange={setLimit} format={(v) => `$${v}`} height={44} />
+        <TextField
+          label="Approval limit"
+          value={limitStr}
+          onChangeText={setLimitStr}
+          keyboardType="numeric"
+        />
+        <ChoiceChips 
+          options={[50, 100, 200] as const} 
+          value={parsedLimit} 
+          onChange={(v) => setLimitStr(String(v))} 
+          format={(v) => `$${v}`} 
+          height={44} 
+        />
         <Text variant="caption" color={colors.textMuted}>
           Anything above this needs one friend to approve.
         </Text>

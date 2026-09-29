@@ -31,7 +31,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil — *ADR 0003 + kode ada; belum terverifikasi di dev build 2 HP*
 - [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate 3 cabang (termasuk cek profil), `EXPO_PUBLIC_SIGNER` demo/mera selesai; sisa: uji Face ID di HP, keputusan penyimpanan kunci (lihat Blocker)*
 - [ ] M4 Transaksi: `src/tx`, semua mutation, status Processing → Done, error ramah
-- [ ] M5 Form & validasi
+- [x] M5 Form & validasi
 - [ ] M6 Data live: adapter Envio + api
 - [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3
 - [ ] M8 Invoice: `payDebt`, PDF, share, QR asli
