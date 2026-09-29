@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { QrCode } from '@/components/invoice/qr-code';
@@ -30,23 +31,50 @@ const BADGE: Record<InvoiceStatus, { label: string; bg: string; color: string }>
 
 export default function InvoiceScreen() {
   const { id, who } = useLocalSearchParams<{ id: string; who?: string }>();
-  const query = combine(useTrip(id), useInvoice(who ?? 'jack'));
+  const [selectedWho, setSelectedWho] = useState<string>(who ?? 'jack');
+
+  const activeWho = who ?? selectedWho;
+  const query = combine(useTrip(id), useInvoice(activeWho));
+
   return (
     <QueryState query={query} title="Trip invoice">
-      {([trip, invoice]) => <InvoiceView trip={trip} invoice={invoice} />}
+      {([trip, invoice]) => (
+        <InvoiceView
+          trip={trip}
+          invoice={invoice}
+          activeWho={activeWho}
+          onSelectWho={setSelectedWho}
+        />
+      )}
     </QueryState>
   );
 }
 
-function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
-  const badge = BADGE[invoice.status];
+function InvoiceView({
+  trip,
+  invoice,
+  activeWho,
+  onSelectWho,
+}: {
+  trip: Trip;
+  invoice: Invoice;
+  activeWho: string;
+  onSelectWho: (who: string) => void;
+}) {
+  const [locallyPaid, setLocallyPaid] = useState(false);
+
+  const currentStatus = locallyPaid ? 'paid' : invoice.status;
+  const badge = BADGE[currentStatus];
+  const headline = locallyPaid ? 'Paid in full' : invoice.headline;
+  const subline = locallyPaid ? 'All debts settled with the group vault' : invoice.subline;
+
   const verifyUrl = `tekosoe.app/v/${invoice.number}`;
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
 
   const payDebt = usePayDebt(trip.id);
   const payTx = useTx(payDebt.mutateAsync, {
     onSuccess: () => {
-      router.replace(`/trip/${trip.id}/invoice?who=rina`);
+      setLocallyPaid(true);
     },
   });
 
@@ -134,12 +162,18 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
       <Screen
         gap={12}
         footer={
-          invoice.status === 'due' ? (
-            <Button
-              label={`Pay ${money(due)}`}
-              onPress={handlePay}
-              disabled={payTx.isProcessing}
-            />
+          currentStatus === 'due' ? (
+            <View style={{ gap: 10 }}>
+              <Button
+                label={`Pay ${money(due)}`}
+                onPress={handlePay}
+                disabled={payTx.isProcessing}
+              />
+              <View style={styles.footer}>
+                <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} onPress={handleSavePdf} />
+                <Button label="Share" style={{ flex: 1, height: 52 }} onPress={share} />
+              </View>
+            </View>
           ) : (
             <View style={styles.footer}>
               <Button label="Save as PDF" variant="outline" style={{ flex: 1 }} onPress={handleSavePdf} />
@@ -147,22 +181,45 @@ function InvoiceView({ trip, invoice }: { trip: Trip; invoice: Invoice }) {
             </View>
           )
         }>
-      <ScreenHeader title="Trip invoice" right={invoice.device ? <Pill label={invoice.device} weight="bold" color={colors.textMuted} /> : undefined} />
+        <ScreenHeader title="Trip invoice" right={invoice.device ? <Pill label={invoice.device} weight="bold" color={colors.textMuted} /> : undefined} />
 
-      <Surface style={styles.summary}>
-        <View style={styles.summaryTop}>
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.5 }} color={colors.textMuted}>
-            {invoice.number}
-          </Text>
-          <Pill label={badge.label} bg={badge.bg} color={badge.color} />
+        {/* Member Invoice Switcher */}
+        <View style={styles.whoSwitcher}>
+          {(['jack', 'wei', 'rina'] as const).map((m) => (
+            <Pressable
+              key={m}
+              accessibilityRole="button"
+              onPress={() => {
+                setLocallyPaid(false);
+                onSelectWho(m);
+              }}
+              style={[styles.whoPill, activeWho === m && styles.whoPillActive]}>
+              <Text
+                style={{
+                  fontFamily: activeWho === m ? fonts.bodyExtraBold : fonts.bodyBold,
+                  fontSize: 12,
+                }}
+                color={activeWho === m ? colors.textOnPrimary : colors.textMuted}>
+                {m === 'jack' ? 'Jack (Refund)' : m === 'wei' ? 'Wei (Due)' : 'Rina (Paid)'}
+              </Text>
+            </Pressable>
+          ))}
         </View>
-        <Text variant="h1" style={{ fontSize: 32, lineHeight: 34, letterSpacing: -1 }} color={invoice.headlineColor === 'positive' ? colors.positive : colors.text}>
-          {invoice.headline}
-        </Text>
-        <Text variant="caption" color={colors.textMuted}>
-          {invoice.subline}
-        </Text>
-      </Surface>
+
+        <Surface style={styles.summary}>
+          <View style={styles.summaryTop}>
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.5 }} color={colors.textMuted}>
+              {invoice.number}
+            </Text>
+            <Pill label={badge.label} bg={badge.bg} color={badge.color} />
+          </View>
+          <Text variant="h1" style={{ fontSize: 32, lineHeight: 34, letterSpacing: -1 }} color={currentStatus === 'refunded' ? colors.positive : colors.text}>
+            {headline}
+          </Text>
+          <Text variant="caption" color={colors.textMuted}>
+            {subline}
+          </Text>
+        </Surface>
 
       <Surface style={{ paddingVertical: 0 }}>
         {invoice.lines.map((line) => (
@@ -247,5 +304,24 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     gap: 10,
+  },
+  whoSwitcher: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingVertical: 2,
+  },
+  whoPill: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  whoPillActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
 });
