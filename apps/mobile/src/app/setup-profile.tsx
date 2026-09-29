@@ -18,7 +18,7 @@ import { useProfile, useSaveProfile } from '@/features/profile/useProfile';
 // `?next=/invite/<code>/join` = kembali ke layar Join setelah selesai (akun baru dari link undangan).
 // TODO (M12 live): simpan ke api → `profiles` (display_name, city, country_code, avatar_color).
 
-const COUNTRIES = ['Australia', 'Indonesia', 'Singapore', 'Japan', 'Malaysia', 'Thailand', 'Germany', 'United States'];
+import { COUNTRIES, LOCATIONS } from '@/data/locations';
 
 export default function SetupProfileScreen() {
   const { next, mode } = useLocalSearchParams<{ next?: string; mode?: string }>();
@@ -26,19 +26,30 @@ export default function SetupProfileScreen() {
   const existing = useProfile().data;
   const save = useSaveProfile();
 
-  const [name, setName] = useState(existing?.name ?? '');
-  const [city, setCity] = useState(existing?.city ?? '');
-  const [country, setCountry] = useState(existing?.country ?? 'Australia');
-  const [tint, setTint] = useState<string>(existing?.tint ?? avatarColors[2]);
-  const [picking, setPicking] = useState(false);
+  const defaultCountry = existing?.country ?? 'Australia';
+  const defaultCities = LOCATIONS[defaultCountry] ?? ['Sydney'];
 
-  const valid = name.trim().length > 0 && city.trim().length > 0;
+  const [name, setName] = useState(existing?.name ?? '');
+  const [country, setCountry] = useState(defaultCountry);
+  const [city, setCity] = useState(existing?.city ?? defaultCities[0]);
+  const [tint, setTint] = useState<string>(existing?.tint ?? avatarColors[2]);
+  const [pickingCountry, setPickingCountry] = useState(false);
+  const [pickingCity, setPickingCity] = useState(false);
+
+  const valid = name.trim().length > 0 && city.trim().length > 0 && country.trim().length > 0;
 
   const submit = async () => {
     if (!valid) return;
     await save.mutateAsync({ name: name.trim(), city: city.trim(), country, tint });
     if (editing && router.canGoBack()) router.back();
     else router.replace((next as Href | undefined) ?? '/trips');
+  };
+
+  const handleSelectCountry = (c: string) => {
+    setCountry(c);
+    const cities = LOCATIONS[c] ?? [];
+    setCity(cities[0] ?? '');
+    setPickingCountry(false);
   };
 
   return (
@@ -73,39 +84,75 @@ export default function SetupProfileScreen() {
 
       <TextField label="Your name" value={name} onChangeText={setName} placeholder="Jack" autoCapitalize="words" />
 
+      {/* Country and City select dropdowns */}
       <View style={styles.twoCol}>
-        <View style={{ flex: 1 }}>
-          <TextField label="City" value={city} onChangeText={setCity} placeholder="Sydney" autoCapitalize="words" />
-        </View>
         <View style={{ flex: 1, gap: 8 }}>
           <Text variant="label">Country</Text>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Country, ${country}`}
-            onPress={() => setPicking((p) => !p)}
+            onPress={() => {
+              setPickingCountry((p) => !p);
+              setPickingCity(false);
+            }}
             style={styles.select}>
-            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 16 }} numberOfLines={1}>
+            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
               {country}
+            </Text>
+            <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
+          </Pressable>
+        </View>
+
+        <View style={{ flex: 1, gap: 8 }}>
+          <Text variant="label">City</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`City, ${city}`}
+            onPress={() => {
+              setPickingCity((p) => !p);
+              setPickingCountry(false);
+            }}
+            style={styles.select}>
+            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
+              {city || 'Select city'}
             </Text>
             <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
           </Pressable>
         </View>
       </View>
 
-      {picking && (
+      {pickingCountry && (
         <View style={styles.countryList}>
           {COUNTRIES.map((c) => (
             <Pressable
               key={c}
               accessibilityRole="radio"
               accessibilityState={{ selected: c === country }}
-              onPress={() => {
-                setCountry(c);
-                setPicking(false);
-              }}
+              onPress={() => handleSelectCountry(c)}
               style={[styles.countryRow, c === country && { backgroundColor: colors.hero }]}>
               <Text style={{ fontFamily: c === country ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>{c}</Text>
               {c === country && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
+            </Pressable>
+          ))}
+        </View>
+      )}
+
+      {pickingCity && (
+        <View style={styles.countryList}>
+          {(LOCATIONS[country] ?? []).map((cityName) => (
+            <Pressable
+              key={cityName}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: cityName === city }}
+              onPress={() => {
+                setCity(cityName);
+                setPickingCity(false);
+              }}
+              style={[styles.countryRow, cityName === city && { backgroundColor: colors.hero }]}>
+              <Text style={{ fontFamily: cityName === city ? fonts.bodyBold : fonts.bodyMedium, fontSize: 15 }}>
+                {cityName}
+              </Text>
+              {cityName === city && <Icon name="check" size={16} color={colors.primary} strokeWidth={2.6} />}
             </Pressable>
           ))}
         </View>
