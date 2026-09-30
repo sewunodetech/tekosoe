@@ -178,6 +178,9 @@ interface IGroupVault {
     /// @notice Membayar debt; AUSD langsung diteruskan ke pemilik credit (urutan anggota).
     function payDebt(uint256 groupId, uint256 amount) external;
 
+    /// @notice payDebt dengan izin AUSD lewat permit di transaksi yang sama.
+    function payDebtWithPermit(uint256 groupId, uint256 amount, PermitSig calldata permit) external;
+
     /// @notice Menarik credit yang dananya sudah ditahan kas (mis. transfer saat settle gagal).
     function claimCredit(uint256 groupId) external;
 
