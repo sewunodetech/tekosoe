@@ -44,3 +44,58 @@ export function computeNoteHash(note: SpendNote): Hex {
   const { title, category, note: text, receiptHash } = spendNoteSchema.parse(note);
   return keccak256(toBytes(canonicalJson({ title, category, note: text, receiptHash })));
 }
+
+/**
+ * Invoice per anggota setelah `settle` (docs/03 â€º Invoice trip per anggota).
+ *
+ * Yang di-hash hanya hasil settle yang bisa dihitung ulang siapa pun dari receipt transaksi
+ * `settle` (event `Pulled` / `Refunded`) + urutan `membersOf`. Status sengaja TIDAK ikut
+ * di-hash: invoice "due" menjadi "paid" setelah `DebtPaid` tanpa mengubah `invoiceHash`.
+ * Rincian pemakaian (judul, bagian) ditampilkan dari Envio + metadata, bukan bagian dari hash.
+ */
+export interface InvoiceSettlement {
+  chainId: number;
+  groupId: bigint;
+  /** Posisi anggota di `membersOf(groupId)`, mulai 1. */
+  index: number;
+  member: string;
+  settleTxHash: string;
+  /** AUSD (6 desimal) yang ditarik dari anggota saat settle. */
+  pulled: bigint;
+  /** AUSD yang dikembalikan ke anggota saat settle. */
+  refunded: bigint;
+  remainingDebt: bigint;
+  remainingCredit: bigint;
+}
+
+/** `INV-{trip}-{urutan}`, mis. `INV-12-003`. */
+export function invoiceNumber(groupId: bigint, index: number): string {
+  return `INV-${groupId.toString()}-${String(index).padStart(3, "0")}`;
+}
+
+/** JSON kanonik yang di-hash. Semua nominal ditulis sebagai string desimal unit terkecil. */
+export function buildInvoicePayload(s: InvoiceSettlement): string {
+  return canonicalJson({
+    v: 1,
+    number: invoiceNumber(s.groupId, s.index),
+    chainId: s.chainId,
+    groupId: s.groupId.toString(),
+    member: s.member.toLowerCase(),
+    settleTxHash: s.settleTxHash.toLowerCase(),
+    pulled: s.pulled.toString(),
+    refunded: s.refunded.toString(),
+    remainingDebt: s.remainingDebt.toString(),
+    remainingCredit: s.remainingCredit.toString(),
+  });
+}
+
+export function computeInvoiceHash(payload: string): Hex {
+  return keccak256(toBytes(payload));
+}
+
+/** Status saat invoice dibuat: Refunded (menerima kembalian), Due (masih ada debt), selain itu Paid. */
+export function initialInvoiceStatus(s: Pick<InvoiceSettlement, "refunded" | "remainingDebt">): InvoiceStatus {
+  if (s.remainingDebt > 0n) return "due";
+  if (s.refunded > 0n) return "refunded";
+  return "paid";
+}
