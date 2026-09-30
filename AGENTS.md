@@ -72,7 +72,8 @@ cd apps/mobile && npx expo install <pkg>   # khusus mobile: versi cocok dengan S
 ## Fakta jaringan
 
 - Monad testnet, chain ID **10143**.
-- AUSD testnet (dari catatan peserta lain, **belum diverifikasi**): `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` — cocokkan dengan halaman contract deployments Agora sebelum dipakai.
+- AUSD testnet (Agora, **terverifikasi** di docs.agora.finance › Contract Deployments + on-chain): `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` — 6 desimal, permit EIP-2612 (domain "Agora Dollar" v1), EIP-3009, akun bisa dibekukan (`isAccountFrozen`).
+- Faucet AUSD testnet: `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)`. Konstanta di `@tekosoe/shared` (`chain.ts`).
 
 <!-- BEGIN:turborepo-agent-rules -->
 
