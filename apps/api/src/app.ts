@@ -17,6 +17,7 @@ import { createPushRoutes } from "./modules/push/routes";
 import { createWebhookRoutes } from "./modules/webhooks/routes";
 import { createAdminRoutes } from "./modules/settle/routes";
 import { createDocsRoutes } from "./modules/docs/routes";
+import { createGroupRoutes } from "./modules/groups/routes";
 
 /** AppDeps plus the on-chain membership checker shared by every route. */
 export function createRouteContext(deps: AppDeps): RouteContext {
@@ -78,6 +79,7 @@ export function createApp(ctx: RouteContext): Express {
   app.use("/api", createOnboardingRoutes(ctx));
   app.use("/api/auth", createAuthRoutes(ctx));
   app.use("/api/profiles", createProfileRoutes(ctx));
+  app.use("/api/groups", createGroupRoutes(ctx));
   app.use("/api/admin", createAdminRoutes(ctx));
   app.use("/api", createDocsRoutes());
 
