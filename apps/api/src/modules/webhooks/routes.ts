@@ -3,6 +3,7 @@ import express, { Router } from "express";
 import { decodeEventLog, type Hex } from "viem";
 import { groupVaultAbi } from "@tekosoe/shared";
 import type { RouteContext } from "../../context";
+import { ensureInvoices } from "../invoices/service";
 import { extractLogs } from "./extract";
 import { dispatchEvent } from "./notify";
 
@@ -53,20 +54,41 @@ export async function handleAlchemyWebhook(
     const isNew = await ctx.repos.processedEvents.insertIfNew(log.txHash, log.logIndex);
     if (!isNew) continue;
 
+    let decoded;
     try {
-      const decoded = decodeEventLog({
+      decoded = decodeEventLog({
         abi: groupVaultAbi,
         data: log.data as Hex,
         topics: log.topics as [Hex, ...Hex[]],
       });
-      await dispatchEvent(ctx, decoded);
     } catch (error) {
       // Unknown selector or a log we do not act on — not worth an error.
       ctx.logger.debug(
         { err: error, txHash: log.txHash, logIndex: log.logIndex },
         "webhook log skipped",
       );
+      continue;
     }
+
+    if (decoded.eventName === "DebtPaid") {
+      // Invoice "due" → "paid" once the paid amount covers the remaining debt.
+      await ctx.repos.invoices
+        .recordDebtPaid(
+          Number(decoded.args.groupId),
+          decoded.args.member.toLowerCase(),
+          decoded.args.amount,
+        )
+        .catch((error: unknown) => {
+          ctx.logger.error({ err: error, txHash: log.txHash }, "could not record DebtPaid on invoice");
+        });
+    }
+    if (decoded.eventName === "Settled") {
+      // Covers groups settled by a member instead of our scheduler.
+      await ensureInvoices(ctx, decoded.args.groupId, log.txHash).catch((error: unknown) => {
+        ctx.logger.error({ err: error, txHash: log.txHash }, "could not create invoices from webhook");
+      });
+    }
+    await dispatchEvent(ctx, decoded);
   }
 }
 

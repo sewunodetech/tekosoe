@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { RouteContext } from "../../context";
 import { requireAdmin } from "../../middleware/adminKey";
 import { pathParam, validate } from "../../middleware/validate";
+import { ensureInvoices } from "../invoices/service";
 import { settleGroup } from "./service";
 
 const groupIdParams = z.object({
@@ -10,8 +11,8 @@ const groupIdParams = z.object({
 });
 
 /**
- * Demo safety net: settle a single group right now, ignoring backoff, plus a view of
- * the last 50 settle_runs rows. Both require the x-admin-key header.
+ * Demo safety net: settle a single group right now (ignoring backoff), rebuild its
+ * invoices, and view the last 50 settle_runs rows. All require the x-admin-key header.
  */
 export function createAdminRoutes(ctx: RouteContext): Router {
   const router = Router();
@@ -22,6 +23,12 @@ export function createAdminRoutes(ctx: RouteContext): Router {
     const groupId = BigInt(pathParam(req, "groupId"));
     const result = await settleGroup(ctx, groupId, { ignoreBackoff: true });
     res.json(result);
+  });
+
+  // Rebuild missing invoices for a settled group (settled by a member, or a failed write).
+  router.post("/invoices/:groupId", validate({ params: groupIdParams }), async (req, res) => {
+    const groupId = BigInt(pathParam(req, "groupId"));
+    res.json(await ensureInvoices(ctx, groupId));
   });
 
   router.get("/settle", async (_req, res) => {
