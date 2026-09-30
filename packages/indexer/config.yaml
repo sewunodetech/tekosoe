@@ -30,6 +30,12 @@ contracts:
 chains:
   - id: 10143 # Monad testnet
     start_block: 66921819 # blok deploy GroupVault v1 (30 Sep 2026)
+    # HyperSync (default, jauh lebih cepat) butuh ENVIO_API_TOKEN (gratis di envio.dev/app/api-tokens).
+    # Tanpa token: sinkron lewat RPC publik Monad — cukup karena event masih sedikit.
+    # Kalau token sudah ada, hapus blok `rpc` ini (atau ganti `for: fallback`).
+    rpc:
+      url: https://testnet-rpc.monad.xyz
+      for: sync
     contracts:
       - name: GroupVault
         address: "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" # GroupVault v1
