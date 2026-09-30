@@ -8,6 +8,10 @@ export const MONAD_TESTNET_CHAIN_ID = 10143;
 /** Maksimal anggota per grup; settle-up berjalan dalam satu transaksi dengan loop sederhana. */
 export const MAX_GROUP_MEMBERS = 10;
 
+/** GroupVault v1 (ADR 0005) di Monad testnet — deploy 30 Sep 2026, blok 66921819. */
+export const GROUP_VAULT_TESTNET_ADDRESS = "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" as const;
+export const GROUP_VAULT_TESTNET_START_BLOCK = 66921819;
+
 /**
  * AUSD (Agora Dollar) di Monad testnet — terverifikasi 30 Sep 2026 di
  * https://docs.agora.finance/developer/contract-deployments dan on-chain:

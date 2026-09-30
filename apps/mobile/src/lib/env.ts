@@ -1,12 +1,12 @@
 import { Platform } from 'react-native';
-import { AUSD_TESTNET_ADDRESS, AUSD_TESTNET_FAUCET_ADDRESS } from '@tekosoe/shared';
+import { AUSD_TESTNET_ADDRESS, AUSD_TESTNET_FAUCET_ADDRESS, GROUP_VAULT_TESTNET_ADDRESS } from '@tekosoe/shared';
 
 // Expo meng-inline EXPO_PUBLIC_* saat build, jadi setiap variabel harus diakses secara statis.
 export const env = {
   monadRpcUrl: process.env.EXPO_PUBLIC_MONAD_RPC_URL ?? 'https://testnet-rpc.monad.xyz',
   ausdAddress: (process.env.EXPO_PUBLIC_AUSD_ADDRESS || AUSD_TESTNET_ADDRESS) as `0x${string}`,
   ausdFaucetAddress: (process.env.EXPO_PUBLIC_AUSD_FAUCET_ADDRESS || AUSD_TESTNET_FAUCET_ADDRESS) as `0x${string}`,
-  groupVaultAddress: process.env.EXPO_PUBLIC_GROUP_VAULT_ADDRESS as `0x${string}` | undefined,
+  groupVaultAddress: (process.env.EXPO_PUBLIC_GROUP_VAULT_ADDRESS || GROUP_VAULT_TESTNET_ADDRESS) as `0x${string}` | undefined,
   envioGraphqlUrl: process.env.EXPO_PUBLIC_ENVIO_GRAPHQL_URL,
   apiUrl: process.env.EXPO_PUBLIC_API_URL,
   passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN ?? 'tekosoe.xyz',
