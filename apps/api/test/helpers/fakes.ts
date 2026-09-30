@@ -3,7 +3,7 @@ import { SignJWT } from "jose";
 import type { Address, Hash } from "viem";
 import { createApp, createRouteContext } from "../../src/app";
 import type { ChainService, GroupView, SimulateResult, SpendView } from "../../src/chain/groupVault";
-import { GROUP_STATUS } from "../../src/chain/abi";
+import { GROUP_STATUS } from "@tekosoe/shared";
 import { loadEnv, type Env } from "../../src/config/env";
 import type { AppDeps, RouteContext } from "../../src/context";
 import type {
