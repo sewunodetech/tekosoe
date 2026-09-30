@@ -9,6 +9,7 @@ import { GET_APP_HREF } from "@/lib/links";
 export const SECTIONS = [
   { id: "how", label: "How it works" },
   { id: "good-to-know", label: "Good to know" },
+  { id: "built-with", label: "Built with" },
   { id: "demo", label: "Try the demo" },
   { id: "faq", label: "FAQ" },
 ] as const;

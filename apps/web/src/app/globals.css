@@ -244,8 +244,8 @@ body {
 /* ===================== Landing: liquid glass ===================== */
 @layer components {
 /*
- * Kaca butuh sesuatu di belakangnya, jadi landing punya lapisan "aurora" (gumpalan warna lembut
- * dari palet Tekosoe) dan semua permukaan kaca memburamkan + menjenuhkan lapisan itu.
+ * Landing memakai dua warna saja: netral (hitam/putih/abu) dan satu aksen teal (--color-teal).
+ * Permukaan kaca duduk di atas latar abu sangat muda; jangan tambah warna lain di sini.
  * Semua kelas diawali `lg-` dan hanya dipakai di components/landing.
  */
 .landing {
@@ -288,7 +288,7 @@ body {
   border-radius: inherit;
   padding: 1px;
   pointer-events: none;
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(142, 216, 198, 0.35) 30%, rgba(207, 198, 255, 0.35) 65%, rgba(255, 255, 255, 0.7));
+  background: linear-gradient(140deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3) 45%, rgba(255, 255, 255, 0.8));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -305,7 +305,7 @@ body {
   background: radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 45%);
 }
 .lg-glass-dark::after {
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.45), rgba(142, 216, 198, 0.25) 35%, rgba(207, 198, 255, 0.2) 70%, rgba(255, 255, 255, 0.12));
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.2));
 }
 
 /* Kartu yang bisa diklik: terangkat, dan kilau menyapu saat hover. */
@@ -346,27 +346,6 @@ body {
   transform: translateY(0) scale(0.98);
 }
 
-/* Aurora: gumpalan warna lembut di belakang halaman. */
-.lg-aurora {
-  position: absolute;
-  inset: 0;
-  z-index: -10;
-  overflow: hidden;
-  pointer-events: none;
-}
-.lg-blob {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(80px);
-  opacity: 0.6;
-  animation: lgDrift var(--dur, 22s) ease-in-out infinite alternate;
-  will-change: transform;
-}
-@keyframes lgDrift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(var(--dx, 40px), var(--dy, -30px), 0) scale(1.12); }
-}
-
 /* Pola titik halus di hero, memudar ke tepi. */
 .lg-dots {
   position: absolute;
@@ -393,16 +372,85 @@ body {
   to { background-position: 100% 50%; }
 }
 
-/* Cahaya di bawah bingkai video. */
-.lg-glow {
+/* Kabel diagram "Built with": garis tipis dengan titik teal yang mengalir turun. */
+.lg-wire {
+  position: relative;
+  width: 1px;
+  height: 40px;
+  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.16);
+}
+.lg-wire::after {
+  content: "";
   position: absolute;
-  inset: 12% 8% -6% 8%;
-  z-index: -1;
+  top: 0;
+  left: -2.5px;
+  width: 6px;
+  height: 6px;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(142, 216, 198, 0.7), rgba(207, 198, 255, 0.7), rgba(255, 220, 203, 0.7));
-  filter: blur(60px);
-  opacity: 0.75;
-  pointer-events: none;
+  background: var(--color-teal);
+  animation: lgFlowDown 2.4s linear infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+@keyframes lgFlowDown {
+  0% { transform: translateY(-3px); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { transform: translateY(37px); opacity: 0; }
+}
+/* Rel mendatar: membentang dari tengah kolom pertama ke tengah kolom kelima. */
+.lg-bus {
+  position: relative;
+  height: 1px;
+  margin: 0 10%;
+  background: rgba(15, 23, 42, 0.16);
+}
+.lg-bus::before,
+.lg-bus::after {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 9999px;
+  background: var(--color-teal);
+  animation: lgFlowOut 2.4s ease-in-out infinite;
+}
+.lg-bus::after { animation-name: lgFlowOutRight; }
+@keyframes lgFlowOut {
+  0% { left: 50%; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { left: 0%; opacity: 0; }
+}
+@keyframes lgFlowOutRight {
+  0% { left: 50%; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Baris nama yang berjalan pelan; memudar di kedua tepi. */
+.lg-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.lg-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: lgMarquee 32s linear infinite;
+}
+.lg-marquee:hover .lg-marquee-track { animation-play-state: paused; }
+.lg-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 3.5rem;
+  padding-right: 3.5rem;
+}
+@keyframes lgMarquee {
+  to { transform: translateX(-50%); }
 }
 
 /* Muncul saat digulir (hanya di browser yang mendukung scroll-driven animation). */
@@ -427,7 +475,13 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lg-blob, .lg-shimmer { animation: none !important; }
+  .lg-shimmer, .lg-wire::after, .lg-bus::before, .lg-bus::after { animation: none !important; }
+  .lg-wire::after, .lg-bus::before, .lg-bus::after { display: none; }
+  /* Tanpa gerakan: nama ditampilkan diam dan boleh turun baris. */
+  .lg-marquee { -webkit-mask-image: none; mask-image: none; }
+  .lg-marquee-track { animation: none !important; width: auto; justify-content: center; }
+  .lg-marquee-group { flex-wrap: wrap; justify-content: center; row-gap: 1rem; padding-right: 0; }
+  .lg-marquee-group + .lg-marquee-group { display: none; }
   .lg-lift, .lg-btn, .lg-sheen { transition: none !important; }
   .lg-lift:hover, .lg-btn:hover { transform: none; }
 }

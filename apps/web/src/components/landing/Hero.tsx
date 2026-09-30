@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Check, MapPin, PartyPopper, PiggyBank, Receipt, Star, type LucideIcon } from "lucide-react";
 import { money, usd } from "@/lib/money";
+import { IntegrationMarquee } from "./Integrations";
 
 type TabId = "plan" | "chipin" | "spend" | "settle";
 
@@ -83,7 +84,6 @@ export function Hero() {
 
         {/* Video + overlay */}
         <div className="animate-fade-in-up relative" style={fade(0.7)}>
-          <div className="lg-glow" aria-hidden="true" />
           <div className="lg-glass rounded-[2rem] p-2">
           <div className="relative h-[400px] overflow-hidden rounded-3xl md:h-[500px]">
           <video className="h-full w-full object-cover" autoPlay loop muted playsInline aria-hidden="true">
@@ -97,11 +97,9 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Built for */}
-        <div className="animate-fade-in-up mt-24 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-gray-400" style={fade(0.8)}>
-          <span className="text-sm">Built for</span>
-          <span className="text-lg font-semibold tracking-[0.2em]">MONAD METROPOLIS</span>
-          <span className="text-sm">Consumer Products &amp; Payments</span>
+        {/* Teknologi yang dipakai */}
+        <div className="animate-fade-in-up mt-20" style={fade(0.8)}>
+          <IntegrationMarquee />
         </div>
       </section>
     </>
@@ -159,7 +157,7 @@ function Progress({ value, color }: { value: number; color: string }) {
 
 function CheckDot({ done }: { done: boolean }) {
   return (
-    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${done ? "bg-green-500 text-white" : "border border-gray-400/70 bg-white/50 text-transparent"}`}>
+    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${done ? "bg-teal text-white" : "border border-gray-400/70 bg-white/50 text-transparent"}`}>
       <Check className="h-3 w-3" aria-hidden="true" />
     </span>
   );
@@ -175,7 +173,7 @@ function PlanCard() {
   return (
     <Overlay>
       <CardHead title="Start your trip pot" meta="Step 1 of 4" />
-      <Progress value={25} color="bg-purple-500" />
+      <Progress value={25} color="bg-teal" />
       <ul className="space-y-3">
         {steps.map((s) => (
           <li key={s.label} className="flex items-center gap-3 text-sm text-gray-800">
@@ -198,7 +196,7 @@ function ChipInCard() {
   return (
     <Overlay>
       <CardHead title="Chip in to the pot" meta="Japan Trip · sample" />
-      <Progress value={67} color="bg-orange-500" />
+      <Progress value={67} color="bg-teal" />
       <dl className="grid grid-cols-2 gap-3">
         {metrics.map((m) => (
           <div key={m.label} className="rounded-xl bg-white/60 px-4 py-3 shadow-[inset_0_1px_0_#fff]">
@@ -220,11 +218,11 @@ function SpendCard() {
   return (
     <Overlay>
       <CardHead title="Spending from the pot" meta="Japan Trip · sample" />
-      <div className="mb-4 flex items-center gap-3 rounded-xl bg-green-100/70 px-4 py-3">
+      <div className="mb-4 flex items-center gap-3 rounded-xl bg-teal/10 px-4 py-3">
         <CheckDot done />
         <div>
-          <p className="text-sm font-semibold text-green-700">3 of 3 payments went through</p>
-          <p className="text-xs text-green-700/80">Anything big needed one friend&apos;s yes</p>
+          <p className="text-sm font-semibold text-teal-deep">3 of 3 payments went through</p>
+          <p className="text-xs text-teal-deep/80">Anything big needed one friend&apos;s yes</p>
         </div>
       </div>
       <ul className="space-y-2.5">

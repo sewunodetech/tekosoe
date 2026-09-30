@@ -102,9 +102,9 @@ export function GoodToKnow() {
           ))}
         </div>
 
-        <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left [--lg-tint:rgba(254,243,199,0.7)]" role="note">
-          <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" aria-hidden="true" />
-          <p className="text-sm leading-relaxed text-amber-900">
+        <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left" role="note">
+          <Info className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
+          <p className="text-sm leading-relaxed text-gray-800">
             <span className="font-semibold">Tekosoe is a preview.</span> It was built for the Monad Metropolis hackathon and runs with test dollars, so no real money moves
             yet. The dashboard on this site shows sample data.
           </p>
@@ -187,12 +187,7 @@ export function Faq() {
 export function ClosingCta() {
   return (
     <section className="px-6 pb-24">
-      <div className="lg-reveal relative isolate mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#0b0c0e] px-6 py-16 text-center text-white md:py-24">
-        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <span className="lg-blob -top-24 left-[8%] h-72 w-72 bg-[#1f7a6e] opacity-70" />
-          <span className="lg-blob -bottom-28 right-[10%] h-80 w-80 bg-[#7c6cf0] opacity-60 [--dx:-50px] [--dy:30px] [--dur:26s]" />
-          <span className="lg-blob top-1/3 left-1/2 h-56 w-56 bg-[#ff9a62] opacity-40 [--dx:30px] [--dy:40px] [--dur:30s]" />
-        </div>
+      <div className="lg-reveal mx-auto max-w-7xl rounded-[2.5rem] bg-[#0b0c0e] px-6 py-16 text-center text-white md:py-24">
         <h2 className="mx-auto mb-4 max-w-2xl text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">Planning a trip with friends?</h2>
         <p className="mx-auto mb-8 max-w-xl text-lg text-gray-300">See how one shared pot works before you go.</p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
