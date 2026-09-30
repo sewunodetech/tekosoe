@@ -2,7 +2,8 @@
 
 Envio HyperIndex **v3** — **sumber data baca untuk semua hal soal uang**: daftar grup, feed, saldo per anggota, status spend, hasil settle. App membaca GraphQL Envio; kontrak hanya dibaca langsung untuk cek ulang saldo sebelum transaksi penting. Monad testnet (10143) didukung HyperSync (`https://10143.hypersync.xyz`).
 
-- `config.yaml` — event harus identik dengan `packages/contracts/src/interfaces/IGroupVault.sol` (GroupVault v1, ADR 0005). `field_selection` memilih `transaction.hash` dan `transaction.from`. Isi `address` dan `start_block` setelah deploy.
+- `config.yaml` — event harus identik dengan `packages/contracts/src/interfaces/IGroupVault.sol` (GroupVault v1, ADR 0005). `field_selection` memilih `transaction.hash` dan `transaction.from`. Chain id, alamat kontrak, start block, dan RPC diambil dari env (`${ENVIO_…:-default}`); default-nya GroupVault v1 testnet.
+- `.env` (gitignored, salin dari `.env.example`) — `ENVIO_API_TOKEN` untuk HyperSync (sumber utama, gratis di envio.dev/app/api-tokens). RPC publik Monad hanya cadangan (`ENVIO_RPC_FOR=fallback`); tanpa token set `ENVIO_RPC_FOR=sync` (lambat: `eth_getLogs` dibatasi 100 blok). Envio hanya membaca variabel berawalan `ENVIO_`.
 - `schema.graphql` — Group, Member, Spend, SpendShare, Receipt, Activity. Relasi memakai `group: Group!` / `spend: Spend!` (kolom `group_id` / `spend_id`) + `@derivedFrom`.
 - `src/EventHandlers.ts` — handler untuk ke-12 event. Di v3, `indexer` dan tipe entitas diimpor dari `"envio"` (tidak ada lagi modul `generated`).
 
@@ -15,7 +16,7 @@ Envio HyperIndex **v3** — **sumber data baca untuk semua hal soal uang**: daft
 
 ## Perintah
 
-CLI Envio **tidak jalan di Windows** — pakai WSL/Linux/macOS (Node 22+, Docker untuk `dev`).
+CLI Envio **tidak jalan di Windows** — pakai WSL/Linux/macOS (Node 22+, Docker untuk `dev`). Kalau memakai salinan di WSL, salin juga `.env` bersama `config.yaml`, `schema.graphql`, dan `src/`.
 
 ```bash
 npm run codegen   # envio codegen — wajib setelah mengubah config.yaml / schema.graphql
