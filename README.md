@@ -55,10 +55,12 @@ Port 8080 clashes with `envio dev`, so stop that stack first (`envio stop`). Hos
 
 ## Deployments (Monad testnet, chain 10143)
 
-| Contract | Address |
+| Contract / service | Address |
 | --- | --- |
-| GroupVault | TBD |
-| AUSD | TBD (verify against Agora docs) |
+| GroupVault v1 | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee` (block 66921819) |
+| AUSD (Agora) | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` |
+| API | https://api.mulalabs.biz.id |
+| Envio GraphQL | https://graphql.mulalabs.biz.id/v1/graphql |
 
 ## For AI agents
 
