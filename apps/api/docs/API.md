@@ -34,7 +34,7 @@ debugging manusia; `details` berisi konteks (mis. `issues` untuk validasi).
 | 404 | `NOT_FOUND`, `PROFILE_NOT_FOUND`, `GROUP_META_NOT_FOUND`, `SPEND_NOT_FOUND`, `INVOICE_NOT_FOUND`, `RECEIPT_NOT_FOUND`, `RECEIPT_NOT_UPLOADED`, `KEY_WRAP_NOT_FOUND`, `FEATURE_DISABLED` | tidak ada / fitur mati |
 | 409 | `DRIP_IN_PROGRESS`, `GROUP_META_EXISTS` | bentrok dengan data yang sudah ada |
 | 413 | `PAYLOAD_TOO_LARGE`, `RECEIPT_TOO_LARGE` | badan/berkas terlalu besar |
-| 422 | `NOTE_HASH_MISMATCH`, `INVITE_HASH_MISMATCH` | isi tidak cocok dengan data on-chain |
+| 422 | `NOTE_HASH_MISMATCH` | isi tidak cocok dengan data on-chain |
 | 429 | `RATE_LIMITED`, `DRIP_LIMIT_REACHED` | kena batas laju |
 | 500 | `INTERNAL_ERROR` | kegagalan tak terduga |
 | 502 | `DRIP_FAILED` | pengiriman biaya jaringan gagal (boleh dicoba lagi) |
@@ -68,7 +68,7 @@ Kalau flag mati, route tidak dipasang sama sekali → balasan `404 NOT_FOUND`.
   string desimal AUSD 6 desimal) yang juga bisa dihitung ulang dari chain.
 - **Metadata dikunci ke chain:** judul pemakaian diterima hanya kalau
   `computeNoteHash` (dari `@tekosoe/shared`) = `noteHash` on-chain; detail trip hanya dari
-  creator on-chain dengan `inviteHash` yang sama.
+  creator on-chain. Rahasia undangan tidak pernah dikirim ke api.
 - **Profil dan nama trip bersifat publik** (layar undangan butuh nama sebelum user gabung).
 - Keanggotaan selalu dicek ke kontrak (`membersOf`), bukan ke Envio.
 - Waktu selalu ISO 8601 (`2026-09-30T12:00:00.000Z`).
@@ -137,9 +137,9 @@ sequenceDiagram
   participant C as GroupVault
   participant API
 
-  App->>C: createGroup(name, inviteHash, …)
-  App->>API: PUT /api/groups/:id/meta {name, inviteCodeHash}
-  Note over API: hanya creator on-chain, inviteCodeHash = inviteHash on-chain
+  App->>C: createGroup(name, inviteKey, …)
+  App->>API: PUT /api/groups/:id/meta {name}
+  Note over API: hanya creator on-chain
   App->>App: noteHash = computeNoteHash({title, category, note, receiptHash})
   App->>C: spend(…, noteHash)
   App->>API: PUT /api/groups/:id/spends/:spendId/meta {title, category, note, receiptHash}
@@ -386,17 +386,16 @@ hanya alamat yang punya profil. Error: `400` · `429` (120/jam).
 ### 9. `GET /api/groups/:groupId/meta` — detail trip (publik)
 
 Untuk layar undangan sebelum bergabung. `{ "groupId", "name", "createdBy", "createdAt" }`.
-`inviteCodeHash` tidak pernah dikembalikan. `404 GROUP_META_NOT_FOUND`.
+`404 GROUP_META_NOT_FOUND`.
 
 ### 10. `PUT /api/groups/:groupId/meta` — simpan detail trip
 
 | Field | Tipe | Aturan |
 | --- | --- | --- |
 | `name` | string | 1–60 karakter setelah trim |
-| `inviteCodeHash` | string | bytes32, wajib sama dengan `inviteHash` on-chain |
 
 Hanya creator on-chain (`getGroup().creator`). Insert-only: `201` pertama kali, `200`
-kalau isinya sama. Error: `403 NOT_GROUP_CREATOR` · `422 INVITE_HASH_MISMATCH` · `409 GROUP_META_EXISTS`.
+kalau isinya sama. Error: `403 NOT_GROUP_CREATOR` · `409 GROUP_META_EXISTS`.
 
 ### 11. `GET /api/groups/:groupId/spends/meta` — label semua pemakaian
 

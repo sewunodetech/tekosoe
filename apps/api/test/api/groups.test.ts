@@ -12,13 +12,12 @@ import {
   THIRD_ADDRESS,
 } from "../helpers/fakes";
 
-const INVITE_HASH = `0x${"12".repeat(32)}` as const;
 const note = { title: "Dinner at Jimbaran", category: "food", note: "seafood", receiptHash: null };
 
 function appWithSpend(noteHash = computeNoteHash(note)) {
   const chain = createFakeChain({
     async getGroup() {
-      return defaultGroup({ inviteHash: INVITE_HASH });
+      return defaultGroup();
     },
     async getSpend() {
       return {
@@ -35,30 +34,35 @@ function appWithSpend(noteHash = computeNoteHash(note)) {
 }
 
 describe("group meta", () => {
-  it("lets only the on-chain creator write it, with the on-chain invite hash", async () => {
+  it("lets only the on-chain creator write it", async () => {
     const { app } = appWithSpend();
 
     const notCreator = await request(app)
       .put("/api/groups/7/meta")
       .set(await authHeader(OTHER_ADDRESS))
-      .send({ name: "Bali", inviteCodeHash: INVITE_HASH });
+      .send({ name: "Bali" });
     expect(notCreator.status).toBe(403);
-
-    const wrongHash = await request(app)
-      .put("/api/groups/7/meta")
-      .set(await authHeader(TEST_ADDRESS))
-      .send({ name: "Bali", inviteCodeHash: `0x${"34".repeat(32)}` });
-    expect(wrongHash.status).toBe(422);
 
     const ok = await request(app)
       .put("/api/groups/7/meta")
       .set(await authHeader(TEST_ADDRESS))
-      .send({ name: " Bali ", inviteCodeHash: INVITE_HASH });
+      .send({ name: " Bali " });
     expect(ok.status).toBe(201);
+
+    const same = await request(app)
+      .put("/api/groups/7/meta")
+      .set(await authHeader(TEST_ADDRESS))
+      .send({ name: "Bali" });
+    expect(same.status).toBe(200);
+
+    const changed = await request(app)
+      .put("/api/groups/7/meta")
+      .set(await authHeader(TEST_ADDRESS))
+      .send({ name: "Lombok" });
+    expect(changed.status).toBe(409);
 
     const pub = await request(app).get("/api/groups/7/meta");
     expect(pub.body).toMatchObject({ groupId: "7", name: "Bali" });
-    expect(pub.body).not.toHaveProperty("inviteCodeHash");
   });
 });
 
