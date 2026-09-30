@@ -24,6 +24,6 @@ npx tsc -p tsconfig.json   # typecheck handler (setelah codegen)
 npm run dev       # envio dev (butuh Docker)
 ```
 
-Alternatif tanpa WSL: `npm run docker:up` di root menjalankan `envio start` di container Linux (`Dockerfile` di folder ini) bersama Postgres + Hasura.
+Alternatif tanpa WSL: `npm run docker:up` di root menjalankan `envio start` di container Linux (`Dockerfile` di folder ini) bersama Hasura. Database-nya Neon (`ENVIO_PG_*` + `HASURA_GRAPHQL_DATABASE_URL` di `.env`): pakai database **terpisah** dari api karena Envio bisa `DROP SCHEMA … CASCADE` saat reset, host langsung (bukan `-pooler`), dan `ENVIO_PG_SSL_MODE=require` (wajib di mode production).
 
 API Envio berubah antar versi: cek dokumentasi terbaru (docs.envio.dev › HyperIndex v3) sebelum menulis handler.

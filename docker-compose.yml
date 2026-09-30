@@ -1,50 +1,27 @@
-# Stack lokal semua service kecuali mobile: Postgres + Hasura + indexer Envio, api, web.
+# Stack lokal: Hasura + indexer Envio + api. Database Postgres di Neon (tidak ada Postgres lokal);
+# mobile jalan terpisah (Expo), web dideploy standalone ke Vercel.
 #   npm run docker:up      # build + jalan di background
 #   npm run docker:logs    # ikuti log
-#   npm run docker:down    # berhenti (data indexer tetap di volume; `docker compose down -v` untuk reset)
+#   npm run docker:down    # berhenti
 #
 # Rahasia tetap di .env masing-masing paket (gitignored):
-#   apps/api/.env          wajib (DATABASE_URL Neon, kunci drip/settler, JWT, …)
-#   packages/indexer/.env  opsional (ENVIO_API_TOKEN untuk HyperSync; tanpa token set ENVIO_RPC_FOR=sync)
-# Port host bisa diubah lewat .env di root (lihat .env.example bagian docker).
+#   apps/api/.env          DATABASE_URL Neon (database api), kunci drip/settler, JWT, …
+#   packages/indexer/.env  ENVIO_API_TOKEN + ENVIO_PG_* dan HASURA_GRAPHQL_DATABASE_URL
+#                          (database Neon TERPISAH dari api — Envio bisa DROP SCHEMA saat reset)
+# Port host bisa diubah lewat .env di root (API_HOST_PORT, HASURA_HOST_PORT, INDEXER_HOST_PORT).
 #
-# Port 5433/8080 sama dengan `envio dev`; hentikan dulu stack `envio dev` (envio stop) sebelum `up`.
+# Port 8080 sama dengan `envio dev`; hentikan dulu stack `envio dev` (envio stop) sebelum `up`.
 
 name: tekosoe
 
-x-envio-db: &envio-db
-  ENVIO_PG_HOST: envio-postgres
-  ENVIO_PG_PORT: "5432"
-  ENVIO_PG_USER: postgres
-  ENVIO_PG_PASSWORD: ${ENVIO_PG_PASSWORD:-testing}
-  ENVIO_PG_DATABASE: envio
-
 services:
-  envio-postgres:
-    image: postgres:17.5
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${ENVIO_PG_PASSWORD:-testing}
-      POSTGRES_DB: envio
-    ports:
-      - "${ENVIO_PG_HOST_PORT:-5433}:5432"
-    volumes:
-      - envio-pg-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d envio"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   graphql-engine:
     image: hasura/graphql-engine:v2.43.0
     restart: unless-stopped
-    depends_on:
-      envio-postgres:
-        condition: service_healthy
+    # HASURA_GRAPHQL_DATABASE_URL (Neon, sslmode=require) diambil dari sini.
+    env_file:
+      - packages/indexer/.env
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${ENVIO_PG_PASSWORD:-testing}@envio-postgres:5432/envio
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_NO_OF_RETRIES: "10"
@@ -68,11 +45,10 @@ services:
     depends_on:
       graphql-engine:
         condition: service_healthy
+    # ENVIO_API_TOKEN + ENVIO_PG_HOST/PORT/USER/PASSWORD/DATABASE/SSL_MODE (Neon).
     env_file:
-      - path: packages/indexer/.env
-        required: false
+      - packages/indexer/.env
     environment:
-      <<: *envio-db
       HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/metadata
       HASURA_GRAPHQL_ROLE: admin
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET:-testing}
@@ -98,14 +74,3 @@ services:
       ENVIO_GRAPHQL_URL: http://graphql-engine:8080/v1/graphql
     ports:
       - "${API_HOST_PORT:-3001}:3001"
-
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-    restart: unless-stopped
-    ports:
-      - "${WEB_HOST_PORT:-3000}:3000"
-
-volumes:
-  envio-pg-data:
