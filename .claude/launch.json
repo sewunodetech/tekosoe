@@ -9,6 +9,14 @@
       "port": 8082
     },
     {
+      "name": "mobile-web-demo",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["expo", "start", "--web", "--port", "8083"],
+      "cwd": "apps/mobile",
+      "env": { "EXPO_PUBLIC_DATA_SOURCE": "demo", "EXPO_PUBLIC_SIGNER": "demo" },
+      "port": 8083
+    },
+    {
       "name": "api",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
