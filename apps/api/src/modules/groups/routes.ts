@@ -6,7 +6,7 @@ import type { GroupMetaRow, SpendMetaRow, SpendReviewRow } from "../../db/repos"
 import { checksumAddress, sameAddress } from "../../lib/address";
 import { ApiError, errors } from "../../lib/errors";
 import { requireAuth } from "../../middleware/auth";
-import { apiRateLimit, HOUR_MS } from "../../middleware/rateLimit";
+import { apiRateLimit, MINUTE_MS } from "../../middleware/rateLimit";
 import { pathParam, validate } from "../../middleware/validate";
 
 const decimalId = z.string().regex(/^\d+$/, "must be a decimal id");
@@ -80,8 +80,9 @@ export function createGroupRoutes(ctx: RouteContext): Router {
   // Public: the invite screen shows the trip name before the visitor joins.
   router.get(
     "/:groupId/meta",
+    // Public, cheap read: per minute, not per hour.
     apiRateLimit({
-      windowMs: HOUR_MS,
+      windowMs: MINUTE_MS,
       max: 120,
       code: "RATE_LIMITED",
       message: "Too many requests, try again later",
