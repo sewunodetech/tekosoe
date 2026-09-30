@@ -400,6 +400,19 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
 
     /// @inheritdoc IGroupVault
     function payDebt(uint256 groupId, uint256 amount) external nonReentrant {
+        _payDebt(groupId, amount);
+    }
+
+    /// @inheritdoc IGroupVault
+    function payDebtWithPermit(uint256 groupId, uint256 amount, PermitSig calldata permit)
+        external
+        nonReentrant
+    {
+        _permit(permit);
+        _payDebt(groupId, amount);
+    }
+
+    function _payDebt(uint256 groupId, uint256 amount) internal {
         Group storage g = _settled(groupId);
         uint256 owed = debt[groupId][msg.sender];
         if (owed == 0) revert NoDebt();

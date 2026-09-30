@@ -552,6 +552,33 @@ contract GroupVaultTest is Test {
         vault.payDebt(groupId, 1);
     }
 
+    function test_payDebtWithPermit_oneTransaction() public {
+        uint256 groupId = _create(1_000 * USD);
+        vm.prank(a);
+        vault.deposit(groupId, 50 * USD);
+        address d = vm.addr(0xD);
+        ausd.mint(d, 100 * USD);
+        IGroupVault.PermitSig memory joinPermit = _permit(0xD, d, 10 * USD);
+        vm.prank(d);
+        vault.joinGroupWithPermit(groupId, _inviteSig(groupId, d), 0, 10 * USD, joinPermit); // no safety net
+        address[] memory onlyD = new address[](1);
+        onlyD[0] = d;
+        uint256[] memory forty = new uint256[](1);
+        forty[0] = 40 * USD;
+        _spend(groupId, a, 40 * USD, onlyD, forty);
+
+        _settleNow(groupId);
+        assertEq(_debt(groupId, d), 30 * USD);
+
+        IGroupVault.PermitSig memory payPermit = _permit(0xD, d, 30 * USD);
+        uint256 aBefore = ausd.balanceOf(a);
+        vm.prank(d);
+        vault.payDebtWithPermit(groupId, 30 * USD, payPermit);
+        assertEq(_debt(groupId, d), 0);
+        assertEq(ausd.balanceOf(a) - aBefore, 30 * USD);
+        _assertSettledInvariant(groupId);
+    }
+
     function test_settle_frozenDebtor_doesNotBlockOthers() public {
         uint256 groupId = _groupOfThree(1_000 * USD);
         _spend(groupId, a, 90 * USD, _all(), _split(_all(), 30 * USD));
