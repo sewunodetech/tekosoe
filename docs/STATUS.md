@@ -81,7 +81,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 | Item | Nilai |
 | --- | --- |
 | GroupVault (Monad testnet) | — |
-| AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (belum diverifikasi) |
+| AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (terverifikasi: docs Agora + on-chain) |
+| Faucet AUSD testnet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C` — `requestFunds(address)` |
 | Envio GraphQL | — |
 | API | — |
 | Contoh hash transaksi | — |
