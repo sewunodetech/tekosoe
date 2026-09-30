@@ -24,4 +24,6 @@ npx tsc -p tsconfig.json   # typecheck handler (setelah codegen)
 npm run dev       # envio dev (butuh Docker)
 ```
 
+Alternatif tanpa WSL: `npm run docker:up` di root menjalankan `envio start` di container Linux (`Dockerfile` di folder ini) bersama Postgres + Hasura.
+
 API Envio berubah antar versi: cek dokumentasi terbaru (docs.envio.dev › HyperIndex v3) sebelum menulis handler.

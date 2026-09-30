@@ -62,6 +62,7 @@ Setiap folder punya `AGENTS.md` sendiri dengan aturan lokal. Baca itu juga saat 
 npm install                                 # sekali di root — semua workspace (npm workspaces)
 npm run dev                                 # semua dev server via turbo
 npm run build | lint | typecheck | test
+npm run docker:up | docker:down | docker:logs   # semua kecuali mobile di Docker (docker-compose.yml)
 npm run start -w @tekosoe/mobile            # Expo
 npm test -w @tekosoe/contracts              # forge test
 npm run codegen -w @tekosoe/indexer         # envio codegen

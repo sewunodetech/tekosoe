@@ -1,0 +1,26 @@
+# Konteks build = root repo. Yang dibutuhkan: package.json/lockfile root, packages/shared, apps/web,
+# dan package.json workspace lain (npm ci memvalidasi lockfile root terhadap semua workspace).
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/.turbo
+**/*.tsbuildinfo
+.git
+.vscode
+.claude
+docs
+database
+apps/api/**
+!apps/api/package.json
+apps/mobile/**
+!apps/mobile/package.json
+packages/contracts/**
+!packages/contracts/package.json
+packages/indexer/**
+!packages/indexer/package.json
+apps/web/.next
+apps/web/.expo
+apps/web/Dockerfile
+apps/web/Dockerfile.dockerignore
