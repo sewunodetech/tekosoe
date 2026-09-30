@@ -17,4 +17,5 @@ ADR 0001 dan Spesifikasi Teknis memilih Hono untuk `apps/api`, dan `apps/api` ba
 
 - ADR 0001 (bagian `apps/api`) dan Spesifikasi Teknis masih menyebut Hono — perbarui dokumen live setelah disetujui.
 - Pilihan ini ikut menjawab sebagian ADR 0002 (driver: Drizzle + `pg`; storage: S3-compatible), tapi Neon vs Supabase masih terbuka.
-- Ada dua sumber skema DB: `database/migrations/0001_init.sql` dan `apps/api/drizzle/`. Harus disatukan (lihat `apps/api/docs/coverage.md`).
+- Skema DB hanya di `apps/api/src/db/schema.ts` (migrasi di `apps/api/drizzle/`); folder `database/` dihapus. Kunci grup memakai `member_enc_keys` + `group_key_wraps`, bukan `group_keys` dari draf spesifikasi.
+- Push memakai Expo Push API (bukan Web Push), sesuai `push_subs` di spesifikasi.

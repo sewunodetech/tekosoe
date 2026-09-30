@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   description: |
     Backend mini Tekosoe — penjadwal settle-up, drip biaya jaringan untuk akun baru,
-    profil, struk terenkripsi, tukar kunci grup, dan push notification.
+    profil, label trip/pemakaian, invoice, struk terenkripsi, tukar kunci grup, dan push notification (Expo).
 
     Prinsipnya:
     - Semua data uang (saldo, anggota, pemakaian, hasil settle) **baca dari kontrak + Envio**, bukan dari API ini.
@@ -25,7 +25,11 @@ tags:
   - name: auth
     description: login tanpa password lewat tanda tangan Mera
   - name: profiles
-    description: nama tampilan dan avatar anggota
+    description: nama tampilan, negara, kota anggota
+  - name: groups
+    description: detail trip dan label pemakaian, dikunci ke data on-chain
+  - name: invoices
+    description: invoice per anggota setelah settle
   - name: receipts
     description: struk terenkripsi (FEATURE_RECEIPTS)
   - name: keys
@@ -117,7 +121,7 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
-  /api/onboard/drip:
+  /api/drip:
     post:
       tags: [onboarding]
       summary: Kirim biaya jaringan ke akun baru
@@ -266,26 +270,34 @@ paths:
   /api/profiles/me:
     put:
       tags: [profiles]
-      summary: Simpan nama tampilan milik sendiri
+      summary: Simpan profil milik sendiri
       description: |
-        Nama tampilan bersifat publik (dipakai layar undangan). Maks 40 karakter setelah
-        trim, tanpa karakter kontrol. `avatar` berupa emoji atau kunci preset — URL ditolak.
+        Sama dengan `profileSchema` di `@tekosoe/shared`. Profil bersifat publik (dipakai
+        layar undangan). `countryCode` ISO 3166-1 alpha-2, disimpan huruf besar.
+        `avatarColor` berupa warna atau kunci preset — URL ditolak.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [displayName]
+              required: [displayName, countryCode]
               properties:
                 displayName:
                   type: string
                   minLength: 1
                   maxLength: 40
-                avatar:
+                countryCode:
+                  type: string
+                  pattern: "^[A-Za-z]{2}$"
+                  example: ID
+                city:
+                  type: string
+                  maxLength: 60
+                avatarColor:
                   type: string
                   maxLength: 32
-                  description: emoji atau kunci preset; tidak boleh berupa URL
+                  description: warna atau kunci preset; tidak boleh berupa URL
       responses:
         "200":
           description: profil tersimpan
@@ -347,11 +359,13 @@ paths:
                     type: array
                     items:
                       type: object
-                      required: [address, displayName, avatar]
+                      required: [address, displayName, city, countryCode, avatarColor]
                       properties:
                         address: { type: string }
                         displayName: { type: string }
-                        avatar: { type: [string, "null"] }
+                        city: { type: [string, "null"] }
+                        countryCode: { type: string }
+                        avatarColor: { type: [string, "null"] }
         "400":
           $ref: "#/components/responses/ValidationError"
         "429":
@@ -412,6 +426,313 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
 
+  /api/admin/invoices/{groupId}:
+    post:
+      tags: [operasional]
+      summary: Bangun ulang invoice satu grup (admin)
+      description: |
+        Untuk grup yang di-settle anggota (bukan scheduler) atau saat penulisan invoice gagal.
+        Tx settle dicari lewat Envio. Idempoten.
+      security:
+        - adminKey: []
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      responses:
+        "200":
+          description: hasil
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, enum: [created, exists, not_settled] }
+                  created: { type: integer }
+                  txHash: { type: string }
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/groups/{groupId}/meta:
+    get:
+      tags: [groups]
+      summary: Detail trip (publik)
+      description: Untuk layar undangan sebelum bergabung. `inviteCodeHash` tidak pernah dikembalikan.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      responses:
+        "200":
+          description: detail trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupMeta"
+        "404":
+          description: "`GROUP_META_NOT_FOUND`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+    put:
+      tags: [groups]
+      summary: Simpan detail trip (creator on-chain)
+      description: |
+        Hanya `getGroup().creator`; `inviteCodeHash` wajib sama dengan `inviteHash` on-chain.
+        Insert-only: 201 pertama kali, 200 kalau isinya sama, 409 kalau berbeda.
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, inviteCodeHash]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 60 }
+                inviteCodeHash: { $ref: "#/components/schemas/Bytes32" }
+      responses:
+        "200":
+          description: sudah tersimpan dengan isi yang sama
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupMeta"
+        "201":
+          description: tersimpan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupMeta"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "`NOT_GROUP_CREATOR`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: "`GROUP_META_EXISTS`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "422":
+          description: "`INVITE_HASH_MISMATCH`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/groups/{groupId}/spends/meta:
+    get:
+      tags: [groups]
+      summary: Label semua pemakaian satu grup
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      responses:
+        "200":
+          description: daftar label
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [spends]
+                properties:
+                  spends:
+                    type: array
+                    items: { $ref: "#/components/schemas/SpendMeta" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/NotGroupMember"
+
+  /api/groups/{groupId}/spends/{spendId}/meta:
+    put:
+      tags: [groups]
+      summary: Beri label pemakaian (spender)
+      description: |
+        Body = `spendNoteSchema` (`@tekosoe/shared`). Pemanggil wajib `spender` dari `getSpend`,
+        dan `computeNoteHash(body)` wajib sama dengan `noteHash` on-chain.
+        201 pertama kali, 200 kalau diulang.
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+        - $ref: "#/components/parameters/SpendIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 80 }
+                category: { type: string, maxLength: 32, default: other }
+                note: { type: string, maxLength: 500, default: "" }
+                receiptHash:
+                  oneOf:
+                    - $ref: "#/components/schemas/Bytes32"
+                    - type: "null"
+      responses:
+        "200":
+          description: sudah ada (isi sama)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpendMeta"
+        "201":
+          description: tersimpan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpendMeta"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "`NOT_GROUP_MEMBER` atau `NOT_SPENDER`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "422":
+          description: "`NOTE_HASH_MISMATCH` (`details.expected`, `details.computed`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/groups/{groupId}/spends/reviews:
+    get:
+      tags: [groups]
+      summary: Status dilihat + catatan penolak (P1)
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      responses:
+        "200":
+          description: daftar review
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reviews]
+                properties:
+                  reviews:
+                    type: array
+                    items: { $ref: "#/components/schemas/SpendReview" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/NotGroupMember"
+
+  /api/groups/{groupId}/spends/{spendId}/review:
+    put:
+      tags: [groups]
+      summary: Tandai dilihat dan/atau simpan catatan penolak (P1)
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+        - $ref: "#/components/parameters/SpendIdPath"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seen: { type: boolean, default: false }
+                decisionNote: { type: [string, "null"], maxLength: 280 }
+      responses:
+        "200":
+          description: review saya
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpendReview"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/NotGroupMember"
+
+  /api/groups/{groupId}/invoices/me:
+    get:
+      tags: [invoices]
+      summary: Invoice saya + share token untuk tautan web
+      parameters:
+        - $ref: "#/components/parameters/GroupIdPath"
+      responses:
+        "200":
+          description: invoice
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Invoice"
+                  - type: object
+                    required: [shareToken]
+                    properties:
+                      shareToken:
+                        type: string
+                        description: berlaku 7 hari, hanya untuk nomor invoice ini
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/NotGroupMember"
+        "404":
+          description: "`INVOICE_NOT_FOUND` — settle belum selesai"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /api/invoices/{number}:
+    get:
+      tags: [invoices]
+      summary: Invoice untuk halaman verifikasi web
+      description: |
+        Wajib `token` dari `GET /api/groups/{groupId}/invoices/me`. Halaman web menghitung ulang
+        `payload` dari receipt tx settle (`buildInvoicePayload`) dan mencocokkan `invoiceHash`.
+      security: []
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema: { type: string, pattern: "^INV-[0-9]+-[0-9]{3,}$", example: INV-12-003 }
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: invoice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: "`INVALID_SHARE_TOKEN`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: "`INVOICE_NOT_FOUND`"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
   /api/receipts/upload-url:
     post:
       tags: [receipts]
@@ -419,21 +740,29 @@ paths:
       description: |
         Membuat baris receipt `pending` lalu memberi presigned PUT (5 menit) ke penyimpanan.
         Backend hanya menerima ciphertext — enkripsi terjadi di perangkat.
-        Wajib anggota grup; `sizeBytes` dibatasi `RECEIPT_MAX_BYTES` (default 5 MB).
+        Wajib anggota grup, pemakaian `spendId` wajib ada on-chain; `sizeBytes` dibatasi
+        `RECEIPT_MAX_BYTES` (default 5 MB). Objek disimpan di `receipts/{groupId}/{spendId}/{uuid}.bin`.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [groupId, sizeBytes]
+              required: [groupId, spendId, sizeBytes, mime]
               properties:
                 groupId:
+                  type: string
+                  pattern: "^[0-9]+$"
+                spendId:
                   type: string
                   pattern: "^[0-9]+$"
                 sizeBytes:
                   type: integer
                   minimum: 1
+                mime:
+                  type: string
+                  maxLength: 64
+                  description: tipe file asli (mis. image/jpeg, application/pdf); yang tersimpan tetap ciphertext
       responses:
         "201":
           description: tautan unggah
@@ -455,6 +784,12 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/NotGroupMember"
+        "404":
+          description: "`SPEND_NOT_FOUND` — pemakaian tidak ada on-chain"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
         "413":
           description: "`RECEIPT_TOO_LARGE` — melebihi `RECEIPT_MAX_BYTES`"
           content:
@@ -471,7 +806,8 @@ paths:
       description: |
         `HeadObject` wajib ada dan ukurannya harus persis sama dengan yang dideklarasikan.
         Objek yang melebihi batas dihapus. Dengan `RECEIPT_VERIFY_HASH=true`, isi objek
-        diunduh dan `keccak256(bytes)` harus sama dengan `noteHash`. Idempoten.
+        diunduh dan `keccak256(bytes)` harus sama dengan `receiptHash` (nilai yang dikirim
+        ke `attachReceipt` on-chain). Idempoten.
       parameters:
         - name: id
           in: path
@@ -483,11 +819,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [noteHash]
+              required: [receiptHash]
               properties:
-                noteHash:
-                  type: string
-                  pattern: "^0x[0-9a-fA-F]{64}$"
+                receiptHash: { $ref: "#/components/schemas/Bytes32" }
       responses:
         "200":
           description: siap dipakai
@@ -500,7 +834,7 @@ paths:
                   receiptId: { type: string }
                   status: { type: string, const: ready }
         "400":
-          description: ukuran tidak cocok atau `noteHash` tidak cocok dengan isi file
+          description: ukuran tidak cocok atau `receiptHash` tidak cocok dengan isi file
           content:
             application/json:
               schema:
@@ -526,19 +860,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
-  /api/receipts/by-hash/{noteHash}:
+  /api/receipts/by-hash/{receiptHash}:
     get:
       tags: [receipts]
-      summary: Ambil tautan unduh struk dari noteHash (FEATURE_RECEIPTS)
+      summary: Ambil tautan unduh struk dari receiptHash (FEATURE_RECEIPTS)
       description: |
-        `noteHash` datang dari data pemakaian di Envio. Pemanggil harus anggota dari
+        `receiptHash` datang dari event `ReceiptAttached` di Envio. Pemanggil harus anggota
         grup pemilik receipt, kalau tidak → 403. Mengembalikan presigned GET 5 menit.
-      security: []
       parameters:
-        - name: noteHash
+        - name: receiptHash
           in: path
           required: true
-          schema: { type: string, pattern: "^0x[0-9a-fA-F]{64}$" }
+          schema: { $ref: "#/components/schemas/Bytes32" }
       responses:
         "200":
           description: tautan unduh
@@ -546,10 +879,12 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [receiptId, groupId, sizeBytes, downloadUrl]
+                required: [receiptId, groupId, spendId, mime, sizeBytes, downloadUrl]
                 properties:
                   receiptId: { type: string }
                   groupId: { type: string }
+                  spendId: { type: string }
+                  mime: { type: string }
                   sizeBytes: { type: integer }
                   downloadUrl: { type: string, format: uri }
         "401":
@@ -583,12 +918,14 @@ paths:
                     type: array
                     items:
                       type: object
-                      required: [receiptId, groupId, uploader, sizeBytes, status, createdAt]
+                      required: [receiptId, groupId, spendId, mime, uploader, sizeBytes, status, createdAt]
                       properties:
                         receiptId: { type: string }
                         groupId: { type: string }
+                        spendId: { type: string }
+                        mime: { type: string }
                         uploader: { type: string }
-                        noteHash: { type: [string, "null"] }
+                        receiptHash: { type: [string, "null"] }
                         sizeBytes: { type: integer }
                         status: { type: string, enum: [pending, ready] }
                         createdAt: { type: string, format: date-time }
@@ -734,44 +1071,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
 
-  /api/push/vapid-public-key:
-    get:
-      tags: [push]
-      summary: Kunci VAPID publik (FEATURE_PUSH)
-      security: []
-      responses:
-        "200":
-          description: kunci publik
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [publicKey]
-                properties:
-                  publicKey: { type: string }
-
   /api/push/subscribe:
     post:
       tags: [push]
-      summary: Daftar notifikasi (FEATURE_PUSH)
+      summary: Daftarkan Expo push token (FEATURE_PUSH)
+      description: Token dari `getExpoPushTokenAsync()` di expo-notifications.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [endpoint, keys]
+              required: [expoPushToken, platform]
               properties:
-                endpoint: { type: string, format: uri, maxLength: 2048 }
-                keys:
-                  type: object
-                  required: [p256dh, auth]
-                  properties:
-                    p256dh: { type: string }
-                    auth: { type: string }
+                expoPushToken: { $ref: "#/components/schemas/ExpoPushToken" }
+                platform: { type: string, enum: [ios, android] }
       responses:
         "201":
-          description: terdaftar (upsert per `endpoint`)
+          description: terdaftar (upsert per alamat + token)
           content:
             application/json:
               schema:
@@ -784,16 +1101,16 @@ paths:
           $ref: "#/components/responses/Unauthorized"
     delete:
       tags: [push]
-      summary: Cabut langganan notifikasi (FEATURE_PUSH)
+      summary: Hapus Expo push token milik saya (FEATURE_PUSH)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [endpoint]
+              required: [expoPushToken]
               properties:
-                endpoint: { type: string, format: uri, maxLength: 2048 }
+                expoPushToken: { $ref: "#/components/schemas/ExpoPushToken" }
       responses:
         "200":
           description: dihapus
@@ -817,7 +1134,8 @@ paths:
         `ALCHEMY_WEBHOOK_SIGNING_KEY` dibandingkan dengan header `x-alchemy-signature`
         secara constant-time. Setelah signature sah, server membalas 200 secepatnya dan
         memproses di belakang: log difilter ke alamat kontrak, di-dedup lewat
-        `processed_events`, didekode, lalu memicu push notification.
+        `processed_events`, didekode; `Settled` membuat invoice, `DebtPaid` memperbarui
+        invoice, lalu push dikirim lewat Expo Push API.
       security: []
       parameters:
         - name: x-alchemy-signature
@@ -871,6 +1189,15 @@ components:
         type: string
         pattern: "^[0-9]+$"
         example: "1"
+    SpendIdPath:
+      name: spendId
+      in: path
+      required: true
+      description: id pemakaian (desimal, bigint on-chain)
+      schema:
+        type: string
+        pattern: "^[0-9]+$"
+        example: "3"
 
   responses:
     Unauthorized:
@@ -932,14 +1259,78 @@ components:
       pattern: "^0x[0-9a-fA-F]{40}$"
       example: "0x1111111111111111111111111111111111111111"
 
+    Bytes32:
+      type: string
+      pattern: "^0x[0-9a-fA-F]{64}$"
+
+    ExpoPushToken:
+      type: string
+      pattern: "^Expo(nent)?PushToken\\[[A-Za-z0-9_-]+\\]$"
+      example: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+
     Profile:
       type: object
-      required: [address, displayName, avatar, updatedAt]
+      required: [address, displayName, city, countryCode, avatarColor, updatedAt]
       properties:
         address: { type: string, description: bentuk EIP-55 }
         displayName: { type: string }
-        avatar: { type: [string, "null"] }
+        city: { type: [string, "null"] }
+        countryCode: { type: string, description: ISO 3166-1 alpha-2, huruf besar }
+        avatarColor: { type: [string, "null"] }
         updatedAt: { type: string, format: date-time }
+
+    GroupMeta:
+      type: object
+      required: [groupId, name, createdBy, createdAt]
+      properties:
+        groupId: { type: string }
+        name: { type: string }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    SpendMeta:
+      type: object
+      required: [groupId, spendId, noteHash, title, category, note, receiptHash, createdBy, createdAt]
+      properties:
+        groupId: { type: string }
+        spendId: { type: string }
+        noteHash: { type: string, description: sama dengan noteHash on-chain }
+        title: { type: string }
+        category: { type: string }
+        note: { type: string }
+        receiptHash: { type: [string, "null"] }
+        createdBy: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    SpendReview:
+      type: object
+      required: [spendId, member, seenAt, decisionNote]
+      properties:
+        spendId: { type: string }
+        member: { type: string }
+        seenAt: { type: [string, "null"], format: date-time }
+        decisionNote: { type: [string, "null"] }
+
+    Invoice:
+      type: object
+      required: [number, groupId, member, status, invoiceHash, payload, debtPaid, issuedAt]
+      properties:
+        number: { type: string, example: INV-12-003 }
+        groupId: { type: string }
+        member: { type: string }
+        status: { type: string, enum: [paid, refunded, due] }
+        invoiceHash:
+          type: string
+          description: keccak256(payload)
+        payload:
+          type: string
+          description: |
+            JSON kanonik yang di-hash (buildInvoicePayload di @tekosoe/shared):
+            v, number, chainId, groupId, member, settleTxHash, pulled, refunded,
+            remainingDebt, remainingCredit (nominal = string desimal AUSD 6 desimal).
+            Status tidak ikut di-hash.
+        debtPaid: { type: string, description: total DebtPaid setelah settle (unit terkecil) }
+        issuedAt: { type: string, format: date-time }
 
     WalletStatus:
       type: object
