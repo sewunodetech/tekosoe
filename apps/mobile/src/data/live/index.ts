@@ -42,6 +42,44 @@ async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
   }
 }
 
+/**
+ * Profil = label saja, jadi tidak perlu ikut polling uang (4–5 s). Cache per alamat selama 60 s,
+ * satu permintaan untuk semua alamat yang kedaluwarsa, dan kalau api menolak (mis. 429) nilai
+ * terakhir tetap dipakai — nama tidak mendadak jadi alamat singkat.
+ */
+const PROFILE_TTL_MS = 60_000;
+const profileCache = new Map<string, { profile: ApiProfile | null; at: number }>();
+
+async function profilesFor(addresses: string[]): Promise<Map<string, ApiProfile>> {
+  const wanted = [...new Set(addresses.map(lower))];
+  const now = Date.now();
+  const stale = wanted.filter((address) => {
+    const cached = profileCache.get(address);
+    return !cached || now - cached.at > PROFILE_TTL_MS;
+  });
+  // api menerima maks. 20 alamat per permintaan.
+  for (let i = 0; i < stale.length; i += 20) {
+    const batch = stale.slice(i, i + 20);
+    try {
+      const found = new Map((await api.profiles(batch)).map((p) => [lower(p.address), p]));
+      for (const address of batch) profileCache.set(address, { profile: found.get(address) ?? null, at: now });
+    } catch {
+      break;
+    }
+  }
+  const result = new Map<string, ApiProfile>();
+  for (const address of wanted) {
+    const profile = profileCache.get(address)?.profile;
+    if (profile) result.set(address, profile);
+  }
+  return result;
+}
+
+/** Setelah user mengubah profilnya sendiri: ambil ulang di permintaan berikutnya. */
+export function forgetProfile(address: string) {
+  profileCache.delete(lower(address));
+}
+
 function toMember(address: string, me: string, profile?: ApiProfile, avatarFallback?: string): Member {
   const name = profile?.displayName ?? short(address);
   const country = profile ? countryName(profile.countryCode) : '';
@@ -100,12 +138,10 @@ function countriesLine(members: Member[]): string {
 }
 
 async function buildTrip(g: EnvioGroup, me: string, account?: LocalAccount): Promise<Trip> {
-  const addresses = g.members.map((m) => m.address);
-  const [profiles, meta] = await Promise.all([
-    safe(api.profiles(addresses), [] as ApiProfile[]),
+  const [byAddress, meta] = await Promise.all([
+    profilesFor(g.members.map((m) => m.address)),
     account ? safe(api.spendMeta(account, g.id), [] as ApiSpendMeta[]) : Promise.resolve([] as ApiSpendMeta[]),
   ]);
-  const byAddress = new Map(profiles.map((p) => [lower(p.address), p]));
   const members = new Map(g.members.map((m) => [lower(m.address), toMember(m.address, me, byAddress.get(lower(m.address)))]));
   const metaById = new Map(meta.map((row) => [row.spendId, row]));
   const mine = g.members.find((m) => lower(m.address) === lower(me));
@@ -131,6 +167,8 @@ async function buildTrip(g: EnvioGroup, me: string, account?: LocalAccount): Pro
 
 export async function liveTrips(me: string, account?: LocalAccount) {
   const groups = await fetchMyGroups(me);
+  // Satu permintaan profil untuk semua trip; buildTrip lalu membaca dari cache.
+  await profilesFor(groups.flatMap((g) => g.members.map((m) => m.address)));
   const trips = await Promise.all(groups.map((g) => buildTrip(g, me, account)));
   return {
     list: trips.filter((t) => !t.settled),
@@ -160,8 +198,7 @@ export async function liveSpend(tripId: string, spendId: string, me: string, acc
 export async function liveSettlement(tripId: string, me: string): Promise<Settlement> {
   const group = await fetchGroup(tripId);
   if (!group) throw new Error('This trip could not be found');
-  const profiles = await safe(api.profiles(group.members.map((m) => m.address)), [] as ApiProfile[]);
-  const byAddress = new Map(profiles.map((p) => [lower(p.address), p]));
+  const byAddress = await profilesFor(group.members.map((m) => m.address));
   return {
     tripId,
     date: monthDay(group.settledAt ?? group.endsAt),

@@ -5,7 +5,7 @@ import { ADDRESS_PATTERN, checksumAddress, normalizeAddress } from "../../lib/ad
 import { errors } from "../../lib/errors";
 import { parseOrThrow, validate } from "../../middleware/validate";
 import { requireAuth } from "../../middleware/auth";
-import { apiRateLimit, HOUR_MS } from "../../middleware/rateLimit";
+import { apiRateLimit, MINUTE_MS } from "../../middleware/rateLimit";
 import type { ProfileRow } from "../../db/repos";
 
 const CONTROL_CHARS = /[\u0000-\u001F\u007F]/;
@@ -113,8 +113,9 @@ export function createProfileRoutes(ctx: RouteContext): Router {
 
   router.get(
     "/",
+    // Public, cheap read that every trip screen polls (via the app's cache): per minute, not per hour.
     apiRateLimit({
-      windowMs: HOUR_MS,
+      windowMs: MINUTE_MS,
       max: 120,
       code: "RATE_LIMITED",
       message: "Too many requests, try again later",
