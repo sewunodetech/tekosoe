@@ -25,7 +25,7 @@ Dokumen asli (live) ada di Claude Docs: "Tekosoe — Dokumen Produk" dan "Monad 
 ```
 apps/mobile        Expo (React Native) + Expo Router — semua interaksi user
 apps/web           Next.js statis — verifikasi invoice, link undangan, file domain passkey
-apps/api           Hono di Docker — penjadwal settle, gas/drip MON, satu-satunya pintu ke database, push
+apps/api           Express di Docker (ADR 0004) — penjadwal settle, gas/drip MON, satu-satunya pintu ke database, push
 packages/contracts Foundry — GroupVault.sol
 packages/indexer   Envio HyperIndex — sumber data baca untuk uang
 packages/shared    ABI, alamat, chain, tipe, skema metadata (zod) — dipakai semua paket
@@ -46,7 +46,7 @@ Setiap folder punya `AGENTS.md` sendiri dengan aturan lokal. Baca itu juga saat 
 7. **Rahasia tidak pernah di-commit.** Hanya `.env.example`. `DATABASE_URL` dan kredensial storage hanya di `apps/api`.
 8. **Mera belum terdokumentasi baik.** Setiap nama fungsi `@category-labs/mera` wajib diverifikasi dari source paket di `node_modules` atau repo contoh publik. Jangan mengarang API.
 9. **Scope berlapis P0 → P1 → P2 → P3.** Jangan mulai lapisan berikutnya sebelum lapisan sebelumnya jalan end-to-end di testnet. Kalau waktu mepet, potong dari P3, lalu P2 — tidak pernah dari P0.
-10. Untuk library apa pun (Expo, Next.js, viem, Hono, Envio, Neon/Supabase, Foundry), ambil dokumentasi terbaru (Context7 / docs resmi) — versi di repo ini lebih baru dari data latih.
+10. Untuk library apa pun (Expo, Next.js, viem, Express, Drizzle, Envio, Neon/Supabase, Foundry), ambil dokumentasi terbaru (Context7 / docs resmi) — versi di repo ini lebih baru dari data latih.
 
 ## Alur kerja agent
 
@@ -74,3 +74,14 @@ cd apps/mobile && npx expo install <pkg>   # khusus mobile: versi cocok dengan S
 
 - Monad testnet, chain ID **10143**.
 - AUSD testnet (dari catatan peserta lain, **belum diverifikasi**): `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` — cocokkan dengan halaman contract deployments Agora sebelum dipakai.
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

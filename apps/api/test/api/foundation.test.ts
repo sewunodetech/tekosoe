@@ -65,7 +65,8 @@ describe("GET /api/status", () => {
     const res = await request(app).get("/api/status").set("x-admin-key", TEST_ADMIN_KEY);
 
     expect(res.status).toBe(200);
-    expect(res.body.status).toBe("ok");
+    // The fake chain reports a 0 MON balance, so both backend wallets are "low" → degraded.
+    expect(res.body.status).toBe("degraded");
     expect(res.body.db).toEqual({ ok: true, latencyMs: 1 });
     expect(res.body.chain).toMatchObject({ ok: true, chainId: 10143 });
     expect(res.body.envio).toEqual({ ok: true });

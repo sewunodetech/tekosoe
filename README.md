@@ -11,7 +11,7 @@ Built for Monad Metropolis (Consumer Products & Payments · Agora · Mera · Env
 ```
 apps/mobile         Expo (React Native) + Expo Router
 apps/web            Next.js — invoice verification, invite links, passkey domain files
-apps/api            Hono — settle scheduler, gas drip, metadata API, push
+apps/api            Express — settle scheduler, gas drip, metadata API, push
 packages/contracts  Foundry — GroupVault
 packages/indexer    Envio HyperIndex
 packages/shared     ABI, chain, money, metadata schemas

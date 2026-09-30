@@ -19,6 +19,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] Monorepo npm workspaces + Turborepo, struktur folder sesuai spesifikasi
 - [x] Dokumen perencanaan di `docs/`, panduan agent di `AGENTS.md`
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
+- [x] Backend Express (PR #5) dipindah dari `backend/` ke `apps/api` — typecheck + 18 test lolos; ADR 0004 (diusulkan); celah & bug di `apps/api/docs/coverage.md`
 - [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
 - [ ] `npm install` dan semua workspace lolos `typecheck`
 - [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
