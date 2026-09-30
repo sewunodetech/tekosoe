@@ -1,7 +1,7 @@
-import type { Address, Hash, Hex } from "viem";
+import { BaseError, ContractFunctionRevertedError, type Address, type Hash, type Hex } from "viem";
+import { groupVaultAbi } from "@tekosoe/shared";
 import type { Env } from "../config/env";
 import type { Logger } from "../lib/logger";
-import { groupVaultAbi } from "./abi";
 import { createPublicChainClient, type PublicClient } from "./clients";
 import { createWallets, type Wallets } from "./wallets";
 
@@ -48,17 +48,12 @@ export interface ChainService {
   sendDrip(to: Address, amountWei: bigint): Promise<Hash>;
 }
 
-/**
- * ASSUMPTION: the contract signals "already settled" with a revert whose message
- * contains one of these fragments. Confirm against the real custom errors.
- */
-const SETTLED_PATTERNS = [
-  /already[_ ]?settled/i,
-  /group[_ ]?is[_ ]?settled/i,
-  /not[_ ]?active/i,
-  /group[_ ]?not[_ ]?active/i,
-  /settled/i,
-];
+/** Custom error name of a contract revert (decoded through the ABI), if any. */
+export function revertErrorName(error: unknown): string | undefined {
+  if (!(error instanceof BaseError)) return undefined;
+  const reverted = error.walk((err) => err instanceof ContractFunctionRevertedError);
+  return reverted instanceof ContractFunctionRevertedError ? reverted.data?.errorName : undefined;
+}
 
 function errorMessage(error: unknown): string {
   if (error && typeof error === "object") {
@@ -103,23 +98,22 @@ export function createChainService(options: {
     },
 
     async getGroup(groupId) {
-      // viem decodes multiple outputs positionally (verified), even though the types
-      // also expose named fields — destructure by index.
-      const result = (await publicClient.readContract({
+      // The contract returns one `Group` struct; viem decodes a single tuple output as an object.
+      const group = await publicClient.readContract({
         ...contract,
         functionName: "getGroup",
         args: [groupId],
-      })) as unknown as [string, Address, Hex, bigint, bigint, bigint, bigint, number];
+      });
 
       return {
-        name: result[0],
-        creator: result[1],
-        inviteHash: result[2],
-        endsAt: Number(result[3]),
-        disputeWindow: Number(result[4]),
-        approvalThreshold: BigInt(result[5]),
-        pool: BigInt(result[6]),
-        status: Number(result[7]),
+        name: group.name,
+        creator: group.creator,
+        inviteHash: group.inviteHash,
+        endsAt: Number(group.endsAt),
+        disputeWindow: Number(group.disputeWindow),
+        approvalThreshold: group.approvalThreshold,
+        pool: group.pool,
+        status: group.status,
       };
     },
 
@@ -133,19 +127,19 @@ export function createChainService(options: {
     },
 
     async getSpend(groupId, spendId) {
-      const result = (await publicClient.readContract({
+      const spend = await publicClient.readContract({
         ...contract,
         functionName: "getSpend",
         args: [groupId, spendId],
-      })) as unknown as [Address, Address, bigint, bigint, number, Hex];
+      });
 
       return {
-        spender: result[0],
-        to: result[1],
-        amount: BigInt(result[2]),
-        executedAt: Number(result[3]),
-        status: Number(result[4]),
-        noteHash: result[5],
+        spender: spend.spender,
+        to: spend.to,
+        amount: spend.amount,
+        executedAt: Number(spend.executedAt),
+        status: spend.status,
+        noteHash: spend.noteHash,
       };
     },
 
@@ -159,11 +153,11 @@ export function createChainService(options: {
         });
         return { ok: true };
       } catch (error) {
-        const reason = errorMessage(error);
+        // GroupNotActive = someone (a member, the admin trigger) already settled this group.
         return {
           ok: false,
-          alreadySettled: SETTLED_PATTERNS.some((pattern) => pattern.test(reason)),
-          reason,
+          alreadySettled: revertErrorName(error) === "GroupNotActive",
+          reason: errorMessage(error),
         };
       }
     },

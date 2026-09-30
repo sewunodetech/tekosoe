@@ -1,5 +1,5 @@
 import type { AppDeps } from "../../context";
-import { GROUP_STATUS } from "../../chain/abi";
+import { GROUP_STATUS } from "@tekosoe/shared";
 import type { Logger } from "../../lib/logger";
 
 export interface SettleAttemptResult {
