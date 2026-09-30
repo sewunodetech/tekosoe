@@ -60,11 +60,20 @@ ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri
 
 - `app/` — route saja (lihat tabel). Kode non-route di luar folder ini.
 - `components/` — `ui/` (komponen dasar desain) + komponen Tekosoe (lihat bagian Desain). Komponen template Expo sudah dihapus.
-- `data/` — `types.ts` (tipe domain), `demo/` (adapter demo), `profile-store.ts`. **Layar tidak boleh meng-import `data/demo`** — pakai hook `features/*` (`useTrips`, `useTrip`, `useSpend`, `useInvoice`, `useSettlement`, `useProfile`).
+- `data/` — `types.ts` (tipe domain), `demo/` (adapter demo), `live/` (adapter live: `index.ts` baca Envio + api → tipe domain yang sama; `actions.ts` transaksi GroupVault), `profile-store.ts`. **Layar tidak boleh meng-import `data/*` langsung** — pakai hook `features/*` (`useTrips`, `useTrip`, `useSpend(spendId, tripId)`, `useInvoice(tripId, who)`, `useSettlement`, `useProfile`, `useBalance`, `useAddDemoFunds`). Setiap hook bercabang `isLive`.
 - `constants/theme.ts` — token desain.
-- `lib/` — `env.ts` (`EXPO_PUBLIC_*`), `envio.ts` (GraphQL client), `api.ts` (`apiFetch` ke apps/api), `chain.ts` (viem public client, baca saja).
-- `providers/app-providers.tsx` — TanStack Query. Provider Mera/sesi nanti ditambahkan di sini.
+- `lib/` — `env.ts` (`EXPO_PUBLIC_*`, `isLive`), `envio.ts` (query GraphQL lewat fetch), `api.ts` (login SIWE + endpoint apps/api), `chain.ts` (baca + `writeVault` + permit AUSD + dana demo), `invite.ts` (kode undangan `<groupId>-<rahasia>`, tanda tangan undangan), `countries.ts` (nama negara ↔ ISO).
+- `wallet/` — `Signer` = `{ address, account: LocalAccount }`. `MeraSigner` memakai `toViemAccount` dari `@category-labs/mera/viem`; `DemoSigner` = kunci acak khusus perangkat (web / Expo Go), menandatangani sungguhan.
+- `providers/` — `app-providers.tsx` (TanStack Query), `session-provider.tsx` (Signer + drip saat masuk), `notification-provider.tsx` (token push → api di mode live).
 - Env: salin `apps/mobile/.env.example` → `apps/mobile/.env`.
+
+### Mode live (`EXPO_PUBLIC_DATA_SOURCE=live`)
+
+- Butuh `EXPO_PUBLIC_GROUP_VAULT_ADDRESS`, `EXPO_PUBLIC_ENVIO_GRAPHQL_URL`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_DEMO_SHOP_ADDRESS`.
+- Masuk → api `/api/drip` (MON untuk transaksi pertama) di latar belakang. Profil, label trip/pemakaian, invoice, dan token push lewat api (login SIWE otomatis).
+- Join = satu transaksi `joinGroupWithPermit` (tanda tangan undangan + permit AUSD setoran + safety net). Setor = `depositWithPermit`; bayar tagihan = `payDebtWithPermit`.
+- Saldo kurang → tombol "Add demo funds" (faucet AUSD Agora, testnet).
+- Belum tersambung di live: struk (enkripsi + unggah, M7) — `useAttachReceipt` gagal terus terang; halaman kartu (Card) masih demo.
 
 ## Expo has changed — do not trust your training data
 

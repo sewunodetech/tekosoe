@@ -1,13 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { getTrip } from '@/data/demo';
+import { useTrip } from './useTrip';
 
+/** Feed satu trip = daftar pemakaian di `Trip.activity` (live: Envio, polling). */
 export function useActivity(tripId: string) {
-  return useQuery({
-    queryKey: ['trip', tripId, 'activity'],
-    queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return getTrip(tripId).activity;
-    },
-    enabled: !!tripId,
-  });
+  const query = useTrip(tripId);
+  return { ...query, data: query.data?.activity };
 }

@@ -20,6 +20,8 @@ export type Spend = {
   shares: { member: Member; share: bigint }[];
   when: string;
   hasReceipt: boolean;
+  /** Live: status on-chain. Demo: tidak diisi (dianggap sudah dibayar). */
+  status?: 'pending' | 'executed' | 'rejected';
 };
 
 export type Trip = {
@@ -36,6 +38,8 @@ export type Trip = {
   activity: Spend[];
   /** Perkiraan "If we settled today". */
   settleToday: { member: Member; amount: bigint }[];
+  /** Live: sudah di-settle on-chain. */
+  settled?: boolean;
 };
 
 /** Ringkasan per anggota setelah settle (F13). */

@@ -13,6 +13,7 @@ import { colors, fonts, radius } from '@/constants/theme';
 import type { Settlement, Trip } from '@/data/types';
 import { useSettlement } from '@/features/trips/useSettlement';
 import { useTrip } from '@/features/trips/useTrip';
+import { isLive } from '@/lib/env';
 import { money } from '@/lib/money';
 
 // 13 Settled — canvas "Final UI" › F13Settled
@@ -50,7 +51,7 @@ function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement 
         </Pop>
         <Pill label={`${trip.name} · settled ${settlement.date}`} bg={colors.positiveBg} color={colors.positiveText} />
         <Text variant="hero" style={[styles.textCenter, { fontSize: 34 }]}>
-          You got {money(mine?.net ?? 0n)} back
+          {(mine?.net ?? 0n) >= 0n ? `You got ${money(mine?.net ?? 0n)} back` : `You covered ${money(-(mine?.net ?? 0n))}`}
         </Text>
         <Text style={{ fontFamily: fonts.body, fontSize: 15 }} color={colors.textMuted}>
           Already in your balance. Nothing to chase.
@@ -76,18 +77,22 @@ function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement 
             <Icon name="check" size={18} color={colors.positive} strokeWidth={2.6} />
           </View>
         }>
-        {short.join("'s and ")}&apos;s $10 came from their safety nets. Nothing left to pay.
+        {isLive
+          ? short.length > 0
+            ? `What ${short.join(' and ')} owed was collected from safety nets. Anything left is on their invoice.`
+            : 'Nobody was short. Nothing left to pay.'
+          : `${short.join("'s and ")}'s $10 came from their safety nets. Nothing left to pay.`}
       </InfoBox>
 
       {/* Tautan demo untuk varian invoice di HP anggota lain (I2, I3). */}
-      <View style={styles.demoRow}>
+      {!isLive && <View style={styles.demoRow}>
         <Link href={`/trip/${trip.id}/invoice?who=wei`} asChild>
           <Button label="Demo: Wei's invoice" variant="dashed" style={styles.demo} />
         </Link>
         <Link href={`/trip/${trip.id}/invoice?who=rina`} asChild>
           <Button label="Demo: Rina's invoice" variant="dashed" style={styles.demo} />
         </Link>
-      </View>
+      </View>}
     </Screen>
   );
 }
