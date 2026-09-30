@@ -1,5 +1,5 @@
-# Draf dari docs/03-spesifikasi-teknis.md › Event & skema indexer Envio.
-# Semua nominal dalam unit AUSD (6 desimal).
+# Entitas Envio untuk GroupVault v1 (ADR 0005). Semua nominal dalam unit AUSD (6 desimal).
+# Aturan saldo sama persis dengan kontrak; lihat src/EventHandlers.ts.
 
 enum GroupStatus {
   Active
@@ -13,54 +13,78 @@ enum SpendStatus {
 }
 
 type Group {
-  id: ID! # groupId
+  id: ID! # groupId (desimal)
   name: String!
   creator: String!
   endsAt: BigInt!
+  disputeWindow: BigInt!
   approvalThreshold: BigInt!
   pool: BigInt!
   status: GroupStatus!
+  memberCount: Int!
+  createdAt: BigInt!
+  settledAt: BigInt
+  settleTxHash: String
+  members: [Member!]! @derivedFrom(field: "group")
+  spends: [Spend!]! @derivedFrom(field: "group")
+  activities: [Activity!]! @derivedFrom(field: "group")
 }
 
 type Member {
   id: ID! # `${groupId}-${address}`
-  group_id: String!
-  address: String!
+  group: Group!
+  address: String! # lowercase
   deposited: BigInt!
   used: BigInt!
   net: BigInt! # deposited − used, aturan sama persis dengan kontrak
   pullCap: BigInt!
+  pulled: BigInt! # ditarik saat settle
+  refunded: BigInt! # diterima saat settle / payDebt / claimCredit
   debt: BigInt!
   credit: BigInt!
+  joinedAt: BigInt!
 }
 
 type Spend {
   id: ID! # `${groupId}-${spendId}`
-  group_id: String!
+  group: Group!
+  spendId: BigInt!
   spender: String!
   to: String!
   amount: BigInt!
   status: SpendStatus!
+  noteHash: String!
+  requestedAt: BigInt!
   executedAt: BigInt
-  noteHash: String
   receiptCount: Int!
+  shares: [SpendShare!]! @derivedFrom(field: "spend")
+  receipts: [Receipt!]! @derivedFrom(field: "spend")
 }
 
 type SpendShare {
   id: ID! # `${groupId}-${spendId}-${participant}`
-  spend_id: String!
+  spend: Spend!
   participant: String!
   share: BigInt!
   disputed: Boolean!
 }
 
+type Receipt {
+  id: ID! # `${txHash}-${logIndex}`
+  spend: Spend!
+  by: String!
+  receiptHash: String!
+  timestamp: BigInt!
+}
+
 type Activity {
   id: ID! # `${txHash}-${logIndex}`
-  group_id: String!
+  group: Group!
   type: String! # nama event
   actor: String!
   counterparty: String
   amount: BigInt
+  spendId: BigInt
   timestamp: BigInt!
   txHash: String!
 }
