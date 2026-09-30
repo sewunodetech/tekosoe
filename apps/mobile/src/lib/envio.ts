@@ -163,4 +163,31 @@ export async function fetchGroup(id: string): Promise<EnvioGroup | null> {
   return data.Group[0] ?? null;
 }
 
+const META = gql`
+  query Meta {
+    _meta {
+      progressBlock
+    }
+  }
+`;
+
+/**
+ * Tunggu sampai Envio memproses blok transaksi ini, supaya data yang diambil ulang sesudahnya
+ * sudah memuat transaksi tersebut. Indexer prod maju bertahap: kadang 0–1 s di belakang chain,
+ * kadang tertahan ±50 s (diukur 1 Okt 2026), jadi batasnya 45 s.
+ * Tidak pernah gagal: setelah batas waktu, layar tetap lanjut dan polling biasa menyusul.
+ */
+export async function waitForIndexer(blockNumber: bigint, timeoutMs = 45_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    try {
+      const data = await query<{ _meta: { progressBlock: number }[] }>(META, {});
+      if (data._meta.some((meta) => BigInt(meta.progressBlock) >= blockNumber)) return;
+    } catch {
+      // Koneksi putus sesaat: coba lagi sampai batas waktu.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 800));
+  }
+}
+
 export const envioConfigured = () => Boolean(env.envioGraphqlUrl);

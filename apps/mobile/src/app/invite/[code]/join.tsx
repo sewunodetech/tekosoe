@@ -14,9 +14,8 @@ import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
 import { useJoinTrip } from '@/features/trips/useJoinTrip';
 import { useBalance } from '@/features/wallet/useFunds';
-import { DemoFundsButton } from '@/components/demo-funds';
 import { tripIdFromInvite } from '@/lib/invite';
-import { money, usd } from '@/lib/money';
+import { money } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -55,16 +54,7 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
     <>
       <Screen
         gap={18}
-        footer={
-          <>
-            <DemoFundsButton needed={usd(putIn)} balance={balance} />
-            <Button
-              label={`Join and put in $${putIn}`}
-              onPress={handleJoin}
-              disabled={joinTx.isProcessing}
-            />
-          </>
-        }>
+        footer={<Button label={`Join and put in $${putIn}`} onPress={handleJoin} disabled={joinTx.isProcessing} />}>
       <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
 
       <Surface style={styles.amountCard}>

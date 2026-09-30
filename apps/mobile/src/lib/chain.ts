@@ -95,7 +95,8 @@ export async function signAusdPermit(account: LocalAccount, value: bigint) {
 }
 
 /**
- * "Add demo funds": faucet AUSD testnet Agora mengirim 10.000 AUSD ke akun ini. Butuh sedikit MON (dari drip).
+ * Testnet: faucet AUSD Agora mengirim 10.000 AUSD ke akun ini. Butuh sedikit MON (dari drip).
+ * Dipanggil otomatis (`prefundAccount` setelah masuk, `ensureBalance` saat saldo kurang) — tidak ada tombol.
  * Faucet punya cooldown global ±1 menit untuk semua pemanggil (teruji di testnet 30 Sep 2026).
  */
 export async function requestDemoFunds(account: LocalAccount): Promise<TransactionReceipt> {
@@ -109,7 +110,7 @@ export async function requestDemoFunds(account: LocalAccount): Promise<Transacti
   try {
     await publicClient.simulateContract(call);
   } catch {
-    throw new Error('Demo funds are busy right now. Please try again in a minute.');
+    throw new Error("We couldn't add money to your balance right now. Please try again in a minute.");
   }
   const wallet = createWalletClient({ account, chain: monadTestnet, transport });
   return waitFor(await wallet.writeContract(call));
