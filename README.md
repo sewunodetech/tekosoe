@@ -11,11 +11,10 @@ Built for Monad Metropolis (Consumer Products & Payments · Agora · Mera · Env
 ```
 apps/mobile         Expo (React Native) + Expo Router
 apps/web            Next.js — invoice verification, invite links, passkey domain files
-apps/api            Hono — settle scheduler, gas drip, metadata API, push
+apps/api            Express — settle scheduler, gas drip, metadata API, push
 packages/contracts  Foundry — GroupVault
 packages/indexer    Envio HyperIndex
 packages/shared     ABI, chain, money, metadata schemas
-database/           Postgres migrations (metadata only)
 docs/               BRD, PRD, technical spec, user stories, flows, screen map, dev plan
 ```
 
@@ -25,7 +24,8 @@ Requirements: Node 22+ (npm), [Foundry](https://getfoundry.sh), Docker (for the 
 
 ```bash
 npm install
-cp .env.example apps/mobile/.env   # fill in the values, then do the same for apps/api
+cp .env.example apps/mobile/.env           # fill in the values
+cp apps/api/.env.example apps/api/.env      # backend secrets (RELAXED_ENV=true to boot locally without all of them)
 npm run start -w @tekosoe/mobile
 npm test -w @tekosoe/contracts
 ```
