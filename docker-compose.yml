@@ -1,0 +1,111 @@
+# Stack lokal semua service kecuali mobile: Postgres + Hasura + indexer Envio, api, web.
+#   npm run docker:up      # build + jalan di background
+#   npm run docker:logs    # ikuti log
+#   npm run docker:down    # berhenti (data indexer tetap di volume; `docker compose down -v` untuk reset)
+#
+# Rahasia tetap di .env masing-masing paket (gitignored):
+#   apps/api/.env          wajib (DATABASE_URL Neon, kunci drip/settler, JWT, …)
+#   packages/indexer/.env  opsional (ENVIO_API_TOKEN untuk HyperSync; tanpa token set ENVIO_RPC_FOR=sync)
+# Port host bisa diubah lewat .env di root (lihat .env.example bagian docker).
+#
+# Port 5433/8080 sama dengan `envio dev`; hentikan dulu stack `envio dev` (envio stop) sebelum `up`.
+
+name: tekosoe
+
+x-envio-db: &envio-db
+  ENVIO_PG_HOST: envio-postgres
+  ENVIO_PG_PORT: "5432"
+  ENVIO_PG_USER: postgres
+  ENVIO_PG_PASSWORD: ${ENVIO_PG_PASSWORD:-testing}
+  ENVIO_PG_DATABASE: envio
+
+services:
+  envio-postgres:
+    image: postgres:17.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${ENVIO_PG_PASSWORD:-testing}
+      POSTGRES_DB: envio
+    ports:
+      - "${ENVIO_PG_HOST_PORT:-5433}:5432"
+    volumes:
+      - envio-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d envio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  graphql-engine:
+    image: hasura/graphql-engine:v2.43.0
+    restart: unless-stopped
+    depends_on:
+      envio-postgres:
+        condition: service_healthy
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${ENVIO_PG_PASSWORD:-testing}@envio-postgres:5432/envio
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_NO_OF_RETRIES: "10"
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET:-testing}
+      HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES: "true"
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: public
+      PORT: "8080"
+    ports:
+      - "${HASURA_HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 1s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+  indexer:
+    build:
+      context: .
+      dockerfile: packages/indexer/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      graphql-engine:
+        condition: service_healthy
+    env_file:
+      - path: packages/indexer/.env
+        required: false
+    environment:
+      <<: *envio-db
+      HASURA_GRAPHQL_ENDPOINT: http://graphql-engine:8080/v1/metadata
+      HASURA_GRAPHQL_ROLE: admin
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET:-testing}
+      ENVIO_INDEXER_HOST: 0.0.0.0
+      ENVIO_TUI: "false"
+      LOG_STRATEGY: console-pretty
+    ports:
+      - "127.0.0.1:${INDEXER_HOST_PORT:-9898}:9898"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      graphql-engine:
+        condition: service_healthy
+    env_file:
+      - apps/api/.env
+    environment:
+      PORT: "3001"
+      # Dari dalam jaringan compose, bukan localhost host.
+      ENVIO_GRAPHQL_URL: http://graphql-engine:8080/v1/graphql
+    ports:
+      - "${API_HOST_PORT:-3001}:3001"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_HOST_PORT:-3000}:3000"
+
+volumes:
+  envio-pg-data:

@@ -30,6 +30,27 @@ npm run start -w @tekosoe/mobile
 npm test -w @tekosoe/contracts
 ```
 
+### Everything except mobile in Docker
+
+`docker-compose.yml` runs Postgres + Hasura + the Envio indexer, the api, and the web app. Secrets stay in each package's gitignored `.env`: `apps/api/.env` is required, and `packages/indexer/.env` (`ENVIO_API_TOKEN` for HyperSync) is optional.
+
+```bash
+npm run docker:up     # build + start in the background
+npm run docker:ps     # status
+npm run docker:logs   # follow logs
+npm run docker:down   # stop (add -v via `docker compose down -v` to wipe the indexer DB)
+```
+
+| Service | URL |
+| --- | --- |
+| api | http://localhost:3001/health |
+| Hasura / Envio GraphQL | http://localhost:8080 (console, admin secret `testing`) · `/v1/graphql` |
+| indexer | http://localhost:9898/healthz |
+| web | http://localhost:3000 |
+| Postgres (indexer) | localhost:5433 |
+
+Ports clash with `envio dev`, so stop that stack first (`envio stop`). Host ports and the Hasura secret can be overridden in a root `.env` (`API_HOST_PORT`, `HASURA_HOST_PORT`, `WEB_HOST_PORT`, `ENVIO_PG_HOST_PORT`, `HASURA_ADMIN_SECRET`, `ENVIO_PG_PASSWORD`). Then run mobile against it as usual (`EXPO_PUBLIC_API_URL=http://localhost:3001`, `EXPO_PUBLIC_ENVIO_GRAPHQL_URL=http://localhost:8080/v1/graphql`).
+
 ## Deployments (Monad testnet, chain 10143)
 
 | Contract | Address |
