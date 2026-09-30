@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { liveProfile } from '@/data/live';
+import { forgetProfile, liveProfile } from '@/data/live';
 import { clearProfile, loadProfile, saveProfile } from '@/data/profile-store';
 import type { Profile } from '@/data/types';
 import { api } from '@/lib/api';
@@ -28,12 +28,14 @@ export function useSaveProfile() {
   return useMutation({
     mutationFn: async (profile: Profile) => {
       if (!isLive) return saveProfile(profile);
-      await api.saveProfile(requireAccount(account), {
+      const signed = requireAccount(account);
+      await api.saveProfile(signed, {
         displayName: profile.name,
         countryCode: countryCode(profile.country),
         city: profile.city || undefined,
         avatarColor: profile.tint || undefined,
       });
+      forgetProfile(signed.address);
       return profile;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: profileKey }),
