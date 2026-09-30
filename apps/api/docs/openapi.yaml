@@ -458,7 +458,7 @@ paths:
     get:
       tags: [groups]
       summary: Detail trip (publik)
-      description: Untuk layar undangan sebelum bergabung. `inviteCodeHash` tidak pernah dikembalikan.
+      description: Untuk layar undangan sebelum bergabung.
       security: []
       parameters:
         - $ref: "#/components/parameters/GroupIdPath"
@@ -481,7 +481,7 @@ paths:
       tags: [groups]
       summary: Simpan detail trip (creator on-chain)
       description: |
-        Hanya `getGroup().creator`; `inviteCodeHash` wajib sama dengan `inviteHash` on-chain.
+        Hanya `getGroup().creator`. Rahasia undangan tidak pernah dikirim ke api.
         Insert-only: 201 pertama kali, 200 kalau isinya sama, 409 kalau berbeda.
       parameters:
         - $ref: "#/components/parameters/GroupIdPath"
@@ -491,10 +491,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [name, inviteCodeHash]
+              required: [name]
               properties:
                 name: { type: string, minLength: 1, maxLength: 60 }
-                inviteCodeHash: { $ref: "#/components/schemas/Bytes32" }
       responses:
         "200":
           description: sudah tersimpan dengan isi yang sama
@@ -518,12 +517,6 @@ paths:
                 $ref: "#/components/schemas/ErrorEnvelope"
         "409":
           description: "`GROUP_META_EXISTS`"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorEnvelope"
-        "422":
-          description: "`INVITE_HASH_MISMATCH`"
           content:
             application/json:
               schema:

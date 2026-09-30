@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "forge build",
+    "abi": "node script/export-abi.mjs",
     "test": "forge test -vvv",
     "fmt": "forge fmt",
     "slither": "slither .",

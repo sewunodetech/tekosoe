@@ -14,7 +14,7 @@ describe("groupVaultAbi", () => {
     const group = {
       name: "Bali trip",
       creator: "0x1111111111111111111111111111111111111111",
-      inviteHash: `0x${"ab".repeat(32)}`,
+      inviteKey: "0x4444444444444444444444444444444444444444",
       endsAt: 1_760_000_000n,
       disputeWindow: 86_400n,
       approvalThreshold: 50_000_000n,

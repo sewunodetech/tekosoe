@@ -12,7 +12,7 @@ Review saat backend dipindah dari `backend/` ke `apps/api` (30 Sep 2026), besert
 6. ✅ **Struk memakai `noteHash`.** Sekarang `receiptHash` (= `keccak256(ciphertext)` = nilai `attachReceipt`), diikat ke `spend_id` + `mime`, dan upload ditolak kalau pemakaian tidak ada on-chain.
 7. ✅ **Metadata spend** — `PUT /api/groups/:id/spends/:spendId/meta` hanya dari spender, ditolak `422` kalau `computeNoteHash` ≠ `noteHash` on-chain; `GET …/spends/meta`.
 8. ✅ **Invoice per anggota** — dibuat dari event `Pulled`/`Refunded` di receipt tx settle; `invoiceHash = keccak256(buildInvoicePayload(...))` dari `@tekosoe/shared` supaya web bisa menghitung ulang. `DebtPaid` → `due` jadi `paid`. Share token 7 hari untuk halaman web.
-9. ✅ **Group meta** — hanya creator on-chain, `inviteCodeHash` wajib = `inviteHash` on-chain; `GET` publik untuk layar undangan.
+9. ✅ **Group meta** — hanya creator on-chain; `GET` publik untuk layar undangan. (Sejak ADR 0005 undangan berupa kunci bertanda tangan, jadi `invite_code_hash` dihapus — migrasi `0002`.)
 10. ✅ **`spend_reviews` (P1)** — seen + catatan penolak.
 
 ## Keputusan yang diambil saat perbaikan

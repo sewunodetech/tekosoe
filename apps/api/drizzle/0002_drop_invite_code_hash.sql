@@ -1,0 +1,1 @@
+ALTER TABLE "group_meta" DROP COLUMN "invite_code_hash";

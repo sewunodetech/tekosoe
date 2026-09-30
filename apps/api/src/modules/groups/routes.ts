@@ -9,7 +9,6 @@ import { requireAuth } from "../../middleware/auth";
 import { apiRateLimit, HOUR_MS } from "../../middleware/rateLimit";
 import { pathParam, validate } from "../../middleware/validate";
 
-const bytes32 = z.string().regex(/^0x[0-9a-fA-F]{64}$/, "must be a 32-byte hex hash");
 const decimalId = z.string().regex(/^\d+$/, "must be a decimal id");
 const CONTROL_CHARS = /[\u0000-\u001F\u007F]/;
 
@@ -27,7 +26,6 @@ const groupMetaBodySchema = z.object({
         .max(60)
         .refine((value) => !CONTROL_CHARS.test(value), "name contains control characters"),
     ),
-  inviteCodeHash: bytes32,
 });
 
 const reviewBodySchema = z
@@ -71,8 +69,8 @@ function serializeReview(row: SpendReviewRow) {
 
 /**
  * /api/groups/:groupId/... — off-chain labels for on-chain groups and spends.
- * Every write is pinned to the contract: group meta only by the on-chain creator with the
- * on-chain inviteHash, spend meta only by the spender and only if computeNoteHash matches.
+ * Every write is pinned to the contract: group meta only by the on-chain creator, spend meta only by
+ * the spender and only if computeNoteHash matches.
  */
 export function createGroupRoutes(ctx: RouteContext): Router {
   const router = Router();
@@ -108,14 +106,10 @@ export function createGroupRoutes(ctx: RouteContext): Router {
       if (!sameAddress(group.creator, req.auth!.address)) {
         throw errors.forbidden("NOT_GROUP_CREATOR", "Only the trip creator can set its details");
       }
-      if (group.inviteHash.toLowerCase() !== body.inviteCodeHash.toLowerCase()) {
-        throw new ApiError(422, "INVITE_HASH_MISMATCH", "Invite code does not match this trip");
-      }
 
       const row = {
         groupId: Number(groupId),
         name: body.name,
-        inviteCodeHash: body.inviteCodeHash.toLowerCase(),
         createdBy: req.auth!.address,
       };
       const created = await ctx.repos.groupMeta.insert(row);
