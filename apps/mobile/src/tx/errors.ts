@@ -7,6 +7,9 @@ export function mapTxError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   const lower = message.toLowerCase();
 
+  if (lower.includes('top up first')) {
+    return 'Not enough dollars. Top up first from your Profile.';
+  }
   // Testnet: faucet AUSD sedang cooldown (lihat requestDemoFunds). Dicek sebelum "balance".
   if (lower.includes("couldn't add money to your balance")) {
     return "We couldn't add money to your balance right now. Please try again in a minute.";

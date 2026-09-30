@@ -15,7 +15,7 @@ import { useTrip } from '@/features/trips/useTrip';
 import { useJoinTrip } from '@/features/trips/useJoinTrip';
 import { useBalance } from '@/features/wallet/useFunds';
 import { tripIdFromInvite } from '@/lib/invite';
-import { money } from '@/lib/money';
+import { money, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -39,6 +39,7 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
   });
 
   const balance = useBalance().data;
+  const short = balance !== undefined && balance < usd(putIn);
   const joinTrip = useJoinTrip(code);
   const joinTx = useTx(joinTrip.mutateAsync, {
     onSuccess: () => {
@@ -54,7 +55,18 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
     <>
       <Screen
         gap={18}
-        footer={<Button label={`Join and put in $${putIn}`} onPress={handleJoin} disabled={joinTx.isProcessing} />}>
+        footer={
+          short ? (
+            // Dolar kurang: ajak Top up dulu (ADR 0006); kembali ke sini setelahnya.
+            <Button
+              label={`Top up to put in $${putIn}`}
+              icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />}
+              onPress={() => router.push('/balance/top-up')}
+            />
+          ) : (
+            <Button label={`Join and put in $${putIn}`} onPress={handleJoin} disabled={joinTx.isProcessing} />
+          )
+        }>
       <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
 
       <Surface style={styles.amountCard}>
@@ -85,7 +97,7 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
       <Surface style={{ gap: 10 }}>
         <KeyValue label="Put in now" value={`$${putIn}.00`} />
         <KeyValue label="Safety net up to" value={`$${safetyNet}.00`} />
-        <KeyValue label="Your balance" value={balance === undefined ? '…' : money(balance)} />
+        <KeyValue label="Your dollars" value={balance === undefined ? '…' : money(balance)} />
       </Surface>
     </Screen>
     <TxOverlay status={joinTx.status} />
