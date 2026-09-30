@@ -15,7 +15,7 @@ import { createWallets, type Wallets } from "./wallets";
 export interface GroupView {
   name: string;
   creator: Address;
-  inviteHash: Hex;
+  inviteKey: Address;
   endsAt: number;
   disputeWindow: number;
   approvalThreshold: bigint;
@@ -156,7 +156,7 @@ export function createChainService(options: {
       return {
         name: group.name,
         creator: group.creator,
-        inviteHash: group.inviteHash,
+        inviteKey: group.inviteKey,
         endsAt: Number(group.endsAt),
         disputeWindow: Number(group.disputeWindow),
         approvalThreshold: group.approvalThreshold,

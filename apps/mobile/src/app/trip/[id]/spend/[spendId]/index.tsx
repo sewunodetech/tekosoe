@@ -22,7 +22,7 @@ import { useTx } from '@/tx/useTx';
 export default function PaymentDetailsScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
-    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Payment details">
+    <QueryState query={combine(useTrip(id), useSpend(spendId, id))} title="Payment details">
       {([trip, spend]) => <PaymentDetailsView trip={trip} spend={spend} />}
     </QueryState>
   );

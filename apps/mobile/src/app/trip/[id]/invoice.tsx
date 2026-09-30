@@ -15,6 +15,7 @@ import type { Invoice, InvoiceStatus, Trip } from '@/data/types';
 import { useInvoice } from '@/features/invoices/useInvoice';
 import { usePayDebt } from '@/features/trips/usePayDebt';
 import { useTrip } from '@/features/trips/useTrip';
+import { env, isLive } from '@/lib/env';
 import { money, signed } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -34,7 +35,7 @@ export default function InvoiceScreen() {
   const [selectedWho, setSelectedWho] = useState<string>(who ?? 'jack');
 
   const activeWho = who ?? selectedWho;
-  const query = combine(useTrip(id), useInvoice(activeWho));
+  const query = combine(useTrip(id), useInvoice(id, activeWho));
 
   return (
     <QueryState query={query} title="Trip invoice">
@@ -68,7 +69,7 @@ function InvoiceView({
   const headline = locallyPaid ? 'Paid in full' : invoice.headline;
   const subline = locallyPaid ? 'All debts settled with the group vault' : invoice.subline;
 
-  const verifyUrl = `tekosoe.xyz/v/${invoice.number}`;
+  const verifyUrl = `${env.webDomain}/v/${invoice.number}`;
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
 
   const payDebt = usePayDebt(trip.id);
@@ -183,8 +184,8 @@ function InvoiceView({
         }>
         <ScreenHeader title="Trip invoice" right={invoice.device ? <Pill label={invoice.device} weight="bold" color={colors.textMuted} /> : undefined} />
 
-        {/* Member Invoice Switcher */}
-        <View style={styles.whoSwitcher}>
+        {/* Member Invoice Switcher (demo multi-HP saja; live = invoice akun ini) */}
+        {!isLive && <View style={styles.whoSwitcher}>
           {(['jack', 'wei', 'rina'] as const).map((m) => (
             <Pressable
               key={m}
@@ -204,7 +205,7 @@ function InvoiceView({
               </Text>
             </Pressable>
           ))}
-        </View>
+        </View>}
 
         <Surface style={styles.summary}>
           <View style={styles.summaryTop}>

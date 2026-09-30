@@ -389,7 +389,7 @@ export function defaultGroup(overrides: Partial<GroupView> = {}): GroupView {
   return {
     name: "Trip to Bali",
     creator: TEST_ADDRESS as Address,
-    inviteHash: `0x${"00".repeat(32)}` as GroupView["inviteHash"],
+    inviteKey: "0x00000000000000000000000000000000000000ee" as Address,
     endsAt: 1_700_000_000,
     disputeWindow: 3_600,
     approvalThreshold: 0n,

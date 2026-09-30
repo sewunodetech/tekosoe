@@ -19,7 +19,7 @@ import { money } from '@/lib/money';
 export default function RequestDeclinedScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
-    <QueryState query={combine(useTrip(id), useSpend(spendId))} headerAction="close">
+    <QueryState query={combine(useTrip(id), useSpend(spendId, id))} headerAction="close">
       {([trip, spend]) => <DeclinedView trip={trip} spend={spend} />}
     </QueryState>
   );

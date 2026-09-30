@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -11,12 +11,13 @@ import { Icon } from '@/components/ui/icon';
 import { Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { combine, QueryState } from '@/components/query-state';
+import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
-import type { Spend, Trip } from '@/data/types';
-import { useSpend } from '@/features/spends/useSpend';
+import type { Trip } from '@/data/types';
 import { useCreateSpend } from '@/features/spends/useCreateSpend';
 import { useTrip } from '@/features/trips/useTrip';
+import { splitEqually } from '@tekosoe/shared';
+import { isLive } from '@/lib/env';
 import { money, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -26,21 +27,21 @@ import { useNotifications } from '@/providers/notification-provider';
 import { createPaySchema, type PayFormData } from '@/lib/form-schemas';
 
 // 09 Pay from pot — canvas "Final UI" › F09Pay
-// TODO (M4/M5): form nominal & penerima; computeNoteHash → spend(groupId, to, amount, participants, shares, noteHash).
-// Di atas approvalThreshold jadi SpendRequested → S2 Waiting.
+// Live: computeNoteHash({title, category}) → spend(groupId, tokoDemo, amount, participants, shares, noteHash),
+// lalu judul dikirim ke api. Di atas approvalThreshold jadi SpendRequested → S2 Waiting.
 export default function PayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  // Draf demo: tiket kereta $150 (cerita desain). Diganti isian form di M5.
-  const query = combine(useTrip(id), useSpend('train'));
   return (
-    <QueryState query={query} title="Pay from the pot" headerAction="close">
-      {([trip, spend]) => <PayView trip={trip} spend={spend} />}
+    <QueryState query={useTrip(id)} title="Pay from the pot" headerAction="close">
+      {(trip) => <PayView trip={trip} />}
     </QueryState>
   );
 }
 
-function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
+function PayView({ trip }: { trip: Trip }) {
   const router = useRouter();
+  // Draf demo: tiket kereta $150 (cerita desain).
+  const [title, setTitle] = useState(isLive ? '' : 'Train tickets to Kyoto');
   const potMax = Number(trip.pot) / 1e6;
 
   const paySchema = useMemo(() => createPaySchema(potMax), [potMax]);
@@ -93,14 +94,15 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const { notify } = useNotifications();
   const createSpend = useCreateSpend(trip.id);
   const tx = useTx(createSpend.mutateAsync, {
-    onSuccess: () => {
-      if (overLimit) {
+    onSuccess: (result) => {
+      // Demo: mock tidak tahu batas trip, jadi pakai `overLimit` dari layar.
+      if (result.pending || (!isLive && overLimit)) {
         notify({
           title: 'Approval requested',
-          body: `Jack requested approval to pay $${amountNumber} for ${spend.title}.`,
-          data: { url: `/trip/${trip.id}/spend/new-spend/waiting` },
+          body: `You requested approval to pay $${amountNumber} for ${title}.`,
+          data: { url: `/trip/${trip.id}/spend/${result.spendId}/waiting` },
         });
-        router.replace(`/trip/${trip.id}/spend/new-spend/waiting`);
+        router.replace(`/trip/${trip.id}/spend/${result.spendId}/waiting`);
       } else {
         notify({
           title: 'Payment sent',
@@ -113,7 +115,19 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
   });
 
   const onSubmit = (data: PayFormData) => {
-    tx.execute({ amount: Number(data.amountStr), splits: {} });
+    const amount = usd(parseInt(data.amountStr, 10) || 0);
+    const people = trip.members.filter((m) => data.included[m.id]);
+    const shares =
+      data.split === 'equal'
+        ? splitEqually(amount, people.length)
+        : people.map((m) => usd(parseInt(data.customShares[m.id] || '0', 10)));
+    tx.execute({
+      amount,
+      title: title.trim() || 'Payment',
+      category: 'other',
+      participants: people.map((m) => m.id),
+      shares,
+    });
   };
 
   const validationErrorMessage =
@@ -128,7 +142,7 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
         footer={
           <Button
             label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`}
-            disabled={!isValid || tx.isProcessing}
+            disabled={!isValid || tx.isProcessing || !title.trim()}
             style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
@@ -160,10 +174,18 @@ function PayView({ trip, spend }: { trip: Trip; spend: Spend }) {
           ) : null}
           <View style={styles.what}>
             <Icon name="train" size={16} strokeWidth={2} />
-            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>{spend.title}</Text>
+            <TextInput
+              style={styles.title}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="What is it for?"
+              placeholderTextColor={colors.textMuted}
+              maxLength={80}
+              accessibilityLabel="What is it for?"
+            />
           </View>
           <Text variant="caption" color={colors.textMuted}>
-            To JR Ticket Office (demo shop)
+            {isLive ? 'To the demo shop' : 'To JR Ticket Office (demo shop)'}
           </Text>
         </Surface>
 
@@ -273,6 +295,13 @@ const styles = StyleSheet.create({
     lineHeight: 58,
     letterSpacing: -1.5,
     color: colors.text,
+  },
+  title: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: colors.text,
+    minWidth: 120,
+    paddingVertical: 0,
   },
   what: {
     flexDirection: 'row',

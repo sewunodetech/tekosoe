@@ -1,6 +1,6 @@
 import { router, type Href } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { BackHandler } from 'react-native';
+import { BackHandler, Platform } from 'react-native';
 
 type Options = {
   isDirty: boolean;
@@ -38,6 +38,8 @@ export function useUnsavedChanges({ isDirty, onExit, fallbackRoute }: Options) {
   }, [isDirty, confirmExit]);
 
   useEffect(() => {
+    // Tombol back perangkat hanya ada di Android; di web BackHandler memunculkan error.
+    if (Platform.OS === 'web') return;
     const onBackPress = () => {
       if (isDirty) {
         setShowDiscardModal(true);
