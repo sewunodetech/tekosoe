@@ -176,25 +176,9 @@ export async function buildNotifyPlan(
   };
 }
 
-async function mapLimit<T>(
-  items: T[],
-  limit: number,
-  worker: (item: T) => Promise<void>,
-): Promise<void> {
-  const queue = [...items];
-  const runners = Array.from({ length: Math.min(limit, queue.length) }, async () => {
-    for (;;) {
-      const item = queue.shift();
-      if (item === undefined) return;
-      await worker(item);
-    }
-  });
-  await Promise.all(runners);
-}
-
 /**
- * Deliver a plan to every recipient that has a subscription.
- * Never throws: one broken subscription must not stop the rest.
+ * Deliver a plan to every recipient that has registered an Expo push token.
+ * Never throws: one broken token must not stop the rest.
  */
 export async function sendPlan(ctx: RouteContext, plan: NotifyPlan): Promise<number> {
   if (!ctx.push) return 0;
@@ -202,37 +186,33 @@ export async function sendPlan(ctx: RouteContext, plan: NotifyPlan): Promise<num
   const recipients = [...plan.bodies.keys()];
   if (recipients.length === 0) return 0;
 
-  let subscriptions;
+  let subs;
   try {
-    subscriptions = await ctx.repos.pushSubscriptions.listByAddresses(recipients);
+    subs = await ctx.repos.pushSubs.listByAddresses(recipients);
   } catch (error) {
-    ctx.logger.error({ err: error }, "could not load push subscriptions");
+    ctx.logger.error({ err: error }, "could not load push tokens");
     return 0;
   }
 
-  let sent = 0;
-  await mapLimit(subscriptions, 5, async (subscription) => {
-    const body = plan.bodies.get(subscription.address);
-    if (!body) return;
-
-    try {
-      const result = await ctx.push!.send(
-        {
-          endpoint: subscription.endpoint,
-          p256dh: subscription.p256dh,
-          auth: subscription.auth,
-        },
-        { title: plan.title, body, url: plan.url, tag: plan.tag },
-      );
-      if (result === "sent") sent += 1;
-      if (result === "gone") {
-        await ctx.repos.pushSubscriptions.deleteByEndpoint(subscription.endpoint);
-        ctx.logger.info({ endpoint: subscription.endpoint }, "removed dead push subscription");
-      }
-    } catch (error) {
-      ctx.logger.warn({ err: error }, "push send failed");
-    }
+  const messages = subs.flatMap((sub) => {
+    const body = plan.bodies.get(sub.address);
+    return body
+      ? [{ to: sub.expoPushToken, title: plan.title, body, data: { url: plan.url, tag: plan.tag } }]
+      : [];
   });
+  const results = await ctx.push.sendMany(messages);
+
+  let sent = 0;
+  for (const [index, result] of results.entries()) {
+    if (result === "sent") sent += 1;
+    if (result === "gone") {
+      const token = messages[index]!.to;
+      await ctx.repos.pushSubs.deleteToken(token).catch((error: unknown) => {
+        ctx.logger.warn({ err: error }, "could not remove dead push token");
+      });
+      ctx.logger.info("removed dead push token");
+    }
+  }
 
   ctx.logger.info(
     { groupId: plan.groupId.toString(), tag: plan.tag, recipients: recipients.length, sent },

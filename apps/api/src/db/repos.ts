@@ -1,29 +1,30 @@
-import { desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gt, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { Db } from "./client";
 import * as schema from "./schema";
-import type { GasDripStatus, ReceiptStatus, SettleRunStatus } from "./schema";
+import type {
+  GasDripStatus,
+  InvoiceStatus,
+  PushPlatform,
+  ReceiptStatus,
+  SettleRunStatus,
+} from "./schema";
 
-/** Row shapes mirror schema.ts. Addresses are always lowercase strings. */
+/** Row shapes come straight from schema.ts. Addresses are always lowercase strings. */
 
-export type { GasDripStatus, ReceiptStatus, SettleRunStatus };
+export type { GasDripStatus, InvoiceStatus, PushPlatform, ReceiptStatus, SettleRunStatus };
 
-export interface GasDripRow {
-  address: string;
-  status: GasDripStatus;
-  txHash: string | null;
-  amountWei: string | null;
-  createdAt: Date;
-}
-
-export interface SettleRunRow {
-  groupId: number;
-  status: SettleRunStatus;
-  txHash: string | null;
-  attempts: number;
-  nextAttemptAt: Date | null;
-  lastError: string | null;
-  updatedAt: Date;
-}
+export type GasDripRow = typeof schema.gasDrips.$inferSelect;
+export type SettleRunRow = typeof schema.settleRuns.$inferSelect;
+export type AuthNonceRow = typeof schema.authNonces.$inferSelect;
+export type ProfileRow = typeof schema.profiles.$inferSelect;
+export type GroupMetaRow = typeof schema.groupMeta.$inferSelect;
+export type SpendMetaRow = typeof schema.spendMeta.$inferSelect;
+export type SpendReviewRow = typeof schema.spendReviews.$inferSelect;
+export type ReceiptRow = typeof schema.receipts.$inferSelect;
+export type InvoiceRow = typeof schema.invoices.$inferSelect;
+export type PushSubRow = typeof schema.pushSubs.$inferSelect;
+export type MemberEncKeyRow = typeof schema.memberEncKeys.$inferSelect;
+export type GroupKeyWrapRow = typeof schema.groupKeyWraps.$inferSelect;
 
 export interface SettleRunUpsert {
   groupId: number;
@@ -34,53 +35,7 @@ export interface SettleRunUpsert {
   lastError?: string | null;
 }
 
-export interface AuthNonceRow {
-  nonce: string;
-  address: string;
-  expiresAt: Date;
-  usedAt: Date | null;
-}
-
-export interface ProfileRow {
-  address: string;
-  displayName: string;
-  avatar: string | null;
-  updatedAt: Date;
-}
-
-export interface ReceiptRow {
-  id: string;
-  groupId: number;
-  uploaderAddress: string;
-  storageKey: string;
-  noteHash: string | null;
-  sizeBytes: number;
-  status: ReceiptStatus;
-  createdAt: Date;
-}
-
-export interface MemberEncKeyRow {
-  address: string;
-  encPublicKey: string;
-  updatedAt: Date;
-}
-
-export interface GroupKeyWrapRow {
-  groupId: number;
-  memberAddress: string;
-  wrappedKey: string;
-  wrappedBy: string;
-  createdAt: Date;
-}
-
-export interface PushSubscriptionRow {
-  id: string;
-  address: string;
-  endpoint: string;
-  p256dh: string;
-  auth: string;
-  createdAt: Date;
-}
+export type NewInvoice = Omit<InvoiceRow, "issuedAt" | "debtPaid">;
 
 export interface GasDripRepo {
   get(address: string): Promise<GasDripRow | null>;
@@ -113,14 +68,56 @@ export interface ProfileRepo {
   list(addresses: string[]): Promise<ProfileRow[]>;
 }
 
+export interface GroupMetaRepo {
+  get(groupId: number): Promise<GroupMetaRow | null>;
+  /** Insert-only: returns false when the group already has metadata. */
+  insert(row: Omit<GroupMetaRow, "createdAt">): Promise<boolean>;
+}
+
+export interface SpendMetaRepo {
+  get(groupId: number, spendId: number): Promise<SpendMetaRow | null>;
+  /** Insert-only: the content is pinned by noteHash, so a second write can only be identical. */
+  insert(row: Omit<SpendMetaRow, "createdAt">): Promise<boolean>;
+  listByGroup(groupId: number): Promise<SpendMetaRow[]>;
+}
+
+export interface SpendReviewRepo {
+  /** Marks the spend as seen (first time only) and/or stores the reviewer's note. */
+  upsert(review: {
+    groupId: number;
+    spendId: number;
+    member: string;
+    seen: boolean;
+    decisionNote?: string | null;
+  }): Promise<SpendReviewRow>;
+  listByGroup(groupId: number): Promise<SpendReviewRow[]>;
+}
+
 export interface ReceiptRepo {
   create(receipt: Omit<ReceiptRow, "id" | "createdAt">): Promise<ReceiptRow>;
   get(id: string): Promise<ReceiptRow | null>;
-  getByNoteHash(noteHash: string): Promise<ReceiptRow | null>;
-  markReady(id: string, noteHash: string, sizeBytes: number): Promise<void>;
+  getByHash(receiptHash: string): Promise<ReceiptRow | null>;
+  markReady(id: string, receiptHash: string, sizeBytes: number): Promise<void>;
   remove(id: string): Promise<void>;
   listByGroup(groupId: number): Promise<ReceiptRow[]>;
   listStalePending(before: Date): Promise<ReceiptRow[]>;
+}
+
+export interface InvoiceRepo {
+  /** Insert-only (idempotent): returns how many rows were new. */
+  insertMany(rows: NewInvoice[]): Promise<number>;
+  countByGroup(groupId: number): Promise<number>;
+  get(groupId: number, member: string): Promise<InvoiceRow | null>;
+  getByNumber(number: string): Promise<InvoiceRow | null>;
+  /** Adds a DebtPaid amount; a "due" invoice becomes "paid" once the debt is covered. */
+  recordDebtPaid(groupId: number, member: string, amount: bigint): Promise<InvoiceRow | null>;
+}
+
+export interface PushSubRepo {
+  upsert(sub: { address: string; expoPushToken: string; platform: PushPlatform }): Promise<void>;
+  /** Removes the token for this address, or for everyone when address is omitted (dead token). */
+  deleteToken(expoPushToken: string, address?: string): Promise<void>;
+  listByAddresses(addresses: string[]): Promise<PushSubRow[]>;
 }
 
 export interface MemberEncKeyRepo {
@@ -133,12 +130,6 @@ export interface GroupKeyWrapRepo {
   /** Insert-only: existing (groupId, member) pairs are never overwritten. */
   insertMany(wraps: Omit<GroupKeyWrapRow, "createdAt">[]): Promise<number>;
   get(groupId: number, memberAddress: string): Promise<GroupKeyWrapRow | null>;
-}
-
-export interface PushSubscriptionRepo {
-  upsert(sub: Omit<PushSubscriptionRow, "id" | "createdAt">): Promise<void>;
-  deleteByEndpoint(endpoint: string): Promise<void>;
-  listByAddresses(addresses: string[]): Promise<PushSubscriptionRow[]>;
 }
 
 export interface ProcessedEventRepo {
@@ -156,10 +147,14 @@ export interface Repos {
   settleRuns: SettleRunRepo;
   authNonces: AuthNonceRepo;
   profiles: ProfileRepo;
+  groupMeta: GroupMetaRepo;
+  spendMeta: SpendMetaRepo;
+  spendReviews: SpendReviewRepo;
   receipts: ReceiptRepo;
+  invoices: InvoiceRepo;
+  pushSubs: PushSubRepo;
   memberEncKeys: MemberEncKeyRepo;
   groupKeyWraps: GroupKeyWrapRepo;
-  pushSubscriptions: PushSubscriptionRepo;
   processedEvents: ProcessedEventRepo;
   kvState: KvRepo;
 }
@@ -217,28 +212,18 @@ export function createRepos(db: Db): Repos {
         return rows[0] ?? null;
       },
       async upsert(run) {
+        const values = {
+          status: run.status,
+          txHash: run.txHash ?? null,
+          attempts: run.attempts ?? 0,
+          nextAttemptAt: run.nextAttemptAt ?? null,
+          lastError: run.lastError ?? null,
+          updatedAt: new Date(),
+        };
         await db
           .insert(schema.settleRuns)
-          .values({
-            groupId: run.groupId,
-            status: run.status,
-            txHash: run.txHash ?? null,
-            attempts: run.attempts ?? 0,
-            nextAttemptAt: run.nextAttemptAt ?? null,
-            lastError: run.lastError ?? null,
-            updatedAt: new Date(),
-          })
-          .onConflictDoUpdate({
-            target: schema.settleRuns.groupId,
-            set: {
-              status: run.status,
-              txHash: run.txHash ?? null,
-              attempts: run.attempts ?? 0,
-              nextAttemptAt: run.nextAttemptAt ?? null,
-              lastError: run.lastError ?? null,
-              updatedAt: new Date(),
-            },
-          });
+          .values({ groupId: run.groupId, ...values })
+          .onConflictDoUpdate({ target: schema.settleRuns.groupId, set: values });
       },
       async listRecent(limit) {
         return db
@@ -258,9 +243,11 @@ export function createRepos(db: Db): Repos {
           .select()
           .from(schema.authNonces)
           .where(
-            sql`${schema.authNonces.address} = ${address}
-                and ${schema.authNonces.usedAt} is null
-                and ${schema.authNonces.expiresAt} > ${now}`,
+            and(
+              eq(schema.authNonces.address, address),
+              isNull(schema.authNonces.usedAt),
+              gt(schema.authNonces.expiresAt, now),
+            ),
           )
           .orderBy(desc(schema.authNonces.expiresAt))
           .limit(1);
@@ -270,7 +257,7 @@ export function createRepos(db: Db): Repos {
         const rows = await db
           .update(schema.authNonces)
           .set({ usedAt: at })
-          .where(sql`${schema.authNonces.nonce} = ${nonce} and ${schema.authNonces.usedAt} is null`)
+          .where(and(eq(schema.authNonces.nonce, nonce), isNull(schema.authNonces.usedAt)))
           .returning({ nonce: schema.authNonces.nonce });
         return rows.length > 0;
       },
@@ -293,17 +280,17 @@ export function createRepos(db: Db): Repos {
         return rows[0] ?? null;
       },
       async upsert(profile) {
+        const values = {
+          displayName: profile.displayName,
+          city: profile.city,
+          countryCode: profile.countryCode,
+          avatarColor: profile.avatarColor,
+          updatedAt: new Date(),
+        };
         const rows = await db
           .insert(schema.profiles)
-          .values({ ...profile, updatedAt: new Date() })
-          .onConflictDoUpdate({
-            target: schema.profiles.address,
-            set: {
-              displayName: profile.displayName,
-              avatar: profile.avatar,
-              updatedAt: new Date(),
-            },
-          })
+          .values({ address: profile.address, ...values })
+          .onConflictDoUpdate({ target: schema.profiles.address, set: values })
           .returning();
         return rows[0]!;
       },
@@ -313,6 +300,82 @@ export function createRepos(db: Db): Repos {
           .select()
           .from(schema.profiles)
           .where(inArray(schema.profiles.address, addresses));
+      },
+    },
+
+    groupMeta: {
+      async get(groupId) {
+        const rows = await db
+          .select()
+          .from(schema.groupMeta)
+          .where(eq(schema.groupMeta.groupId, groupId))
+          .limit(1);
+        return rows[0] ?? null;
+      },
+      async insert(row) {
+        const rows = await db
+          .insert(schema.groupMeta)
+          .values(row)
+          .onConflictDoNothing()
+          .returning({ groupId: schema.groupMeta.groupId });
+        return rows.length > 0;
+      },
+    },
+
+    spendMeta: {
+      async get(groupId, spendId) {
+        const rows = await db
+          .select()
+          .from(schema.spendMeta)
+          .where(and(eq(schema.spendMeta.groupId, groupId), eq(schema.spendMeta.spendId, spendId)))
+          .limit(1);
+        return rows[0] ?? null;
+      },
+      async insert(row) {
+        const rows = await db
+          .insert(schema.spendMeta)
+          .values(row)
+          .onConflictDoNothing()
+          .returning({ spendId: schema.spendMeta.spendId });
+        return rows.length > 0;
+      },
+      async listByGroup(groupId) {
+        return db
+          .select()
+          .from(schema.spendMeta)
+          .where(eq(schema.spendMeta.groupId, groupId))
+          .orderBy(desc(schema.spendMeta.spendId));
+      },
+    },
+
+    spendReviews: {
+      async upsert({ groupId, spendId, member, seen, decisionNote }) {
+        const now = new Date();
+        const set: Partial<SpendReviewRow> = {};
+        // Keep the first time the member saw it.
+        if (seen) set.seenAt = sql`coalesce(${schema.spendReviews.seenAt}, ${now})` as unknown as Date;
+        if (decisionNote !== undefined) set.decisionNote = decisionNote;
+        const rows = await db
+          .insert(schema.spendReviews)
+          .values({
+            groupId,
+            spendId,
+            member,
+            seenAt: seen ? now : null,
+            decisionNote: decisionNote ?? null,
+          })
+          .onConflictDoUpdate({
+            target: [schema.spendReviews.groupId, schema.spendReviews.spendId, schema.spendReviews.member],
+            set: Object.keys(set).length > 0 ? set : { member },
+          })
+          .returning();
+        return rows[0]!;
+      },
+      async listByGroup(groupId) {
+        return db
+          .select()
+          .from(schema.spendReviews)
+          .where(eq(schema.spendReviews.groupId, groupId));
       },
     },
 
@@ -332,18 +395,18 @@ export function createRepos(db: Db): Repos {
           .limit(1);
         return rows[0] ?? null;
       },
-      async getByNoteHash(noteHash) {
+      async getByHash(receiptHash) {
         const rows = await db
           .select()
           .from(schema.receipts)
-          .where(sql`${schema.receipts.noteHash} = ${noteHash} and ${schema.receipts.status} = 'ready'`)
+          .where(and(eq(schema.receipts.receiptHash, receiptHash), eq(schema.receipts.status, "ready")))
           .limit(1);
         return rows[0] ?? null;
       },
-      async markReady(id, noteHash, sizeBytes) {
+      async markReady(id, receiptHash, sizeBytes) {
         await db
           .update(schema.receipts)
-          .set({ status: "ready", noteHash, sizeBytes })
+          .set({ status: "ready", receiptHash, sizeBytes })
           .where(eq(schema.receipts.id, id));
       },
       async remove(id) {
@@ -353,14 +416,89 @@ export function createRepos(db: Db): Repos {
         return db
           .select()
           .from(schema.receipts)
-          .where(sql`${schema.receipts.groupId} = ${groupId} and ${schema.receipts.status} = 'ready'`)
+          .where(and(eq(schema.receipts.groupId, groupId), eq(schema.receipts.status, "ready")))
           .orderBy(desc(schema.receipts.createdAt));
       },
       async listStalePending(before) {
         return db
           .select()
           .from(schema.receipts)
-          .where(sql`${schema.receipts.status} = 'pending' and ${schema.receipts.createdAt} < ${before}`);
+          .where(and(eq(schema.receipts.status, "pending"), lt(schema.receipts.createdAt, before)));
+      },
+    },
+
+    invoices: {
+      async insertMany(rows) {
+        if (rows.length === 0) return 0;
+        const inserted = await db
+          .insert(schema.invoices)
+          .values(rows)
+          .onConflictDoNothing()
+          .returning({ number: schema.invoices.number });
+        return inserted.length;
+      },
+      async countByGroup(groupId) {
+        const rows = await db
+          .select({ value: sql<string>`count(*)::int` })
+          .from(schema.invoices)
+          .where(eq(schema.invoices.groupId, groupId));
+        return Number(rows[0]?.value ?? 0);
+      },
+      async get(groupId, member) {
+        const rows = await db
+          .select()
+          .from(schema.invoices)
+          .where(and(eq(schema.invoices.groupId, groupId), eq(schema.invoices.member, member)))
+          .limit(1);
+        return rows[0] ?? null;
+      },
+      async getByNumber(number) {
+        const rows = await db
+          .select()
+          .from(schema.invoices)
+          .where(eq(schema.invoices.number, number))
+          .limit(1);
+        return rows[0] ?? null;
+      },
+      async recordDebtPaid(groupId, member, amount) {
+        const paid = sql`${schema.invoices.debtPaid} + ${amount.toString()}::numeric`;
+        const rows = await db
+          .update(schema.invoices)
+          .set({
+            debtPaid: paid as unknown as string,
+            status: sql`case when ${schema.invoices.status} = 'due' and ${paid} >= ${schema.invoices.remainingDebt} then 'paid' else ${schema.invoices.status} end` as unknown as InvoiceStatus,
+          })
+          .where(and(eq(schema.invoices.groupId, groupId), eq(schema.invoices.member, member)))
+          .returning();
+        return rows[0] ?? null;
+      },
+    },
+
+    pushSubs: {
+      async upsert({ address, expoPushToken, platform }) {
+        await db
+          .insert(schema.pushSubs)
+          .values({ address, expoPushToken, platform })
+          .onConflictDoUpdate({
+            target: [schema.pushSubs.address, schema.pushSubs.expoPushToken],
+            set: { platform },
+          });
+      },
+      async deleteToken(expoPushToken, address) {
+        await db
+          .delete(schema.pushSubs)
+          .where(
+            address
+              ? and(eq(schema.pushSubs.expoPushToken, expoPushToken), eq(schema.pushSubs.address, address))
+              : eq(schema.pushSubs.expoPushToken, expoPushToken),
+          );
+      },
+      async listByAddresses(addresses) {
+        if (addresses.length === 0) return [];
+        return db
+          .select()
+          .from(schema.pushSubs)
+          .where(inArray(schema.pushSubs.address, addresses));
       },
     },
 
@@ -406,34 +544,13 @@ export function createRepos(db: Db): Repos {
           .select()
           .from(schema.groupKeyWraps)
           .where(
-            sql`${schema.groupKeyWraps.groupId} = ${groupId} and ${schema.groupKeyWraps.memberAddress} = ${memberAddress}`,
+            and(
+              eq(schema.groupKeyWraps.groupId, groupId),
+              eq(schema.groupKeyWraps.memberAddress, memberAddress),
+            ),
           )
           .limit(1);
         return rows[0] ?? null;
-      },
-    },
-
-    pushSubscriptions: {
-      async upsert(sub) {
-        await db
-          .insert(schema.pushSubscriptions)
-          .values({ ...sub, id: crypto.randomUUID() })
-          .onConflictDoUpdate({
-            target: schema.pushSubscriptions.endpoint,
-            set: { address: sub.address, p256dh: sub.p256dh, auth: sub.auth },
-          });
-      },
-      async deleteByEndpoint(endpoint) {
-        await db
-          .delete(schema.pushSubscriptions)
-          .where(eq(schema.pushSubscriptions.endpoint, endpoint));
-      },
-      async listByAddresses(addresses) {
-        if (addresses.length === 0) return [];
-        return db
-          .select()
-          .from(schema.pushSubscriptions)
-          .where(inArray(schema.pushSubscriptions.address, addresses));
       },
     },
 

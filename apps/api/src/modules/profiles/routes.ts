@@ -23,14 +23,31 @@ const displayNameSchema = z
       .refine((value) => !CONTROL_CHARS.test(value), "display name contains control characters"),
   );
 
-const avatarSchema = z
+const citySchema = z
+  .string()
+  .max(200)
+  .transform((value) => value.trim())
+  .pipe(
+    z
+      .string()
+      .max(60, "city must be at most 60 characters")
+      .refine((value) => !CONTROL_CHARS.test(value), "city contains control characters"),
+  );
+
+const avatarColorSchema = z
   .string()
   .max(32)
-  .refine((value) => !URL_LIKE.test(value), "avatar must be an emoji or a preset key");
+  .refine((value) => !URL_LIKE.test(value), "avatarColor must be a color or a preset key");
 
+/** Mirrors profileSchema in @tekosoe/shared; countryCode is ISO 3166-1 alpha-2. */
 const updateBodySchema = z.object({
   displayName: displayNameSchema,
-  avatar: avatarSchema.optional(),
+  countryCode: z
+    .string()
+    .regex(/^[A-Za-z]{2}$/, "countryCode must be a 2-letter ISO code")
+    .transform((value) => value.toUpperCase()),
+  city: citySchema.optional(),
+  avatarColor: avatarColorSchema.optional(),
 });
 
 const addressesParamSchema = z.string().transform((value, ctx) => {
@@ -60,7 +77,9 @@ function serialize(profile: ProfileRow) {
   return {
     address: checksumAddress(profile.address),
     displayName: profile.displayName,
-    avatar: profile.avatar,
+    city: profile.city,
+    countryCode: profile.countryCode,
+    avatarColor: profile.avatarColor,
     updatedAt: profile.updatedAt.toISOString(),
   };
 }
@@ -73,11 +92,13 @@ export function createProfileRoutes(ctx: RouteContext): Router {
   const router = Router();
 
   router.put("/me", requireAuth(ctx.env), validate({ body: updateBodySchema }), async (req, res) => {
-    const address = req.auth!.address;
+    const body = req.body as z.infer<typeof updateBodySchema>;
     const profile = await ctx.repos.profiles.upsert({
-      address,
-      displayName: req.body.displayName as string,
-      avatar: (req.body.avatar as string | undefined) ?? null,
+      address: req.auth!.address,
+      displayName: body.displayName,
+      countryCode: body.countryCode,
+      city: body.city || null,
+      avatarColor: body.avatarColor ?? null,
     });
     res.json(serialize(profile));
   });
@@ -108,7 +129,9 @@ export function createProfileRoutes(ctx: RouteContext): Router {
           .map((row) => ({
             address: checksumAddress(row.address),
             displayName: row.displayName,
-            avatar: row.avatar,
+            city: row.city,
+            countryCode: row.countryCode,
+            avatarColor: row.avatarColor,
           }))
           // Only addresses that actually have a profile are returned.
           .sort((a, b) => a.address.localeCompare(b.address)),

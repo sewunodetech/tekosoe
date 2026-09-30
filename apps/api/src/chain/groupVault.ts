@@ -1,4 +1,11 @@
-import { BaseError, ContractFunctionRevertedError, type Address, type Hash, type Hex } from "viem";
+import {
+  BaseError,
+  ContractFunctionRevertedError,
+  parseEventLogs,
+  type Address,
+  type Hash,
+  type Hex,
+} from "viem";
 import { groupVaultAbi } from "@tekosoe/shared";
 import type { Env } from "../config/env";
 import type { Logger } from "../lib/logger";
@@ -29,6 +36,14 @@ export type SimulateResult =
   | { ok: true }
   | { ok: false; alreadySettled: boolean; reason: string };
 
+/** What one settle transaction did, per member (lowercase address). Source for invoices. */
+export interface SettleOutcome {
+  txHash: Hash;
+  groupId: bigint;
+  pulled: Map<string, { amount: bigint; remainingDebt: bigint }>;
+  refunded: Map<string, { amount: bigint; remainingCredit: bigint }>;
+}
+
 /**
  * Every chain read/write the API needs, behind one interface so tests can fake it.
  * Nothing here ever touches user keys or user funds.
@@ -45,6 +60,8 @@ export interface ChainService {
   getSpend(groupId: bigint, spendId: bigint): Promise<SpendView>;
   simulateSettle(groupId: bigint): Promise<SimulateResult>;
   sendSettle(groupId: bigint): Promise<{ hash: Hash; ok: boolean }>;
+  /** Decodes Settled/Pulled/Refunded from a settle receipt; null when it holds no Settled for the group. */
+  getSettleOutcome(groupId: bigint, txHash: Hash): Promise<SettleOutcome | null>;
   sendDrip(to: Address, amountWei: bigint): Promise<Hash>;
 }
 
@@ -53,6 +70,37 @@ export function revertErrorName(error: unknown): string | undefined {
   if (!(error instanceof BaseError)) return undefined;
   const reverted = error.walk((err) => err instanceof ContractFunctionRevertedError);
   return reverted instanceof ContractFunctionRevertedError ? reverted.data?.errorName : undefined;
+}
+
+/** Pure part of getSettleOutcome, exported for tests. `logs` must come from the GroupVault. */
+export function settleOutcomeFromLogs(
+  groupId: bigint,
+  txHash: Hash,
+  logs: Parameters<typeof parseEventLogs>[0]["logs"],
+): SettleOutcome | null {
+  const events = parseEventLogs({
+    abi: groupVaultAbi,
+    logs,
+    eventName: ["Settled", "Pulled", "Refunded"],
+  }).filter((event) => event.args.groupId === groupId);
+
+  if (!events.some((event) => event.eventName === "Settled")) return null;
+
+  const outcome: SettleOutcome = { txHash, groupId, pulled: new Map(), refunded: new Map() };
+  for (const event of events) {
+    if (event.eventName === "Pulled") {
+      outcome.pulled.set(event.args.member.toLowerCase(), {
+        amount: event.args.amount,
+        remainingDebt: event.args.remainingDebt,
+      });
+    } else if (event.eventName === "Refunded") {
+      outcome.refunded.set(event.args.member.toLowerCase(), {
+        amount: event.args.amount,
+        remainingCredit: event.args.remainingCredit,
+      });
+    }
+  }
+  return outcome;
 }
 
 function errorMessage(error: unknown): string {
@@ -183,6 +231,15 @@ export function createChainService(options: {
         });
         return { hash, ok: receipt.status === "success" };
       });
+    },
+
+    async getSettleOutcome(groupId, txHash) {
+      const receipt = await publicClient.getTransactionReceipt({ hash: txHash });
+      if (receipt.status !== "success") return null;
+      const logs = receipt.logs.filter(
+        (log) => log.address.toLowerCase() === address.toLowerCase(),
+      );
+      return settleOutcomeFromLogs(groupId, txHash, logs);
     },
 
     async sendDrip(to, amountWei) {

@@ -104,9 +104,8 @@ export const envSchema = z.object({
 
   // P3 — push notifications (only required when FEATURE_PUSH=true)
   FEATURE_PUSH: bool(false),
-  VAPID_PUBLIC_KEY: optionalString(""),
-  VAPID_PRIVATE_KEY: optionalString(""),
-  VAPID_SUBJECT: optionalString(""),
+  /** Optional: only needed when "enhanced push security" is enabled for the Expo project. */
+  EXPO_ACCESS_TOKEN: optionalString(""),
   ALCHEMY_WEBHOOK_SIGNING_KEY: optionalString(""),
   NOTIFY_SOURCE: z.preprocess(unset, z.enum(["alchemy", "envio"]).default("alchemy")),
 });
@@ -133,12 +132,7 @@ function collectProblems(env: Env): string[] {
   }
 
   if (env.FEATURE_PUSH) {
-    const missing = [
-      "VAPID_PUBLIC_KEY",
-      "VAPID_PRIVATE_KEY",
-      "VAPID_SUBJECT",
-      "ALCHEMY_WEBHOOK_SIGNING_KEY",
-    ].filter((key) => !env[key as keyof Env]);
+    const missing = ["ALCHEMY_WEBHOOK_SIGNING_KEY"].filter((key) => !env[key as keyof Env]);
     if (missing.length > 0) {
       problems.push(`FEATURE_PUSH=true requires: ${missing.join(", ")}`);
     }
