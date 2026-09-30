@@ -59,7 +59,8 @@ export default function NewTripScreen() {
     onSuccess: (data) => {
       router.replace(`/trip/${data.id}`);
       if (isLive) {
-        void Share.share({ message: `Join our trip "${tripName}" on Tekosoe: ${inviteUrl(data.inviteCode)}` });
+        // Web browsers without navigator.share reject; the link is still available from Members.
+        Share.share({ message: `Join our trip "${tripName}" on Tekosoe: ${inviteUrl(data.inviteCode)}` }).catch(() => undefined);
       }
     },
   });
