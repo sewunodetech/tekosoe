@@ -49,6 +49,9 @@ export function createApp(ctx: RouteContext): Express {
         }
       },
       credentials: false,
+      // The app polls every few seconds with a Bearer header; cache the preflight so
+      // browsers do not send an OPTIONS before every request.
+      maxAge: 600,
     }),
   );
 

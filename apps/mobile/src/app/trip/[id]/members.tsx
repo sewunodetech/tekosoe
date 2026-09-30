@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams } from 'expo-router';
-import { Alert, Share, StyleSheet, View } from 'react-native';
+import { Alert, Platform, Share, StyleSheet, View } from 'react-native';
 
 import { PersonRow } from '@/components/trip-rows';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,13 @@ async function shareInvite(trip: Trip) {
     Alert.alert('Invite link', 'Ask the person who created this trip to share the invite link.');
     return;
   }
-  await Share.share({ message: `Join our trip "${trip.name}" on Tekosoe: ${inviteUrl(code)}` });
+  const message = `Join our trip "${trip.name}" on Tekosoe: ${inviteUrl(code)}`;
+  // Browsers without navigator.share: show the link instead.
+  await Share.share({ message }).catch(() => {
+    // react-native-web has no Alert; prompt() lets the user copy the link.
+    if (Platform.OS === 'web') globalThis.prompt?.('Invite link', inviteUrl(code));
+    else Alert.alert('Invite link', inviteUrl(code));
+  });
 }
 
 // S6 Trip members — canvas "Final UI" › S06Members
