@@ -36,6 +36,9 @@ chains:
     rpc:
       url: https://testnet-rpc.monad.xyz
       for: sync
+      # RPC publik Monad membatasi eth_getLogs ke 100 blok per permintaan.
+      initial_block_interval: 100
+      interval_ceiling: 100
     contracts:
       - name: GroupVault
         address: "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" # GroupVault v1
