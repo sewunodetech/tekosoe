@@ -96,7 +96,9 @@ async function main(): Promise<void> {
   const env = loadEnv();
   const logger = createLogger({ level: process.env["LOG_LEVEL"] });
 
-  const pool = createPool(env.DATABASE_URL);
+  const pool = createPool(env.DATABASE_URL, (error) =>
+    logger.warn({ err: error }, "idle database connection dropped; the pool will reconnect"),
+  );
   const db = createDb(pool);
   const repos = createRepos(db);
   const chain = createChainService({ env, logger });
