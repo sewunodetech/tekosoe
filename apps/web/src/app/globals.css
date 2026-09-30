@@ -235,3 +235,8 @@ body {
     opacity: 1 !important;
   }
 }
+
+/* Gulir halus ke bagian landing (hanya bila gerakan tidak dikurangi). */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) { scroll-behavior: smooth; }
+}

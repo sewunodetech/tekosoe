@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Check, MapPin, PartyPopper, PiggyBank, Receipt, Star, type LucideIcon } from "lucide-react";
-import { GET_APP_HREF } from "@/lib/links";
 import { money, usd } from "@/lib/money";
 
 type TabId = "plan" | "chipin" | "spend" | "settle";
@@ -18,17 +17,11 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
 const VIDEO_SRC =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4";
 
-const NAV_LINKS = [
-  { label: "Dashboard", href: "/trips" },
-  { label: "A trip", href: "/trips/japan" },
-  { label: "Invite", href: "/j/japan" },
-  { label: "Invoice", href: "/trips/japan/invoice/jack" },
-];
 
 /** Setiap bagian besar masuk dengan fade-in-up bertahap; opacity awal 0 diisi animasi. */
 const fade = (delay: number): CSSProperties => ({ animationDelay: `${delay}s`, opacity: 0 });
 
-export function Landing() {
+export function Hero() {
   const [active, setActive] = useState<TabId>("plan");
 
   // Tab berganti sendiri tiap 4 detik (dimatikan bila pengguna memilih "kurangi gerakan").
@@ -41,32 +34,9 @@ export function Landing() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-white text-black">
-      {/* Navigation */}
-      <nav className="animate-fade-in-up mx-auto flex max-w-7xl items-center justify-between px-6 py-4" style={fade(0.1)}>
-        <Link href="/" className="flex items-center gap-2" aria-label="Tekosoe">
-          <Star className="h-5 w-5 fill-black" aria-hidden="true" />
-          <span className="text-lg font-semibold whitespace-nowrap">Tekosoe</span>
-        </Link>
-        <div className="hidden items-center gap-8 md:flex">
-          {NAV_LINKS.map((l) => (
-            <Link key={l.label} href={l.href} className="text-sm text-gray-700 hover:text-black">
-              {l.label}
-            </Link>
-          ))}
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href={GET_APP_HREF} className="hidden text-sm whitespace-nowrap text-gray-700 hover:text-black sm:inline">
-            Get the app
-          </Link>
-          <Link href="/trips" className="rounded-full bg-black px-4 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-gray-800 sm:px-5">
-            Dashboard
-          </Link>
-        </div>
-      </nav>
-
+    <>
       {/* Hero */}
-      <section className="mx-auto max-w-7xl px-6 pt-24 pb-32 text-center">
+      <section id="top" className="mx-auto max-w-7xl px-6 pt-20 pb-24 text-center md:pt-24">
         <div className="animate-fade-in-up mb-8 inline-flex items-center gap-2" style={fade(0.2)}>
           <span className="flex h-6 w-6 items-center justify-center rounded border border-gray-300">
             <Star className="h-3.5 w-3.5 fill-black" aria-hidden="true" />
@@ -129,7 +99,7 @@ export function Landing() {
           <span className="text-sm">Consumer Products &amp; Payments</span>
         </div>
       </section>
-    </div>
+    </>
   );
 }
 
