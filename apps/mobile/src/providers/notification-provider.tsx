@@ -15,6 +15,9 @@ import {
   setupNotificationChannels,
   type NotificationPayload,
 } from '@/services/notifications';
+import { api } from '@/lib/api';
+import { isLive } from '@/lib/env';
+import { useSession } from './session-provider';
 
 type NotificationContextType = {
   enabled: boolean;
@@ -107,6 +110,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     [enabled, showBanner],
   );
 
+  const { signer } = useSession();
+
   const toggleNotifications = useCallback(
     async (targetVal: boolean): Promise<void> => {
       if (!targetVal) {
@@ -120,9 +125,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       if (granted) {
         // Ambil token push
         getExpoPushToken().then((token) => {
-          if (token) {
-            // TODO (M11): simpan token ke api `push_subs`
-            console.log('Push token registered:', token);
+          // Live: simpan token di api `push_subs` (Expo Push). Gagal = notifikasi lokal tetap jalan.
+          if (token && isLive && signer && (Platform.OS === 'ios' || Platform.OS === 'android')) {
+            void api.subscribePush(signer.account, token, Platform.OS).catch(() => undefined);
           }
         });
 
@@ -133,7 +138,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
       }
     },
-    [notify],
+    [notify, signer],
   );
 
   const handleBannerPress = () => {

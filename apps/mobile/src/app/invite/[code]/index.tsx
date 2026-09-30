@@ -12,15 +12,17 @@ import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
+import { tripIdFromInvite } from '@/lib/invite';
+import { money, moneyShort } from '@/lib/money';
 
 // 05 Invite — canvas "Final UI" › F05Invite. Dibuka dari tekosoe://invite/<code> atau tautan web.
-// TODO: api → group_meta, profiles berdasarkan kode undangan.
+// Live: kode = `<groupId>-<rahasia>`; trip dibaca dari Envio + profil dari api. Rahasia tetap di link.
 export default function InviteScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
-  return <QueryState query={useTrip(code)}>{(trip) => <InviteView trip={trip} />}</QueryState>;
+  return <QueryState query={useTrip(tripIdFromInvite(code))}>{(trip) => <InviteView trip={trip} code={code} />}</QueryState>;
 }
 
-function InviteView({ trip }: { trip: Trip }) {
+function InviteView({ trip, code }: { trip: Trip; code: string }) {
   // Anggota pertama = pembuat trip; yang ditampilkan hanya anggota lain (bukan "You").
   const organizer = trip.members[0];
   const others = trip.members.filter((m) => m.label !== 'You');
@@ -30,7 +32,7 @@ function InviteView({ trip }: { trip: Trip }) {
       gap={20}
       footer={
         <>
-          <Link href={`/invite/${trip.id}/join`} asChild>
+          <Link href={`/invite/${code}/join`} asChild>
             <Button label="Join with Passkey" />
           </Link>
           <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
@@ -64,8 +66,8 @@ function InviteView({ trip }: { trip: Trip }) {
 
       <View style={styles.facts}>
         <Fact label="Ends" value={trip.settlesOn} />
-        <Fact label="In the pot" value="$200" />
-        <Fact label="Approval" value="Over $100" />
+        <Fact label="In the pot" value={money(trip.pot)} />
+        <Fact label="Approval" value={`Over ${moneyShort(trip.approvalLimit)}`} />
       </View>
     </Screen>
   );

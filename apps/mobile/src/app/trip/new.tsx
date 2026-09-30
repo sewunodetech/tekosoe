@@ -20,9 +20,12 @@ import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
 import { newTripFormSchema, type NewTripFormData } from '@/lib/form-schemas';
+import { env, isLive } from '@/lib/env';
+import { inviteUrl } from '@/lib/invite';
 
 // 04 New trip — canvas "Final UI" › F04Create
-// TODO: createGroup(name, inviteHash, endsAt, disputeWindow, approvalThreshold) + api → group_meta.
+// Live: createGroup(name, inviteKey, endsAt, disputeWindow, approvalThreshold, safetyNet) + api → group_meta.
+// Rahasia undangan dibuat di HP; link dibagikan setelah trip ada.
 export default function NewTripScreen() {
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -55,6 +58,9 @@ export default function NewTripScreen() {
   const tx = useTx(createTrip.mutateAsync, {
     onSuccess: (data) => {
       router.replace(`/trip/${data.id}`);
+      if (isLive) {
+        void Share.share({ message: `Join our trip "${tripName}" on Tekosoe: ${inviteUrl(data.inviteCode)}` });
+      }
     },
   });
 
@@ -159,9 +165,9 @@ export default function NewTripScreen() {
           </View>
           <Text variant="label">Invite link</Text>
           <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14 }} color={colors.heroText}>
-            tekosoe.xyz/j/[invite-code]
+            {isLive ? `${env.webDomain}/j/… · ready after you create the trip` : 'tekosoe.xyz/j/[invite-code]'}
           </Text>
-          <View style={styles.inviteActions}>
+          {!isLive && <View style={styles.inviteActions}>
             <Button
               label="Share link"
               variant="pill"
@@ -170,7 +176,7 @@ export default function NewTripScreen() {
             <Link href="/invite/japan" asChild>
               <Button label="Preview" variant="pill" />
             </Link>
-          </View>
+          </View>}
         </View>
       </Screen>
       <TxOverlay status={tx.status} />

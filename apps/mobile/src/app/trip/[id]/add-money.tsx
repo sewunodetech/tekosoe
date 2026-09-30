@@ -14,6 +14,8 @@ import { colors, fonts } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useDeposit } from '@/features/trips/useDeposit';
 import { useTrip } from '@/features/trips/useTrip';
+import { useBalance } from '@/features/wallet/useFunds';
+import { DemoFundsButton } from '@/components/demo-funds';
 import { money, signed, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -22,7 +24,7 @@ import { DiscardModal } from '@/components/ui/discard-modal';
 import { useNotifications } from '@/providers/notification-provider';
 
 // 08 Add money — canvas "Final UI" › F08AddMoney
-// TODO (M4): deposit(groupId, amount).
+// Live: depositWithPermit(groupId, amount) — permit menjaga izin safety net tetap ada.
 export default function AddMoneyScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
@@ -42,6 +44,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
     fallbackRoute: `/trip/${trip.id}`,
   });
 
+  const balance = useBalance(320).data;
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {
     onSuccess: () => {
@@ -63,11 +66,14 @@ function AddMoneyView({ trip }: { trip: Trip }) {
       <Screen
         gap={18}
         footer={
-          <Button
-            label={`Add $${amount} to the pot`}
-            onPress={handleAddMoney}
-            disabled={depositTx.isProcessing}
-          />
+          <>
+            <DemoFundsButton needed={usd(amount)} balance={balance} />
+            <Button
+              label={`Add $${amount} to the pot`}
+              onPress={handleAddMoney}
+              disabled={depositTx.isProcessing}
+            />
+          </>
         }>
         <ScreenHeader title="Add money" action="close" onPress={handleBack} />
 
@@ -90,7 +96,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
         <View style={{ alignItems: 'center', gap: 6 }}>
           <Text style={styles.amount}>${amount}</Text>
           <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-            From your balance of $320.00
+            From your balance of {balance === undefined ? '…' : money(balance)}
           </Text>
         </View>
 

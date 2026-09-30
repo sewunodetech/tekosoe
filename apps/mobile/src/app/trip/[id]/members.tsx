@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Alert, Share, StyleSheet, View } from 'react-native';
 
 import { PersonRow } from '@/components/trip-rows';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,18 @@ import { QueryState } from '@/components/query-state';
 import { colors, fonts } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
+import { isLive } from '@/lib/env';
+import { inviteUrl, loadInviteCode } from '@/lib/invite';
+
+/** Live: link undangan hanya ada di HP pembuat trip (rahasianya tidak pernah dikirim ke server). */
+async function shareInvite(trip: Trip) {
+  const code = await loadInviteCode(trip.id);
+  if (!code) {
+    Alert.alert('Invite link', 'Ask the person who created this trip to share the invite link.');
+    return;
+  }
+  await Share.share({ message: `Join our trip "${trip.name}" on Tekosoe: ${inviteUrl(code)}` });
+}
 
 // S6 Trip members — canvas "Final UI" › S06Members
 // TODO: Envio MemberJoined + api → profiles. Batas 10 anggota ada di kontrak.
@@ -30,9 +42,17 @@ function MembersView({ trip }: { trip: Trip }) {
   return (
     <Screen
       footer={
-        <Link href={`/invite/${trip.id}`} asChild>
-          <Button label="Invite more friends" icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />} />
-        </Link>
+        isLive ? (
+          <Button
+            label="Invite more friends"
+            icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />}
+            onPress={() => void shareInvite(trip)}
+          />
+        ) : (
+          <Link href={`/invite/${trip.id}`} asChild>
+            <Button label="Invite more friends" icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />} />
+          </Link>
+        )
       }>
       <ScreenHeader title={trip.name} />
 

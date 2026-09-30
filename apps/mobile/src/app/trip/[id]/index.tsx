@@ -14,23 +14,41 @@ import { colors, fonts, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
+import { isLive } from '@/lib/env';
 import { money, signed, usd } from '@/lib/money';
 
 // 07 Trip — canvas "Final UI" › F07Group. Dengan `?state=empty` menjadi S1 Pot is empty (S01PotEmpty),
 // yang muncul setelah permintaan $150 disetujui di layar 10.
-// TODO (M6): Envio (pot, saldo, feed) + api (judul, status struk). Pot kosong dari pot == 0, bukan query param.
+// Live: Envio (pot, saldo, feed, polling) + api (judul). Pot kosong = pot 0 setelah ada pemakaian.
 export default function TripScreen() {
   const { id, state } = useLocalSearchParams<{ id: string; state?: string }>();
-  // Pengeluaran terakhir yang disetujui (demo: tiket kereta), untuk keadaan S1.
-  const query = combine(useTrip(id), useSpend('train'));
+  // Demo: pengeluaran terakhir yang disetujui (tiket kereta), untuk keadaan S1.
+  const demoSpend = useSpend(isLive ? '' : 'train');
+  const trip = useTrip(id);
+  if (isLive) {
+    return (
+      <QueryState query={trip}>
+        {(t) => {
+          const lastSpend = t.activity.find((s) => s.status !== 'pending');
+          return <TripView trip={t} lastSpend={lastSpend} empty={t.pot === 0n && !t.settled && Boolean(lastSpend)} />;
+        }}
+      </QueryState>
+    );
+  }
   return (
-    <QueryState query={query}>
-      {([trip, lastSpend]) => <TripView trip={trip} lastSpend={lastSpend} empty={state === 'empty'} />}
+    <QueryState query={combine(trip, demoSpend)}>
+      {([t, demoLast]) => <TripView trip={t} lastSpend={demoLast} empty={state === 'empty'} />}
     </QueryState>
   );
 }
 
-function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; empty: boolean }) {
+function spendHref(trip: Trip, spend: Spend): Href | undefined {
+  if (spend.status === 'pending') return `/trip/${trip.id}/spend/${spend.id}/waiting`;
+  if (isLive || spend.hasReceipt) return `/trip/${trip.id}/spend/${spend.id}`;
+  return undefined;
+}
+
+function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; empty: boolean }) {
   return (
     <Screen
       gap={16}
@@ -44,6 +62,10 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; em
               <Button label="Preview settle-up" variant="outline" />
             </Link>
           </>
+        ) : trip.settled ? (
+          <Link href={`/trip/${trip.id}/settled`} asChild>
+            <Button label="See how it evened out" />
+          </Link>
         ) : undefined
       }>
       <ScreenHeader
@@ -67,7 +89,7 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; em
                 Your balance
               </Text>
               <Text variant="h3" style={{ fontSize: 22, lineHeight: 28 }} color={colors.positive}>
-                {signed(usd(20))}
+                {signed(isLive ? trip.myBalance : usd(20))}
               </Text>
             </Surface>
             <Surface style={styles.stat} padded={false}>
@@ -79,7 +101,13 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; em
               </Text>
             </Surface>
           </View>
-          <ActivityRow spend={lastSpend} fresh meta={`You · approved by ${trip.members[0].name} · just now`} />
+          {lastSpend && (
+            <ActivityRow
+              spend={lastSpend}
+              fresh
+              meta={isLive ? `${lastSpend.paidBy.label} · ${lastSpend.when}` : `You · approved by ${trip.members[0].name} · just now`}
+            />
+          )}
         </>
       ) : (
         <>
@@ -114,8 +142,12 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend: Spend; em
                 key={spend.id}
                 spend={spend}
                 fresh={i === 0}
-                meta={i === 0 ? `${spend.paidBy.name} · ${spend.forWhom} · settled instantly` : undefined}
-                href={spend.hasReceipt ? `/trip/${trip.id}/spend/${spend.id}` : undefined}
+                meta={
+                  i === 0
+                    ? `${spend.paidBy.name} · ${spend.forWhom} · ${spend.status === 'pending' ? 'waiting for a yes' : 'settled instantly'}`
+                    : undefined
+                }
+                href={spendHref(trip, spend)}
               />
             ))}
           </View>

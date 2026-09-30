@@ -22,7 +22,7 @@ import { money } from '@/lib/money';
 export default function ReceiptScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
-    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Receipt">
+    <QueryState query={combine(useTrip(id), useSpend(spendId, id))} title="Receipt">
       {([trip, spend]) => <ReceiptView trip={trip} spend={spend} />}
     </QueryState>
   );

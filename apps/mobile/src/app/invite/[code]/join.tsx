@@ -13,19 +13,23 @@ import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
 import { useJoinTrip } from '@/features/trips/useJoinTrip';
+import { useBalance } from '@/features/wallet/useFunds';
+import { DemoFundsButton } from '@/components/demo-funds';
+import { tripIdFromInvite } from '@/lib/invite';
+import { money, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
 
 // 06 Join + put in — canvas "Final UI" › F06Join
-// TODO: satu signing session Mera: joinGroup(groupId, inviteSecret, pullCap) + approve AUSD (pullCap) + deposit.
+// Live: satu transaksi joinGroupWithPermit (tanda tangan undangan + permit AUSD setoran + safety net).
 export default function JoinScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
-  return <QueryState query={useTrip(code)}>{(trip) => <JoinView trip={trip} />}</QueryState>;
+  return <QueryState query={useTrip(tripIdFromInvite(code))}>{(trip) => <JoinView trip={trip} code={code} />}</QueryState>;
 }
 
-function JoinView({ trip }: { trip: Trip }) {
+function JoinView({ trip, code }: { trip: Trip; code: string }) {
   const [putIn, setPutIn] = useState<number>(100);
   const [safetyNet, setSafetyNet] = useState<number>(50);
 
@@ -35,7 +39,8 @@ function JoinView({ trip }: { trip: Trip }) {
     fallbackRoute: '/trips',
   });
 
-  const joinTrip = useJoinTrip(trip.id);
+  const balance = useBalance().data;
+  const joinTrip = useJoinTrip(code);
   const joinTx = useTx(joinTrip.mutateAsync, {
     onSuccess: () => {
       router.replace(`/trip/${trip.id}`);
@@ -51,11 +56,14 @@ function JoinView({ trip }: { trip: Trip }) {
       <Screen
         gap={18}
         footer={
-          <Button
-            label={`Join and put in $${putIn}`}
-            onPress={handleJoin}
-            disabled={joinTx.isProcessing}
-          />
+          <>
+            <DemoFundsButton needed={usd(putIn)} balance={balance} />
+            <Button
+              label={`Join and put in $${putIn}`}
+              onPress={handleJoin}
+              disabled={joinTx.isProcessing}
+            />
+          </>
         }>
       <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
 
@@ -87,7 +95,7 @@ function JoinView({ trip }: { trip: Trip }) {
       <Surface style={{ gap: 10 }}>
         <KeyValue label="Put in now" value={`$${putIn}.00`} />
         <KeyValue label="Safety net up to" value={`$${safetyNet}.00`} />
-        <KeyValue label="Your balance" value="$420.00" />
+        <KeyValue label="Your balance" value={balance === undefined ? '…' : money(balance)} />
       </Surface>
     </Screen>
     <TxOverlay status={joinTx.status} />
