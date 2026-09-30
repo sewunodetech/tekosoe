@@ -19,6 +19,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] Monorepo npm workspaces + Turborepo, struktur folder sesuai spesifikasi
 - [x] Dokumen perencanaan di `docs/`, panduan agent di `AGENTS.md`
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
+- [x] Backend Express (PR #5) dipindah dari `backend/` ke `apps/api`; ADR 0004 (diusulkan)
+- [x] api: ABI struct + custom error di `@tekosoe/shared`, skema DB disatukan di Drizzle (`database/` dihapus), push lewat Expo, metadata grup/spend dikunci ke hash on-chain, invoice setelah settle — 38 test api lolos (fake chain, belum testnet). Sisa: `apps/api/docs/coverage.md` › Masih terbuka
 - [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
 - [ ] `npm install` dan semua workspace lolos `typecheck`
 - [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
