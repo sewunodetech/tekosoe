@@ -1,30 +1,35 @@
 import type { Express } from "express";
 import { SignJWT } from "jose";
 import type { Address, Hash } from "viem";
-import { createApp, createRouteContext } from "../../src/app";
-import type { ChainService, GroupView, SimulateResult, SpendView } from "../../src/chain/groupVault";
 import { GROUP_STATUS } from "@tekosoe/shared";
+import { createApp, createRouteContext } from "../../src/app";
+import type {
+  ChainService,
+  GroupView,
+  SettleOutcome,
+  SimulateResult,
+  SpendView,
+} from "../../src/chain/groupVault";
 import { loadEnv, type Env } from "../../src/config/env";
 import type { AppDeps, RouteContext } from "../../src/context";
 import type {
   AuthNonceRow,
   GasDripRow,
   GroupKeyWrapRow,
+  GroupMetaRow,
+  InvoiceRow,
   MemberEncKeyRow,
   ProfileRow,
-  PushSubscriptionRow,
+  PushSubRow,
   ReceiptRow,
   Repos,
   SettleRunRow,
+  SpendMetaRow,
+  SpendReviewRow,
 } from "../../src/db/repos";
 import type { StorageService } from "../../src/integrations/storage";
 import type { DueGroup, EnvioClient } from "../../src/integrations/envio";
-import type {
-  PushPayload,
-  PushResult,
-  PushService,
-  PushTarget,
-} from "../../src/integrations/webpush";
+import type { PushMessage, PushResult, PushService } from "../../src/integrations/expoPush";
 import { createSilentLogger } from "../../src/lib/logger";
 import { createSchedulerState } from "../../src/modules/settle/state";
 
@@ -64,9 +69,6 @@ export function testEnv(overrides: Record<string, string> = {}): Env {
     S3_ACCESS_KEY_ID: "test-access",
     S3_SECRET_ACCESS_KEY: "test-secret",
     FEATURE_PUSH: "true",
-    VAPID_PUBLIC_KEY: "BPtest-public-key",
-    VAPID_PRIVATE_KEY: "test-private-key",
-    VAPID_SUBJECT: "mailto:test@example.com",
     ALCHEMY_WEBHOOK_SIGNING_KEY: "test-signing-key",
     ...overrides,
   });
@@ -79,10 +81,14 @@ export function createFakeRepos(): Repos {
   const settleRuns = new Map<number, SettleRunRow>();
   const nonces = new Map<string, AuthNonceRow>();
   const profileRows = new Map<string, ProfileRow>();
+  const groupMetaRows = new Map<number, GroupMetaRow>();
+  const spendMetaRows = new Map<string, SpendMetaRow>();
+  const reviewRows = new Map<string, SpendReviewRow>();
   const receiptRows = new Map<string, ReceiptRow>();
+  const invoiceRows = new Map<string, InvoiceRow>();
   const encKeys = new Map<string, MemberEncKeyRow>();
   const wraps = new Map<string, GroupKeyWrapRow>();
-  const subscriptions = new Map<string, PushSubscriptionRow>();
+  const pushRows = new Map<string, PushSubRow>();
   const processed = new Set<string>();
   const kv = new Map<string, string>();
   let receiptSeq = 0;
@@ -186,6 +192,53 @@ export function createFakeRepos(): Repos {
       },
     },
 
+    groupMeta: {
+      async get(groupId) {
+        return groupMetaRows.get(groupId) ?? null;
+      },
+      async insert(row) {
+        if (groupMetaRows.has(row.groupId)) return false;
+        groupMetaRows.set(row.groupId, { ...row, createdAt: new Date() });
+        return true;
+      },
+    },
+
+    spendMeta: {
+      async get(groupId, spendId) {
+        return spendMetaRows.get(`${groupId}:${spendId}`) ?? null;
+      },
+      async insert(row) {
+        const key = `${row.groupId}:${row.spendId}`;
+        if (spendMetaRows.has(key)) return false;
+        spendMetaRows.set(key, { ...row, createdAt: new Date() });
+        return true;
+      },
+      async listByGroup(groupId) {
+        return [...spendMetaRows.values()]
+          .filter((row) => row.groupId === groupId)
+          .sort((a, b) => b.spendId - a.spendId);
+      },
+    },
+
+    spendReviews: {
+      async upsert({ groupId, spendId, member, seen, decisionNote }) {
+        const key = `${groupId}:${spendId}:${member}`;
+        const existing = reviewRows.get(key);
+        const row: SpendReviewRow = {
+          groupId,
+          spendId,
+          member,
+          seenAt: existing?.seenAt ?? (seen ? new Date() : null),
+          decisionNote: decisionNote !== undefined ? decisionNote : (existing?.decisionNote ?? null),
+        };
+        reviewRows.set(key, row);
+        return row;
+      },
+      async listByGroup(groupId) {
+        return [...reviewRows.values()].filter((row) => row.groupId === groupId);
+      },
+    },
+
     receipts: {
       async create(receipt) {
         receiptSeq += 1;
@@ -200,15 +253,15 @@ export function createFakeRepos(): Repos {
       async get(id) {
         return receiptRows.get(id) ?? null;
       },
-      async getByNoteHash(noteHash) {
+      async getByHash(receiptHash) {
         for (const row of receiptRows.values()) {
-          if (row.noteHash === noteHash && row.status === "ready") return row;
+          if (row.receiptHash === receiptHash && row.status === "ready") return row;
         }
         return null;
       },
-      async markReady(id, noteHash, sizeBytes) {
+      async markReady(id, receiptHash, sizeBytes) {
         const row = receiptRows.get(id);
-        if (row) receiptRows.set(id, { ...row, status: "ready", noteHash, sizeBytes });
+        if (row) receiptRows.set(id, { ...row, status: "ready", receiptHash, sizeBytes });
       },
       async remove(id) {
         receiptRows.delete(id);
@@ -222,6 +275,57 @@ export function createFakeRepos(): Repos {
         return [...receiptRows.values()].filter(
           (row) => row.status === "pending" && row.createdAt < before,
         );
+      },
+    },
+
+    invoices: {
+      async insertMany(rows) {
+        let created = 0;
+        for (const row of rows) {
+          const key = `${row.groupId}:${row.member}`;
+          const numberTaken = [...invoiceRows.values()].some((r) => r.number === row.number);
+          if (invoiceRows.has(key) || numberTaken) continue;
+          invoiceRows.set(key, { ...row, debtPaid: "0", issuedAt: new Date() });
+          created += 1;
+        }
+        return created;
+      },
+      async countByGroup(groupId) {
+        return [...invoiceRows.values()].filter((row) => row.groupId === groupId).length;
+      },
+      async get(groupId, member) {
+        return invoiceRows.get(`${groupId}:${member}`) ?? null;
+      },
+      async getByNumber(number) {
+        return [...invoiceRows.values()].find((row) => row.number === number) ?? null;
+      },
+      async recordDebtPaid(groupId, member, amount) {
+        const key = `${groupId}:${member}`;
+        const row = invoiceRows.get(key);
+        if (!row) return null;
+        const debtPaid = BigInt(row.debtPaid) + amount;
+        const status =
+          row.status === "due" && debtPaid >= BigInt(row.remainingDebt) ? "paid" : row.status;
+        const next = { ...row, debtPaid: debtPaid.toString(), status };
+        invoiceRows.set(key, next);
+        return next;
+      },
+    },
+
+    pushSubs: {
+      async upsert(sub) {
+        pushRows.set(`${sub.address}:${sub.expoPushToken}`, { ...sub, createdAt: new Date() });
+      },
+      async deleteToken(expoPushToken, address) {
+        for (const [key, row] of pushRows) {
+          if (row.expoPushToken === expoPushToken && (!address || row.address === address)) {
+            pushRows.delete(key);
+          }
+        }
+      },
+      async listByAddresses(addresses) {
+        const wanted = new Set(addresses);
+        return [...pushRows.values()].filter((row) => wanted.has(row.address));
       },
     },
 
@@ -255,19 +359,6 @@ export function createFakeRepos(): Repos {
       },
     },
 
-    pushSubscriptions: {
-      async upsert(sub) {
-        subscriptions.set(sub.endpoint, { ...sub, id: sub.endpoint, createdAt: new Date() });
-      },
-      async deleteByEndpoint(endpoint) {
-        subscriptions.delete(endpoint);
-      },
-      async listByAddresses(addresses) {
-        const wanted = new Set(addresses);
-        return [...subscriptions.values()].filter((row) => wanted.has(row.address));
-      },
-    },
-
     processedEvents: {
       async insertIfNew(txHash, logIndex) {
         const key = `${txHash}:${logIndex}`;
@@ -292,18 +383,29 @@ export function createFakeRepos(): Repos {
 
 export const FAKE_DRIP_ADDRESS = "0xaaaa000000000000000000000000000000000001" as Address;
 export const FAKE_SETTLER_ADDRESS = "0xaaaa000000000000000000000000000000000002" as Address;
+export const FAKE_SETTLE_TX = `0x${"5e".repeat(32)}` as Hash;
 
 export function defaultGroup(overrides: Partial<GroupView> = {}): GroupView {
   return {
     name: "Trip to Bali",
     creator: TEST_ADDRESS as Address,
-    inviteHash: "0x00" as GroupView["inviteHash"],
+    inviteHash: `0x${"00".repeat(32)}` as GroupView["inviteHash"],
     endsAt: 1_700_000_000,
     disputeWindow: 3_600,
     approvalThreshold: 0n,
     pool: 0n,
     status: GROUP_STATUS.Active,
     ...overrides,
+  };
+}
+
+/** TEST_ADDRESS paid in $10 short, OTHER_ADDRESS got $10 back. */
+export function defaultSettleOutcome(groupId: bigint, txHash: Hash = FAKE_SETTLE_TX): SettleOutcome {
+  return {
+    txHash,
+    groupId,
+    pulled: new Map([[TEST_ADDRESS, { amount: 10_000_000n, remainingDebt: 0n }]]),
+    refunded: new Map([[OTHER_ADDRESS, { amount: 10_000_000n, remainingCredit: 0n }]]),
   };
 }
 
@@ -336,14 +438,17 @@ export function createFakeChain(overrides: Partial<ChainService> = {}): ChainSer
         amount: 1_500_000n,
         executedAt: 0,
         status: 1,
-        noteHash: "0x00" as SpendView["noteHash"],
+        noteHash: `0x${"00".repeat(32)}` as SpendView["noteHash"],
       };
     },
     async simulateSettle(): Promise<SimulateResult> {
       return { ok: true };
     },
     async sendSettle() {
-      return { hash: "0xsettlehash" as Hash, ok: true };
+      return { hash: FAKE_SETTLE_TX, ok: true };
+    },
+    async getSettleOutcome(groupId, txHash) {
+      return defaultSettleOutcome(groupId, txHash);
     },
     async sendDrip() {
       return "0xdriphash" as Hash;
@@ -357,11 +462,14 @@ export function createFakeChain(overrides: Partial<ChainService> = {}): ChainSer
 export interface FakeEnvio extends EnvioClient {
   groups: DueGroup[];
   failNext: boolean;
+  settleTxs: Map<string, string>;
 }
 
 export function createFakeEnvio(groups: DueGroup[] = []): FakeEnvio {
   const state = { groups: [...groups], failNext: false };
+  const settleTxs = new Map<string, string>();
   return {
+    settleTxs,
     get groups() {
       return state.groups;
     },
@@ -377,6 +485,9 @@ export function createFakeEnvio(groups: DueGroup[] = []): FakeEnvio {
     async dueGroups(now, limit, offset) {
       if (state.failNext) throw new Error("indexer unavailable");
       return state.groups.filter((group) => group.endsAt <= now).slice(offset, offset + limit);
+    },
+    async settleTxHash(groupId) {
+      return settleTxs.get(groupId) ?? null;
     },
     async ping() {
       return !state.failNext;
@@ -419,20 +530,20 @@ export function createFakeStorage(): FakeStorage {
 /* ------------------------------------------------------------------ push */
 
 export interface FakePush extends PushService {
-  sent: { target: PushTarget; payload: PushPayload }[];
+  sent: PushMessage[];
+  /** Result per Expo token; defaults to "sent". */
   results: Map<string, PushResult>;
 }
 
 export function createFakePush(): FakePush {
-  const sent: { target: PushTarget; payload: PushPayload }[] = [];
+  const sent: PushMessage[] = [];
   const results = new Map<string, PushResult>();
   return {
-    publicVapidKey: "BPtest-public-key",
     sent,
     results,
-    async send(target, payload) {
-      sent.push({ target, payload });
-      return results.get(target.endpoint) ?? "sent";
+    async sendMany(messages) {
+      sent.push(...messages);
+      return messages.map((message) => results.get(message.to) ?? "sent");
     },
   };
 }

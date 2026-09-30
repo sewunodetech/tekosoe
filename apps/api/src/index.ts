@@ -7,7 +7,7 @@ import { createDb, createPool, pingDb } from "./db/client";
 import { createRepos } from "./db/repos";
 import { createEnvioClient } from "./integrations/envio";
 import { createStorageService } from "./integrations/storage";
-import { createPushService } from "./integrations/webpush";
+import { createPushService } from "./integrations/expoPush";
 import { createLogger, type Logger } from "./lib/logger";
 import { checksumAddress } from "./lib/address";
 import { startNonceCleanup } from "./modules/auth/service";

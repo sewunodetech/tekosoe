@@ -2,7 +2,7 @@ import type { Env } from "./config/env";
 import type { ChainService } from "./chain/groupVault";
 import type { Repos } from "./db/repos";
 import type { EnvioClient } from "./integrations/envio";
-import type { PushService } from "./integrations/webpush";
+import type { PushService } from "./integrations/expoPush";
 import type { StorageService } from "./integrations/storage";
 import type { Logger } from "./lib/logger";
 import type { MembershipChecker } from "./middleware/auth";

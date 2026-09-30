@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { keccak256 } from "viem";
+import { revertErrorName } from "../../chain/groupVault";
 import type { RouteContext } from "../../context";
 import { ApiError, errors } from "../../lib/errors";
 
@@ -13,12 +14,30 @@ function requireStorage(ctx: RouteContext) {
   return ctx.storage;
 }
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+/** A receipt can only be attached to a spend that exists on-chain. */
+async function requireSpend(ctx: RouteContext, groupId: bigint, spendId: bigint): Promise<void> {
+  let spender: string;
+  try {
+    spender = (await ctx.chain.getSpend(groupId, spendId)).spender;
+  } catch (error) {
+    // A contract revert means "no such spend"; anything else (RPC down) is a real error.
+    if (revertErrorName(error) === undefined) throw error;
+    spender = ZERO_ADDRESS;
+  }
+  if (spender.toLowerCase() === ZERO_ADDRESS) {
+    throw errors.notFound("SPEND_NOT_FOUND", "This payment does not exist in the group");
+  }
+}
+
 /** Step 1 — create a pending row and a presigned PUT the device uploads to directly. */
 export async function createUploadUrl(
   ctx: RouteContext,
-  params: { address: string; groupId: string; sizeBytes: number },
+  params: { address: string; groupId: string; spendId: string; mime: string; sizeBytes: number },
 ) {
   const storage = requireStorage(ctx);
+  await requireSpend(ctx, BigInt(params.groupId), BigInt(params.spendId));
 
   if (params.sizeBytes > ctx.env.RECEIPT_MAX_BYTES) {
     throw new ApiError(
@@ -29,12 +48,14 @@ export async function createUploadUrl(
     );
   }
 
-  const storageKey = `receipts/${params.groupId}/${randomUUID()}`;
+  const storageKey = `receipts/${params.groupId}/${params.spendId}/${randomUUID()}.bin`;
   const receipt = await ctx.repos.receipts.create({
     groupId: Number(params.groupId),
+    spendId: Number(params.spendId),
+    mime: params.mime,
     uploaderAddress: params.address,
     storageKey,
-    noteHash: null,
+    receiptHash: null,
     sizeBytes: params.sizeBytes,
     status: "pending",
   });
@@ -54,12 +75,12 @@ export async function createUploadUrl(
 
 /**
  * Step 2 — verify what actually landed in storage before marking it ready.
- * ASSUMPTION: noteHash is keccak256 of the ciphertext (RECEIPT_VERIFY_HASH=true);
- * confirm the definition with the mobile team (docs/coverage.md).
+ * receiptHash = keccak256(ciphertext), the same value the app passes to attachReceipt.
+ * ASSUMPTION: confirm this definition with the mobile team (docs/coverage.md).
  */
 export async function confirmReceipt(
   ctx: RouteContext,
-  params: { address: string; receiptId: string; noteHash: string },
+  params: { address: string; receiptId: string; receiptHash: string },
 ) {
   const storage = requireStorage(ctx);
   const receipt = await ctx.repos.receipts.get(params.receiptId);
@@ -89,26 +110,26 @@ export async function confirmReceipt(
       throw errors.notFound("RECEIPT_NOT_UPLOADED", "Receipt has not been uploaded yet");
     }
     const hash = keccak256(bytes).toLowerCase();
-    if (hash !== params.noteHash.toLowerCase()) {
-      throw errors.validation({ reason: "noteHash does not match the uploaded bytes" });
+    if (hash !== params.receiptHash.toLowerCase()) {
+      throw errors.validation({ reason: "receiptHash does not match the uploaded bytes" });
     }
   }
 
   await ctx.repos.receipts.markReady(
     receipt.id,
-    params.noteHash.toLowerCase(),
+    params.receiptHash.toLowerCase(),
     head.contentLength,
   );
   return { receiptId: receipt.id, status: "ready" as const };
 }
 
 /** Step 3 — only members of the owning group get a download link. */
-export async function findReceiptByNoteHash(
+export async function findReceiptByHash(
   ctx: RouteContext,
-  params: { address: string; noteHash: string },
+  params: { address: string; receiptHash: string },
 ) {
   const storage = requireStorage(ctx);
-  const receipt = await ctx.repos.receipts.getByNoteHash(params.noteHash.toLowerCase());
+  const receipt = await ctx.repos.receipts.getByHash(params.receiptHash.toLowerCase());
   if (!receipt) throw errors.notFound("RECEIPT_NOT_FOUND", "Receipt not found");
 
   const member = await ctx.membership.isMember(params.address, BigInt(receipt.groupId));
@@ -120,6 +141,8 @@ export async function findReceiptByNoteHash(
   return {
     receiptId: receipt.id,
     groupId: String(receipt.groupId),
+    spendId: String(receipt.spendId),
+    mime: receipt.mime,
     sizeBytes: receipt.sizeBytes,
     downloadUrl,
   };

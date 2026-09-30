@@ -25,11 +25,10 @@ Dokumen asli (live) ada di Claude Docs: "Tekosoe — Dokumen Produk" dan "Monad 
 ```
 apps/mobile        Expo (React Native) + Expo Router — semua interaksi user
 apps/web           Next.js statis — verifikasi invoice, link undangan, file domain passkey
-apps/api           Express di Docker (ADR 0004) — penjadwal settle, gas/drip MON, satu-satunya pintu ke database, push
+apps/api           Express di Docker (ADR 0004) — penjadwal settle, gas/drip MON, satu-satunya pintu ke database (skema + migrasi Drizzle di apps/api/drizzle), push
 packages/contracts Foundry — GroupVault.sol
 packages/indexer   Envio HyperIndex — sumber data baca untuk uang
 packages/shared    ABI, alamat, chain, tipe, skema metadata (zod) — dipakai semua paket
-database/          migrasi Postgres (Neon/Supabase — belum final, lihat ADR 0002)
 docs/              BRD, PRD, spesifikasi, user stories, flow, peta layar, rencana, keputusan
 ```
 

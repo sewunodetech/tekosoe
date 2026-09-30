@@ -9,6 +9,8 @@ export interface DueGroup {
 export interface EnvioClient {
   /** Groups indexed as Active whose endsAt has already passed. */
   dueGroups(now: number, limit: number, offset: number): Promise<DueGroup[]>;
+  /** Hash of the transaction that emitted Settled for the group (settled by anyone), or null. */
+  settleTxHash(groupId: string): Promise<string | null>;
   ping(): Promise<boolean>;
 }
 
@@ -28,6 +30,15 @@ const DUE_GROUPS_QUERY = `
       id
       endsAt
       status
+    }
+  }
+`;
+
+/** ASSUMPTION: Activity.type holds the event name and group_id the decimal group id (schema.graphql draft). */
+const SETTLE_TX_QUERY = `
+  query SettleTx($groupId: String!) {
+    Activity(where: { group_id: { _eq: $groupId }, type: { _eq: "Settled" } }, limit: 1) {
+      txHash
     }
   }
 `;
@@ -76,6 +87,13 @@ export function createEnvioClient(env: Env): EnvioClient {
         endsAt: Number(row.endsAt),
         status: String(row.status),
       }));
+    },
+    async settleTxHash(groupId) {
+      const data = await graphql<{ Activity?: { txHash: unknown }[] }>(endpoint, SETTLE_TX_QUERY, {
+        groupId,
+      });
+      const hash = data.Activity?.[0]?.txHash;
+      return typeof hash === "string" ? hash : null;
     },
     async ping() {
       try {
