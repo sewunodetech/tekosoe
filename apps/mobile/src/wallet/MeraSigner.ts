@@ -1,22 +1,27 @@
-import { createSecp256k1SigningSession, getEvmAddress } from '@category-labs/mera';
+import { createSecp256k1SigningSession } from '@category-labs/mera';
+import { toViemAccount } from '@category-labs/mera/viem';
+import type { Address, LocalAccount } from 'viem';
+
 import type { Signer } from './types';
 
+/**
+ * Akun Mera: kunci secp256k1 dari PRF passkey. `toViemAccount` (Mera ≥0.2, dist/viem.d.ts)
+ * menandatangani semua jenis pesan lewat `session.signDigest`, tanpa prompt passkey tambahan.
+ */
 export class MeraSigner implements Signer {
-  constructor(private readonly prfOutput: Uint8Array) {}
+  private readonly session: ReturnType<typeof createSecp256k1SigningSession>;
+  readonly account: LocalAccount;
 
-  getAddress(): string {
-    const session = createSecp256k1SigningSession({ privateKey: this.prfOutput });
-    const address = getEvmAddress(session.publicKey);
-    session.end();
-    return address;
+  constructor(prfOutput: Uint8Array) {
+    this.session = createSecp256k1SigningSession({ privateKey: prfOutput });
+    this.account = toViemAccount(this.session);
   }
 
-  async signDigest(digest32: Uint8Array) {
-    const session = createSecp256k1SigningSession({ privateKey: this.prfOutput });
-    try {
-      return await session.signDigest(digest32);
-    } finally {
-      session.end();
-    }
+  get address(): Address {
+    return this.account.address;
+  }
+
+  end(): void {
+    this.session.end();
   }
 }

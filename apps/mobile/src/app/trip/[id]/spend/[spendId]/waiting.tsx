@@ -21,7 +21,7 @@ import { money } from '@/lib/money';
 export default function WaitingForApprovalScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
-    <QueryState query={combine(useTrip(id), useSpend(spendId))} title="Waiting for a yes">
+    <QueryState query={combine(useTrip(id), useSpend(spendId, id))} title="Waiting for a yes">
       {([trip, spend]) => <WaitingView trip={trip} spend={spend} />}
     </QueryState>
   );

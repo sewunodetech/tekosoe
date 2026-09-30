@@ -101,11 +101,10 @@ export const profiles = pgTable("profiles", {
     .defaultNow(),
 });
 
-/** Home, Trip, Invite. Written once by the creator; inviteCodeHash must equal inviteHash on-chain. */
+/** Home, Trip, Invite. Written once by the on-chain creator (the invite secret never reaches the api). */
 export const groupMeta = pgTable("group_meta", {
   groupId: bigint("group_id", { mode: "number" }).primaryKey(),
   name: varchar("name", { length: 60 }).notNull(),
-  inviteCodeHash: varchar("invite_code_hash", { length: 66 }).notNull(),
   createdBy: varchar("created_by", { length: 42 }).notNull(),
   createdAt: createdAt(),
 });

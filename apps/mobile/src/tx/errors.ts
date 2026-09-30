@@ -7,6 +7,9 @@ export function mapTxError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   const lower = message.toLowerCase();
 
+  if (lower.includes('demo funds are busy')) {
+    return 'Demo funds are busy right now. Please try again in a minute.';
+  }
   if (lower.includes('user rejected') || lower.includes('cancelled') || lower.includes('user denied') || lower.includes('abort')) {
     return 'Action was cancelled.';
   }

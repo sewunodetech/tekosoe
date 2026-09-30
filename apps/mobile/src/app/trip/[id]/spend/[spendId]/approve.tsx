@@ -23,7 +23,7 @@ import { useNotifications } from '@/providers/notification-provider';
 export default function ApprovalScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
-    <QueryState query={combine(useTrip(id), useSpend(spendId))} headerAction="close">
+    <QueryState query={combine(useTrip(id), useSpend(spendId, id))} headerAction="close">
       {([trip, spend]) => <ApprovalView trip={trip} spend={spend} />}
     </QueryState>
   );

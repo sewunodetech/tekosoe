@@ -31,6 +31,8 @@ packages/contracts/lib/
 
 # envio
 packages/indexer/generated/
+packages/indexer/.envio/
+packages/indexer/envio-env.d.ts
 
 
 # os / editor

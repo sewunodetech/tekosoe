@@ -21,9 +21,9 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [x] Scaffold `apps/mobile` (Expo SDK 57), `apps/web` (Next.js 16), `apps/api` (Hono)
 - [x] Backend Express (PR #5) dipindah dari `backend/` ke `apps/api`; ADR 0004 (diusulkan)
 - [x] api: ABI struct + custom error di `@tekosoe/shared`, skema DB disatukan di Drizzle (`database/` dihapus), push lewat Expo, metadata grup/spend dikunci ke hash on-chain, invoice setelah settle — 38 test api lolos (fake chain, belum testnet). Sisa: `apps/api/docs/coverage.md` › Masih terbuka
-- [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared`, `database/`
+- [x] Skeleton `packages/contracts`, `packages/indexer`, `packages/shared` (`database/` dihapus, skema di `apps/api`)
 - [ ] `npm install` dan semua workspace lolos `typecheck`
-- [ ] Foundry terpasang, `forge-std` terpasang, `forge build` lolos
+- [x] Foundry (WSL) + `forge-std`: `forge build` lolos, 26 test (termasuk fuzz) lolos
 
 ## Mobile (tim kita) — lihat `apps/mobile/ROADMAP.md`
 
@@ -34,14 +34,21 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate 3 cabang (termasuk cek profil), `EXPO_PUBLIC_SIGNER` demo/mera selesai; sisa: uji Face ID di HP, keputusan penyimpanan kunci (lihat Blocker)*
 - [x] M4 Transaksi: `src/tx`, semua mutation hook & feedback modal status Processing → Done, error ramah
 - [x] M5 Form & validasi
-- [ ] M6 Data live: adapter Envio + api
+- [ ] M6 Data live: adapter Envio + api — *kode selesai (`src/data/live`, `EXPO_PUBLIC_DATA_SOURCE=live`), typecheck + lint lolos, jalur demo terverifikasi di web; belum diuji end-to-end karena kontrak/indexer/api belum di-deploy*
 - [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3 — *UI capture + attachReceipt + unlock passkey selesai*
 - [x] M8 Invoice: `payDebt`, PDF via expo-print, share, QR asli ke tautan verifikasi web
 - [x] M9 Undangan & deep link: skema tekosoe://, universal link, dan companion web /j/[code]
 - [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
 - [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
 - [x] Desain P1 Set up profile + P2 Profile di canvas Final UI (28 Sep)
-- [ ] M12 Profil & akun: layar P1 + tab P2, simpan ke `profiles` lewat api, Sign out — *UI P1 + tab P2 + gate + Sign out + simpan lokal selesai; sisa: api `profiles` (live)*
+- [ ] M12 Profil & akun: layar P1 + tab P2, simpan ke `profiles` lewat api, Sign out — *UI P1 + tab P2 + gate + Sign out + simpan lokal selesai; api `profiles` tersambung di mode live (belum diuji live)*
+
+## Kontrak, indexer, api (30 Sep)
+
+- [x] GroupVault v1 (ADR 0005): undangan bertanda tangan, settle tidak bisa macet karena akun AUSD beku, permit AUSD (join/deposit/payDebt satu transaksi), `positionOf`. 26 test Foundry. **Ter-deploy** di `0x1467c9de54C1e4570AF062E80E860F94852BB7ee` (terverifikasi: `ausd()` = AUSD Agora).
+- [x] Indexer Envio v3: 12 handler, tervalidasi `codegen` + `tsc` di WSL. Belum di-host.
+- [x] api: ABI dari `forge build`, `invite_code_hash` dihapus (migrasi 0002). Belum di-deploy.
+- [x] AUSD Agora terverifikasi (alamat, 6 desimal, permit, faucet `requestFunds`).
 
 ## Gambaran semua tim (per lapisan) — lihat `docs/ROADMAP.md`
 
@@ -80,8 +87,9 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 
 | Item | Nilai |
 | --- | --- |
-| GroupVault (Monad testnet) | — |
-| AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (belum diverifikasi) |
+| GroupVault v1 (Monad testnet) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee` — blok 66921819, tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
+| AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (terverifikasi: docs Agora + on-chain) |
+| Faucet AUSD testnet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C` — `requestFunds(address)` |
 | Envio GraphQL | — |
 | API | — |
 | Contoh hash transaksi | — |

@@ -1,18 +1,23 @@
-# Envio HyperIndex — GroupVault di Monad testnet.
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+# Envio HyperIndex v3 — GroupVault di Monad testnet (HyperSync: https://10143.hypersync.xyz).
 # Event harus identik dengan packages/contracts/src/interfaces/IGroupVault.sol.
 # Setelah kontrak di-deploy: isi `address` dan `start_block`, lalu `npm run codegen`.
-# Format mengikuti Envio v3; kalau codegen menolak, bandingkan dengan template `npx envio init`.
 name: tekosoe-indexer
 schema: ./schema.graphql
+
+field_selection:
+  transaction_fields:
+    - hash
+    - from
 
 contracts:
   - name: GroupVault
     handler: ./src/EventHandlers.ts
     events:
-      - event: GroupCreated(uint256 indexed groupId, address indexed creator, string name, uint64 endsAt, uint256 approvalThreshold)
+      - event: GroupCreated(uint256 indexed groupId, address indexed creator, string name, uint64 endsAt, uint64 disputeWindow, uint256 approvalThreshold)
       - event: MemberJoined(uint256 indexed groupId, address indexed member, uint256 pullCap)
       - event: Deposited(uint256 indexed groupId, address indexed member, uint256 amount)
-      - event: SpendRequested(uint256 indexed groupId, uint256 indexed spendId, address indexed spender, address to, uint256 amount)
+      - event: SpendRequested(uint256 indexed groupId, uint256 indexed spendId, address indexed spender, address to, uint256 amount, address[] participants, uint256[] shares, bytes32 noteHash)
       - event: SpendExecuted(uint256 indexed groupId, uint256 indexed spendId, address indexed spender, address to, uint256 amount, address[] participants, uint256[] shares, bytes32 noteHash)
       - event: SpendRejected(uint256 indexed groupId, uint256 indexed spendId, address indexed by)
       - event: ShareDisputed(uint256 indexed groupId, uint256 indexed spendId, address indexed participant, uint256 share)
@@ -24,7 +29,7 @@ contracts:
 
 chains:
   - id: 10143 # Monad testnet
-    start_block: 0 # TODO: blok deploy GroupVault
+    start_block: 66921819 # blok deploy GroupVault v1 (30 Sep 2026)
     contracts:
       - name: GroupVault
-        address: "0x0000000000000000000000000000000000000000" # TODO: alamat GroupVault
+        address: "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" # GroupVault v1
