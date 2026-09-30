@@ -46,8 +46,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 ## Kontrak, indexer, api (30 Sep)
 
 - [x] GroupVault v1 (ADR 0005): undangan bertanda tangan, settle tidak bisa macet karena akun AUSD beku, permit AUSD (join/deposit/payDebt satu transaksi), `positionOf`. 26 test Foundry. **Ter-deploy** di `0x1467c9de54C1e4570AF062E80E860F94852BB7ee` (terverifikasi: `ausd()` = AUSD Agora).
-- [x] Indexer Envio v3: 12 handler, tervalidasi `codegen` + `tsc` di WSL. Belum di-host.
-- [x] api: ABI dari `forge build`, `invite_code_hash` dihapus (migrasi 0002). Belum di-deploy.
+- [x] Indexer Envio v3: 12 handler, tervalidasi `codegen` + `tsc` di WSL. **Ter-host** di VPS (Docker, HyperSync, DB Neon terpisah): `isReady`, 17 event, data sama dengan kontrak.
+- [x] api: ABI dari `forge build`, `invite_code_hash` dihapus (migrasi 0002). **Ter-deploy** di VPS (Docker), `/health` ok.
 - [x] AUSD Agora terverifikasi (alamat, 6 desimal, permit, faucet `requestFunds`).
 
 ## Gambaran semua tim (per lapisan) — lihat `docs/ROADMAP.md`
@@ -90,8 +90,8 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 | GroupVault v1 (Monad testnet) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee` — blok 66921819, tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
 | AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (terverifikasi: docs Agora + on-chain) |
 | Faucet AUSD testnet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C` — `requestFunds(address)` |
-| Envio GraphQL | — |
-| API | — |
+| Envio GraphQL | `https://graphql.mulalabs.biz.id/v1/graphql` (Hasura di VPS, `docker-compose.yml`) |
+| API | `https://api.mulalabs.biz.id` (VPS, `docker-compose.yml`) |
 | Contoh hash transaksi | — |
 
 ## Blocker & pertanyaan terbuka
