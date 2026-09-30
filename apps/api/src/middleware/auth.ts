@@ -26,7 +26,8 @@ export function requireAuth(env: Env): RequestHandler {
         throw errors.unauthorized("INVALID_TOKEN", "Token is invalid or expired");
       }
 
-      if (typeof payload.sub !== "string") {
+      // Session tokens carry no audience; scoped tokens (e.g. invoice share links) do and are refused here.
+      if (typeof payload.sub !== "string" || payload.aud !== undefined) {
         throw errors.unauthorized("INVALID_TOKEN", "Token is invalid or expired");
       }
 

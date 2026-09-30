@@ -1,6 +1,7 @@
 import type { AppDeps } from "../../context";
 import { GROUP_STATUS } from "@tekosoe/shared";
 import type { Logger } from "../../lib/logger";
+import { ensureInvoices } from "../invoices/service";
 
 export interface SettleAttemptResult {
   groupId: string;
@@ -17,6 +18,15 @@ const BACKOFF_MAX_MS = 600_000;
 /** 30s * 2^attempts, capped at 10 minutes. `attempts` is the count *before* this run. */
 function backoffDelay(attempts: number): number {
   return Math.min(BACKOFF_BASE_MS * 2 ** attempts, BACKOFF_MAX_MS);
+}
+
+/** Invoices never block settle: a failure here is retried by the sweep's backfill. */
+async function tryInvoices(ctx: AppDeps, groupId: bigint, txHash?: string): Promise<void> {
+  try {
+    await ensureInvoices(ctx, groupId, txHash);
+  } catch (error) {
+    ctx.logger.warn({ err: error, groupId: groupId.toString() }, "invoice creation failed, will retry");
+  }
 }
 
 function errorMessage(error: unknown): string {
@@ -104,6 +114,7 @@ export async function settleGroup(
   if (group.status !== GROUP_STATUS.Active) {
     await ctx.repos.settleRuns.upsert({ groupId: id, status: "skipped" });
     logger.info({ groupId: groupId.toString(), durationMs: Date.now() - started, status: "skipped" }, "settle skipped");
+    await tryInvoices(ctx, groupId);
     return finish("skipped");
   }
 
@@ -120,6 +131,7 @@ export async function settleGroup(
         { groupId: groupId.toString(), durationMs: Date.now() - started, status: "skipped" },
         "settle skipped",
       );
+      await tryInvoices(ctx, groupId);
       return finish("skipped", { error: simulation.reason });
     }
     await recordFailure(ctx, id, run?.attempts ?? 0, simulation.reason);
@@ -159,5 +171,6 @@ export async function settleGroup(
     { groupId: groupId.toString(), txHash: sent.hash, durationMs: Date.now() - started, status: "confirmed" },
     "settle confirmed",
   );
+  await tryInvoices(ctx, groupId, sent.hash);
   return finish("confirmed", { txHash: sent.hash, attempts });
 }

@@ -1,5 +1,6 @@
 import type { AppDeps } from "../../context";
 import { fetchAllDueGroups } from "../../integrations/envio";
+import { backfillInvoices } from "../invoices/service";
 import { settleGroup, type SettleAttemptResult } from "./service";
 
 export interface SweepResult {
@@ -58,6 +59,10 @@ export async function runSettleSweep(ctx: AppDeps): Promise<SweepResult> {
         ctx.logger.error({ err: error, groupId: candidate.id }, "settle candidate failed");
       }
     }
+
+    await backfillInvoices(ctx).catch((error: unknown) => {
+      ctx.logger.warn({ err: error }, "invoice backfill failed");
+    });
 
     state.lastError = null;
     return { status: "completed", candidates: candidates.length, processed: results.length, results };
