@@ -63,9 +63,7 @@ export function Navbar() {
   }, [open]);
 
   return (
-    <header
-      className={`sticky top-0 z-40 bg-white/85 backdrop-blur-md transition-shadow ${scrolled || open ? "shadow-[0_1px_0_rgba(0,0,0,0.08)]" : ""}`}
-    >
+    <header className="sticky top-0 z-40 px-3 pt-3">
       <a
         href="#main"
         className="sr-only rounded-full bg-black px-4 py-2 text-sm text-white focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50"
@@ -73,7 +71,12 @@ export function Navbar() {
         Skip to content
       </a>
 
-      <nav aria-label="Main" className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-6">
+      <nav
+        aria-label="Main"
+        className={`lg-glass mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 rounded-full pr-2 pl-5 transition-[box-shadow] duration-300 ${
+          scrolled || open ? "" : "[--lg-shadow:0_2px_10px_-6px_rgba(15,23,42,0.12)]"
+        }`}
+      >
         <Link href="/" className="flex items-center gap-2" aria-label="Tekosoe home">
           <Star className="h-5 w-5 fill-black" aria-hidden="true" />
           <span className="text-lg font-semibold whitespace-nowrap">Tekosoe</span>
@@ -86,7 +89,7 @@ export function Navbar() {
                 href={`#${s.id}`}
                 aria-current={current === s.id ? "true" : undefined}
                 className={`rounded-full px-3.5 py-2 text-sm transition-colors ${
-                  current === s.id ? "bg-gray-100 font-medium text-black" : "text-gray-700 hover:text-black"
+                  current === s.id ? "bg-white/80 font-medium text-black shadow-[0_2px_8px_-3px_rgba(15,23,42,0.2),inset_0_1px_0_#fff]" : "text-gray-700 hover:bg-white/40 hover:text-black"
                 }`}
               >
                 {s.label}
@@ -101,13 +104,13 @@ export function Navbar() {
           </Link>
           <Link
             href="/trips"
-            className="hidden rounded-full bg-black px-5 py-2.5 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-gray-800 sm:inline-block"
+            className="lg-btn hidden rounded-full px-5 py-2.5 text-sm font-medium whitespace-nowrap text-white sm:inline-block"
           >
             Open dashboard
           </Link>
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-800 hover:bg-gray-100 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-800 hover:bg-white/60 lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="landing-menu"
@@ -118,21 +121,25 @@ export function Navbar() {
         </div>
       </nav>
 
-      <div id="landing-menu" hidden={!open} className="h-[calc(100dvh-4rem)] overflow-y-auto border-t border-gray-100 bg-white px-6 pt-4 pb-8 lg:hidden">
+      <div
+        id="landing-menu"
+        hidden={!open}
+        className="lg-glass animate-fade-in-overlay mx-auto mt-2 max-h-[calc(100dvh-6rem)] max-w-6xl overflow-y-auto rounded-3xl px-5 pt-2 pb-5 [--lg-blur:30px] [--lg-tint:rgba(255,255,255,0.78)] lg:hidden"
+      >
         <ul className="flex flex-col">
           {SECTIONS.map((s) => (
             <li key={s.id}>
-              <a href={`#${s.id}`} onClick={() => setOpen(false)} className="block border-b border-gray-100 py-4 text-lg text-gray-900">
+              <a href={`#${s.id}`} onClick={() => setOpen(false)} className="block border-b border-black/5 py-4 text-lg text-gray-900">
                 {s.label}
               </a>
             </li>
           ))}
         </ul>
         <div className="mt-6 flex flex-col gap-3">
-          <Link href="/trips" onClick={() => setOpen(false)} className="rounded-full bg-black py-3 text-center text-base font-medium text-white">
+          <Link href="/trips" onClick={() => setOpen(false)} className="lg-btn rounded-full py-3 text-center text-base font-medium text-white">
             Open dashboard
           </Link>
-          <Link href={GET_APP_HREF} onClick={() => setOpen(false)} className="rounded-full border border-gray-300 py-3 text-center text-base font-medium text-black">
+          <Link href={GET_APP_HREF} onClick={() => setOpen(false)} className="rounded-full border border-black/10 bg-white/60 py-3 text-center text-base font-medium text-black">
             Get the app
           </Link>
         </div>

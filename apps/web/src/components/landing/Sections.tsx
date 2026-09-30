@@ -31,8 +31,8 @@ const REPO_URL = "https://github.com/sewunodetech/tekosoe";
 
 function SectionHead({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: string }) {
   return (
-    <div className="mx-auto mb-12 max-w-2xl text-center">
-      <p className="mb-3 text-sm font-medium text-gray-500">{eyebrow}</p>
+    <div className="lg-reveal mx-auto mb-12 max-w-2xl text-center">
+      <p className="lg-glass mb-4 inline-block rounded-full px-3.5 py-1 text-xs font-medium text-gray-700">{eyebrow}</p>
       <h2 className="text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">{title}</h2>
       {intro && <p className="mt-4 text-lg text-gray-600">{intro}</p>}
     </div>
@@ -50,17 +50,17 @@ const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
 
 export function HowItWorks() {
   return (
-    <section id="how" className="scroll-mt-20 bg-gray-50 py-24">
+    <section id="how" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHead eyebrow="How it works" title="From first dollar to last day" intro="Four steps, and nobody has to keep a spreadsheet." />
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
-            <li key={s.title} className="rounded-2xl border border-gray-200 bg-white p-6">
+            <li key={s.title} className="lg-glass lg-reveal rounded-3xl p-6">
               <div className="mb-5 flex items-center justify-between">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 shadow-[inset_0_1px_0_#fff,0_4px_12px_-4px_rgba(15,23,42,0.18)]">
                   <s.icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                <span className="text-sm font-medium text-gray-400">0{i + 1}</span>
+                <span className="text-sm font-medium text-gray-500">0{i + 1}</span>
               </div>
               <h3 className="mb-2 text-lg font-semibold">{s.title}</h3>
               <p className="text-sm leading-relaxed text-gray-600">{s.body}</p>
@@ -87,20 +87,22 @@ const FACTS: { icon: LucideIcon; title: string; body: string }[] = [
 
 export function GoodToKnow() {
   return (
-    <section id="good-to-know" className="scroll-mt-20 py-24">
+    <section id="good-to-know" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHead eyebrow="Good to know" title="Before you start a trip" intro="The rules everyone in the group agrees to when they join." />
-        <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="lg-glass lg-reveal grid gap-x-10 gap-y-9 rounded-[2rem] p-7 sm:grid-cols-2 md:p-10 lg:grid-cols-4">
           {FACTS.map((f) => (
             <div key={f.title}>
-              <f.icon className="mb-4 h-6 w-6" aria-hidden="true" />
+              <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 shadow-[inset_0_1px_0_#fff,0_4px_12px_-4px_rgba(15,23,42,0.18)]">
+                <f.icon className="h-5 w-5" aria-hidden="true" />
+              </span>
               <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
               <p className="text-sm leading-relaxed text-gray-600">{f.body}</p>
             </div>
           ))}
         </div>
 
-        <div className="mx-auto mt-14 flex max-w-3xl items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left" role="note">
+        <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left [--lg-tint:rgba(254,243,199,0.7)]" role="note">
           <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" aria-hidden="true" />
           <p className="text-sm leading-relaxed text-amber-900">
             <span className="font-semibold">Tekosoe is a preview.</span> It was built for the Monad Metropolis hackathon and runs with test dollars, so no real money moves
@@ -123,13 +125,16 @@ const DEMOS: { icon: LucideIcon; title: string; body: string; href: string }[] =
 
 export function TryDemo() {
   return (
-    <section id="demo" className="scroll-mt-20 bg-gray-50 py-24">
+    <section id="demo" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHead eyebrow="Try the demo" title="Look around a real trip" intro="Three friends from Indonesia, Singapore and Australia on a trip to Japan. Sample data, nothing to sign up for." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {DEMOS.map((d) => (
-            <Link key={d.href} href={d.href} className="group flex flex-col rounded-2xl border border-gray-200 bg-white p-6 transition-colors hover:border-gray-400">
-              <d.icon className="mb-5 h-6 w-6" aria-hidden="true" />
+            <Link key={d.href} href={d.href} className="group lg-glass lg-lift lg-reveal flex flex-col rounded-3xl p-6">
+              <span className="lg-sheen" aria-hidden="true" />
+              <span className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 shadow-[inset_0_1px_0_#fff,0_4px_12px_-4px_rgba(15,23,42,0.18)]">
+                <d.icon className="h-5 w-5" aria-hidden="true" />
+              </span>
               <h3 className="mb-2 text-base font-semibold">{d.title}</h3>
               <p className="mb-6 text-sm leading-relaxed text-gray-600">{d.body}</p>
               <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium">
@@ -158,10 +163,10 @@ const FAQ: { q: string; a: string }[] = [
 
 export function Faq() {
   return (
-    <section id="faq" className="scroll-mt-20 py-24">
+    <section id="faq" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-3xl px-6">
         <SectionHead eyebrow="FAQ" title="Questions people ask" />
-        <div className="divide-y divide-gray-200 border-y border-gray-200">
+        <div className="lg-glass lg-reveal divide-y divide-black/5 rounded-[2rem] px-6 py-2 md:px-8">
           {FAQ.map((f) => (
             <details key={f.q} className="group py-1">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4 text-left text-base font-medium [&::-webkit-details-marker]:hidden">
@@ -182,14 +187,19 @@ export function Faq() {
 export function ClosingCta() {
   return (
     <section className="px-6 pb-24">
-      <div className="mx-auto max-w-7xl rounded-3xl bg-black px-6 py-16 text-center text-white md:py-20">
+      <div className="lg-reveal relative isolate mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#0b0c0e] px-6 py-16 text-center text-white md:py-24">
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <span className="lg-blob -top-24 left-[8%] h-72 w-72 bg-[#1f7a6e] opacity-70" />
+          <span className="lg-blob -bottom-28 right-[10%] h-80 w-80 bg-[#7c6cf0] opacity-60 [--dx:-50px] [--dy:30px] [--dur:26s]" />
+          <span className="lg-blob top-1/3 left-1/2 h-56 w-56 bg-[#ff9a62] opacity-40 [--dx:30px] [--dy:40px] [--dur:30s]" />
+        </div>
         <h2 className="mx-auto mb-4 max-w-2xl text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">Planning a trip with friends?</h2>
         <p className="mx-auto mb-8 max-w-xl text-lg text-gray-300">See how one shared pot works before you go.</p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/trips" className="rounded-full bg-white px-8 py-3 text-base font-medium text-black transition-colors hover:bg-gray-200">
+          <Link href="/trips" className="rounded-full bg-white px-8 py-3 text-base font-medium text-black shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] transition-transform hover:-translate-y-0.5">
             Open dashboard
           </Link>
-          <Link href={GET_APP_HREF} className="rounded-full border border-white/30 px-8 py-3 text-base font-medium text-white transition-colors hover:bg-white/10">
+          <Link href={GET_APP_HREF} className="lg-glass lg-glass-dark rounded-full px-8 py-3 text-base font-medium text-white transition-transform hover:-translate-y-0.5">
             Get the app
           </Link>
         </div>
@@ -226,7 +236,7 @@ const FOOTER: { title: string; links: { label: string; href: string }[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200">
+    <footer className="border-t border-black/5 bg-white/40 backdrop-blur-md">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
         <div>
           <div className="mb-3 flex items-center gap-2">
@@ -256,7 +266,7 @@ export function Footer() {
           </div>
         ))}
       </div>
-      <div className="mx-auto max-w-7xl border-t border-gray-100 px-6 py-6 text-xs text-gray-500">
+      <div className="mx-auto max-w-7xl border-t border-black/5 px-6 py-6 text-xs text-gray-600">
         © 2026 Tekosoe · Built for the Monad Metropolis hackathon, Consumer Products &amp; Payments
       </div>
     </footer>
