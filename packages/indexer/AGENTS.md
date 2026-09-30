@@ -1,22 +1,26 @@
 # packages/indexer
 
-Envio HyperIndex (v3) — **sumber data baca untuk semua hal soal uang**: daftar grup, feed, saldo per anggota, status spend, hasil settle. App membaca GraphQL Envio; kontrak hanya dibaca langsung untuk cek ulang saldo sebelum transaksi penting.
+Envio HyperIndex **v3** — **sumber data baca untuk semua hal soal uang**: daftar grup, feed, saldo per anggota, status spend, hasil settle. App membaca GraphQL Envio; kontrak hanya dibaca langsung untuk cek ulang saldo sebelum transaksi penting. Monad testnet (10143) didukung HyperSync (`https://10143.hypersync.xyz`).
 
-- `config.yaml` — event harus identik dengan `packages/contracts/src/interfaces/IGroupVault.sol`. Isi `address` dan `start_block` setelah deploy.
-- `schema.graphql` — entitas Group, Member, Spend, SpendShare, Activity (spesifikasi › Event & skema indexer Envio).
-- `src/EventHandlers.ts` — skeleton; baru `GroupCreated` yang ditulis.
+- `config.yaml` — event harus identik dengan `packages/contracts/src/interfaces/IGroupVault.sol` (GroupVault v1, ADR 0005). `field_selection` memilih `transaction.hash` dan `transaction.from`. Isi `address` dan `start_block` setelah deploy.
+- `schema.graphql` — Group, Member, Spend, SpendShare, Receipt, Activity. Relasi memakai `group: Group!` / `spend: Spend!` (kolom `group_id` / `spend_id`) + `@derivedFrom`.
+- `src/EventHandlers.ts` — handler untuk ke-12 event. Di v3, `indexer` dan tipe entitas diimpor dari `"envio"` (tidak ada lagi modul `generated`).
 
 ## Aturan
 
-- `Member.net = deposited − used` dengan aturan persis seperti kontrak (termasuk efek `ShareDisputed`, `Pulled`, `Refunded`, `DebtPaid`).
-- Setiap event menulis satu baris `Activity` untuk feed.
-- Target P1: semua 12 event terindeks, dan saldo di indexer == `balanceOf` di kontrak untuk setiap anggota.
+- `Member.net = deposited − used` dengan aturan persis seperti kontrak (termasuk efek `ShareDisputed`).
+- `Group.pool`: + Deposited, − SpendExecuted, + Pulled, − Refunded, + DebtPaid. `debt`/`credit` mengikuti `remainingDebt`/`remainingCredit`.
+- Setiap event menulis satu baris `Activity` untuk feed (id `${txHash}-${logIndex}`).
+- Target: saldo di indexer == `positionOf` di kontrak untuk setiap anggota.
 
 ## Perintah
 
+CLI Envio **tidak jalan di Windows** — pakai WSL/Linux/macOS (Node 22+, Docker untuk `dev`).
+
 ```bash
 npm run codegen   # envio codegen — wajib setelah mengubah config.yaml / schema.graphql
+npx tsc -p tsconfig.json   # typecheck handler (setelah codegen)
 npm run dev       # envio dev (butuh Docker)
 ```
 
-API Envio berubah antar versi: cek dokumentasi terbaru (Context7 `/enviodev/hyperindex`) sebelum menulis handler.
+API Envio berubah antar versi: cek dokumentasi terbaru (docs.envio.dev › HyperIndex v3) sebelum menulis handler.
