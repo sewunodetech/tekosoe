@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -128,6 +129,17 @@ export function TryDemo() {
     <section id="demo" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHead eyebrow="Try the demo" title="Look around a real trip" intro="Three friends from Indonesia, Singapore and Australia on a trip to Japan. Sample data, nothing to sign up for." />
+        {/* Tangkapan layar asli dashboard demo (public/landing/README.md menjelaskan cara memperbaruinya). */}
+        <div className="lg-reveal mb-14 flex items-end justify-center gap-4 sm:gap-8">
+          <PhoneShot src="/landing/trip.jpg" alt="Japan Trip in the dashboard: $150.00 in the pot, balances for Rina, Wei and you, and recent payments" href="/trips/japan" />
+          <PhoneShot
+            src="/landing/invoice.jpg"
+            alt="A trip invoice: $20.00 refunded, each payment listed, and a QR code"
+            href="/trips/japan/invoice/jack"
+            className="mb-8 sm:mb-14"
+          />
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {DEMOS.map((d) => (
             <Link key={d.href} href={d.href} className="group lg-glass lg-lift lg-reveal flex flex-col rounded-3xl p-6">
@@ -146,6 +158,22 @@ export function TryDemo() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Tangkapan layar dalam bingkai ponsel kaca. Ukuran asli 750×1624 (2x dari 375×812). */
+function PhoneShot({ src, alt, href, className = "" }: { src: string; alt: string; href: string; className?: string }) {
+  return (
+    <Link href={href} className={`lg-glass lg-lift block w-[46%] max-w-[270px] rounded-[2rem] p-1.5 sm:rounded-[2.6rem] sm:p-2 ${className}`}>
+      <Image
+        src={src}
+        alt={alt}
+        width={750}
+        height={1624}
+        sizes="(min-width: 640px) 270px, 46vw"
+        className="h-auto w-full rounded-[1.6rem] sm:rounded-[2.1rem]"
+      />
+    </Link>
   );
 }
 
