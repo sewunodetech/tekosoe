@@ -72,7 +72,8 @@ ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri
 - Butuh `EXPO_PUBLIC_GROUP_VAULT_ADDRESS`, `EXPO_PUBLIC_ENVIO_GRAPHQL_URL`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_DEMO_SHOP_ADDRESS`.
 - Masuk → api `/api/drip` (MON untuk transaksi pertama) di latar belakang. Profil, label trip/pemakaian, invoice, dan token push lewat api (login SIWE otomatis).
 - Join = satu transaksi `joinGroupWithPermit` (tanda tangan undangan + permit AUSD setoran + safety net). Setor = `depositWithPermit`; bayar tagihan = `payDebtWithPermit`.
-- Saldo kurang → tombol "Add demo funds" (faucet AUSD Agora, testnet).
+- Saldo dolar pribadi (testnet) diisi otomatis dari faucet AUSD Agora — tidak ada tombol "Add demo funds": di latar belakang setelah masuk (`prefundAccount`, setelah drip) dan di dalam alur Join/Add money/Pay kalau saldo kurang (`ensureBalance`). User hanya melihat satu aksi "Add money to the pot". Di mainnet tempat ini diganti on-ramp.
+- Setiap aksi live (`data/live/actions.ts`) baru selesai setelah Envio memproses blok transaksinya (`waitForIndexer`), jadi `invalidateQueries` sesudahnya langsung mengambil data terbaru. Tidak perlu optimistic update untuk pot/saldo.
 - Belum tersambung di live: struk (enkripsi + unggah, M7) — `useAttachReceipt` gagal terus terang; halaman kartu (Card) masih demo.
 
 ## Expo has changed — do not trust your training data
