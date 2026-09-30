@@ -15,7 +15,6 @@ import type { Trip } from '@/data/types';
 import { useDeposit } from '@/features/trips/useDeposit';
 import { useTrip } from '@/features/trips/useTrip';
 import { useBalance } from '@/features/wallet/useFunds';
-import { DemoFundsButton } from '@/components/demo-funds';
 import { money, signed, usd } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -66,14 +65,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
       <Screen
         gap={18}
         footer={
-          <>
-            <DemoFundsButton needed={usd(amount)} balance={balance} />
-            <Button
-              label={`Add $${amount} to the pot`}
-              onPress={handleAddMoney}
-              disabled={depositTx.isProcessing}
-            />
-          </>
+          <Button label={`Add $${amount} to the pot`} onPress={handleAddMoney} disabled={depositTx.isProcessing} />
         }>
         <ScreenHeader title="Add money" action="close" onPress={handleBack} />
 
