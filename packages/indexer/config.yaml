@@ -27,18 +27,18 @@ contracts:
       - event: Refunded(uint256 indexed groupId, address indexed member, uint256 amount, uint256 remainingCredit)
       - event: DebtPaid(uint256 indexed groupId, address indexed member, uint256 amount)
 
+# Nilai per lingkungan dari env (awalan wajib ENVIO_, lihat .env.example). Default = GroupVault v1 testnet.
 chains:
-  - id: 10143 # Monad testnet
-    start_block: 66921819 # blok deploy GroupVault v1 (30 Sep 2026)
-    # HyperSync (default, jauh lebih cepat) butuh ENVIO_API_TOKEN (gratis di envio.dev/app/api-tokens).
-    # Tanpa token: sinkron lewat RPC publik Monad — cukup karena event masih sedikit.
-    # Kalau token sudah ada, hapus blok `rpc` ini (atau ganti `for: fallback`).
+  - id: ${ENVIO_CHAIN_ID:-10143} # Monad testnet
+    start_block: ${ENVIO_START_BLOCK:-66921819} # blok deploy GroupVault v1 (30 Sep 2026)
+    # Sumber utama: HyperSync (butuh ENVIO_API_TOKEN). RPC Monad hanya cadangan saat realtime macet.
+    # Tanpa token: set ENVIO_RPC_FOR=sync supaya seluruh sinkron lewat RPC.
     rpc:
-      url: https://testnet-rpc.monad.xyz
-      for: sync
+      url: ${ENVIO_RPC_URL:-https://testnet-rpc.monad.xyz}
+      for: ${ENVIO_RPC_FOR:-fallback}
       # RPC publik Monad membatasi eth_getLogs ke 100 blok per permintaan.
       initial_block_interval: 100
       interval_ceiling: 100
     contracts:
       - name: GroupVault
-        address: "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" # GroupVault v1
+        address: "${ENVIO_GROUP_VAULT_ADDRESS:-0x1467c9de54C1e4570AF062E80E860F94852BB7ee}"
