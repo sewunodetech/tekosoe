@@ -70,7 +70,8 @@ export function BuiltWith() {
                 <div className={`lg-wire ${i === 0 ? "hidden lg:block" : ""}`} style={{ ["--delay" as string]: `${0.6 + i * 0.25}s` }} aria-hidden="true" />
                 <div className="lg-glass flex flex-1 flex-col rounded-3xl p-6 text-center lg:text-left">
                   <h3 className="text-3xl font-semibold tracking-tight">{it.name}</h3>
-                  <p className="mt-1 min-h-5 text-sm font-medium text-teal">{it.by ? `by ${it.by}` : " "}</p>
+                  {/* Baris "by" tetap mengambil tempat di layar lebar supaya kelima kartu sejajar. */}
+                  <p className={`mt-1 min-h-5 text-sm font-medium text-teal ${it.by ? "" : "hidden lg:block"}`}>{it.by ? `by ${it.by}` : "\u00a0"}</p>
                   <p className="mt-4 text-sm leading-relaxed text-gray-600">{it.role}</p>
                   {it.planned && (
                     <span className="mt-4 self-center rounded-full border border-black/10 px-2.5 py-0.5 text-xs font-medium text-gray-600 lg:self-start">

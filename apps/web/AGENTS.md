@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Tekosoe — web
 
-Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel. Dashboard **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah, `components/Frame.tsx` lewat route group `(phone)`). Landing `/` adalah hero putih full-bleed dan responsif (`components/landing/`: `Navbar`, `Hero`, `Sections`; gaya "liquid glass" lewat kelas `lg-*` di `globals.css` di atas lapisan aurora; Inter, hitam/abu, Tailwind + `lucide-react`) — pengecualian yang disengaja dari tema kartun; jangan campurkan token kartun ke sana.
+Lihat juga `AGENTS.md` di root dan [ADR 0004](../../docs/decisions/0004-web-dashboard-demo.md). Next.js statis di Vercel. Dashboard **mobile-only** (satu kolom maks. 430px; di layar lebar tampil sebagai bingkai ponsel di tengah, `components/Frame.tsx` lewat route group `(phone)`). Landing `/` adalah hero putih full-bleed dan responsif (`components/landing/`: `Navbar`, `Hero`, `Sections`; gaya kaca lewat kelas `lg-*` di `globals.css`; **dua warna saja**: netral + aksen `teal`; integrasi sponsor ada di `Integrations.tsx`, ditulis "Built with", bukan "partner"; Inter, hitam/abu, Tailwind + `lucide-react`) — pengecualian yang disengaja dari tema kartun; jangan campurkan token kartun ke sana.
 
 Tugasnya:
 
