@@ -53,8 +53,17 @@ export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <SectionHead eyebrow="How it works" title="From first dollar to last day" intro="Four steps, and nobody has to keep a spreadsheet." />
-        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Panel bergambar: judul di sisi kiri yang lengang, kartu langkah menumpang di tepi bawahnya. */}
+        <div className="lg-reveal relative isolate overflow-hidden rounded-[2.5rem]">
+          <Image src="/landing/path.webp" alt="" fill sizes="(min-width: 1280px) 1232px, 100vw" className="-z-10 object-cover object-right" />
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/95 via-white/85 to-white/35 md:via-white/45 md:to-transparent" aria-hidden="true" />
+          <div className="max-w-xl px-7 pt-12 pb-28 md:px-12 md:pt-20 md:pb-40">
+            <p className="lg-glass mb-4 inline-block rounded-full px-3.5 py-1 text-xs font-medium text-gray-700">How it works</p>
+            <h2 className="text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">From first dollar to last day</h2>
+            <p className="mt-4 text-lg text-gray-700">Four steps, and nobody has to keep a spreadsheet.</p>
+          </div>
+        </div>
+        <ol className="relative -mt-20 grid gap-4 px-3 sm:grid-cols-2 md:-mt-28 md:px-8 lg:grid-cols-4">
           {STEPS.map((s, i) => (
             <li key={s.title} className="lg-glass lg-reveal rounded-3xl p-6">
               <div className="mb-5 flex items-center justify-between">
@@ -215,9 +224,12 @@ export function Faq() {
 export function ClosingCta() {
   return (
     <section className="px-6 pb-24">
-      <div className="lg-reveal mx-auto max-w-7xl rounded-[2.5rem] bg-[#0b0c0e] px-6 py-16 text-center text-white md:py-24">
+      <div className="lg-reveal relative isolate mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#0b0c0e] px-6 py-20 text-center text-white md:py-32">
+        <Image src="/landing/lake.webp" alt="" fill sizes="(min-width: 1280px) 1232px, 100vw" className="-z-10 object-cover" />
+        {/* Lapisan gelap supaya teks putih tetap terbaca di atas gambar. */}
+        <div className="absolute inset-0 -z-10 bg-black/45" aria-hidden="true" />
         <h2 className="mx-auto mb-4 max-w-2xl text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">Planning a trip with friends?</h2>
-        <p className="mx-auto mb-8 max-w-xl text-lg text-gray-300">See how one shared pot works before you go.</p>
+        <p className="mx-auto mb-8 max-w-xl text-lg text-gray-100">See how one shared pot works before you go.</p>
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link href="/trips" className="rounded-full bg-white px-8 py-3 text-base font-medium text-black shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] transition-transform hover:-translate-y-0.5">
             Open dashboard
