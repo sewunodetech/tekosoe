@@ -49,7 +49,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return;
       }
       try {
-        const prfHex = await SecureStore.getItemAsync(PRF_STORAGE_KEY);
+        const prfHex = await SecureStore.getItemAsync(PRF_STORAGE_KEY, {
+          requireAuthentication: true,
+          authenticationPrompt: 'Unlock Tekosoe',
+        });
         if (prfHex) {
           const restored = new MeraSigner(hexToBytes(prfHex as `0x${string}`));
           setSigner(restored);
@@ -98,8 +101,10 @@ export function SessionProvider({ children }: PropsWithChildren) {
       newCredentialId = result.credentialId;
     }
 
-    // Save to SecureStore
-    await SecureStore.setItemAsync(PRF_STORAGE_KEY, bytesToHex(prfOutput));
+    // Save to SecureStore with biometric requirement
+    await SecureStore.setItemAsync(PRF_STORAGE_KEY, bytesToHex(prfOutput), {
+      requireAuthentication: true,
+    });
     await SecureStore.setItemAsync(CREDENTIAL_ID_KEY, newCredentialId);
 
     const mera = new MeraSigner(prfOutput);
