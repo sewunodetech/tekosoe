@@ -1,5 +1,7 @@
 import { Link, router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
 import { Sparkle } from '@/components/decor';
 import { combine, QueryState } from '@/components/query-state';
@@ -36,9 +38,10 @@ function HomeView({
   profile,
 }: {
   list: Trip[];
-  settled: { name: string; returnAmount: string }[];
+  settled: { id: string; name: string; returnAmount: string }[];
   profile: Profile | null;
 }) {
+  const [drafts, setDrafts] = useState<string[]>([]);
   const me = { name: profile?.name ?? 'there', tint: profile?.tint ?? palette.sky };
 
   return (
@@ -58,7 +61,11 @@ function HomeView({
           </Text>
           <Text variant="h3">Hi, {me.name}</Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Notifications" style={styles.circle}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Notifications"
+          style={styles.circle}
+          onPress={() => router.push('/notifications')}>
           <Icon name="bell" strokeWidth={2} />
           <View style={styles.badgeDot} />
         </Pressable>
@@ -70,19 +77,34 @@ function HomeView({
         <TripCard key={trip.id} trip={trip} tone={idx % 2 === 0 ? 'mint' : 'violet'} />
       ))}
 
-      {settled.map((s) => (
-        <View key={s.name} style={styles.settledRow}>
-          <View style={styles.checkCircle}>
-            <Icon name="check" color={colors.positive} strokeWidth={2.6} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong">{s.name}</Text>
-            <Text variant="caption" color={colors.textMuted}>
-              Settled · you got {s.returnAmount} back
-            </Text>
-          </View>
-          <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
-        </View>
+      {settled.length > 0 && settled.length > drafts.length && (
+        <Text variant="caption" color={colors.textMuted} style={{ marginTop: 8, textAlign: 'center' }}>
+          Swipe left on a settled trip to archive it
+        </Text>
+      )}
+
+      {settled.filter(s => !drafts.includes(s.id)).map((s) => (
+        <Swipeable
+          key={s.id}
+          renderRightActions={() => (
+            <Pressable onPress={() => setDrafts([...drafts, s.id])} style={styles.draftAction}>
+              <Icon name="archive" color={colors.textOnPrimary} strokeWidth={2.4} />
+              <Text variant="caption" color={colors.textOnPrimary} style={{ fontFamily: fonts.bodyBold }}>Archive</Text>
+            </Pressable>
+          )}>
+          <Pressable style={styles.settledRow} onPress={() => router.push(`/trip/${s.id}`)}>
+            <View style={styles.checkCircle}>
+              <Icon name="check" color={colors.positive} strokeWidth={2.6} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text variant="bodyStrong">{s.name}</Text>
+              <Text variant="caption" color={colors.textMuted}>
+                Settled · you got {s.returnAmount} back
+              </Text>
+            </View>
+            <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
+          </Pressable>
+        </Swipeable>
       ))}
 
       <View style={styles.tip}>
@@ -109,48 +131,48 @@ function TripCard({ trip, tone }: { trip: Trip; tone: 'mint' | 'violet' }) {
       accessibilityLabel={`Open ${trip.name}`}
       onPress={() => router.push(`/trip/${trip.id}`)}
       style={[styles.tripCard, { backgroundColor: bg }]}>
-        <View style={[styles.tripDeco, { backgroundColor: deco }]} />
-        {mint && <Sparkle size={20} style={{ right: 28, top: 22 }} />}
-        <View style={styles.tripTitleRow}>
-          <Text variant="h3">{trip.name}</Text>
-          <Pill label={trip.status} bg={mint ? palette.peach : colors.surface} />
+      <View style={[styles.tripDeco, { backgroundColor: deco }]} />
+      {mint && <Sparkle size={20} style={{ right: 28, top: 22 }} />}
+      <View style={styles.tripTitleRow}>
+        <Text variant="h3">{trip.name}</Text>
+        <Pill label={trip.status} bg={mint ? palette.peach : colors.surface} />
+      </View>
+      <View style={styles.tripStats}>
+        <View style={{ flex: 1 }}>
+          <Text variant="caption" color={sub}>
+            In the pot
+          </Text>
+          <Text variant="h1">{money(trip.pot)}</Text>
         </View>
-        <View style={styles.tripStats}>
-          <View style={{ flex: 1 }}>
-            <Text variant="caption" color={sub}>
-              In the pot
-            </Text>
-            <Text variant="h1">{money(trip.pot)}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text variant="caption" color={sub}>
-              Your balance
-            </Text>
-            <Text variant="h1" color={colors.positive}>
-              {signed(trip.myBalance)}
-            </Text>
-          </View>
+        <View style={{ flex: 1 }}>
+          <Text variant="caption" color={sub}>
+            Your balance
+          </Text>
+          <Text variant="h1" color={colors.positive}>
+            {signed(trip.myBalance)}
+          </Text>
         </View>
-        {big ? (
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel={`See all ${trip.members.length} members`}
-            onPress={() => router.push(`/trip/${trip.id}/members`)}
-            style={styles.membersRow}>
-            <AvatarStack people={trip.members.slice(0, 3)} ring={bg} extra={trip.members.length - 3} />
-            <Text variant="caption" color={sub} style={{ flex: 1, fontFamily: fonts.bodySemiBold }}>
-              {trip.countries}
-            </Text>
-            <Icon name="chevron" size={16} color={sub} />
-          </Pressable>
-        ) : (
-          <View style={styles.membersRow}>
-            <AvatarStack people={trip.members} ring={bg} />
-            <Text variant="caption" color={sub} style={{ fontFamily: fonts.bodySemiBold }}>
-              {trip.countries}
-            </Text>
-          </View>
-        )}
+      </View>
+      {big ? (
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel={`See all ${trip.members.length} members`}
+          onPress={() => router.push(`/trip/${trip.id}/members`)}
+          style={styles.membersRow}>
+          <AvatarStack people={trip.members.slice(0, 3)} ring={bg} extra={trip.members.length - 3} />
+          <Text variant="caption" color={sub} style={{ flex: 1, fontFamily: fonts.bodySemiBold }}>
+            {trip.countries}
+          </Text>
+          <Icon name="chevron" size={16} color={sub} />
+        </Pressable>
+      ) : (
+        <View style={styles.membersRow}>
+          <AvatarStack people={trip.members} ring={bg} />
+          <Text variant="caption" color={sub} style={{ fontFamily: fonts.bodySemiBold }}>
+            {trip.countries}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -232,5 +254,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  draftAction: {
+    backgroundColor: colors.borderStrong,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    borderTopRightRadius: radius.card,
+    borderBottomRightRadius: radius.card,
   },
 });

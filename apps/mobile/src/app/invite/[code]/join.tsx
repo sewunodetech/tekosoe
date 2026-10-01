@@ -20,6 +20,7 @@ import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { DiscardModal } from '@/components/ui/discard-modal';
+import { useNotifications } from '@/providers/notification-provider';
 
 // 06 Join + put in — canvas "Final UI" › F06Join
 // Live: satu transaksi joinGroupWithPermit (tanda tangan undangan + permit AUSD setoran + safety net).
@@ -41,8 +42,14 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
   const balance = useBalance().data;
   const short = balance !== undefined && balance < usd(putIn);
   const joinTrip = useJoinTrip(code);
+  const { notify } = useNotifications();
   const joinTx = useTx(joinTrip.mutateAsync, {
     onSuccess: () => {
+      notify({
+        title: 'Joined trip',
+        body: `You joined ${trip.name} and put in $${putIn}.`,
+        data: { url: `/trip/${trip.id}` },
+      });
       router.replace(`/trip/${trip.id}`);
     },
   });

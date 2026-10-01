@@ -20,6 +20,7 @@ import { colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
 import { AppProviders } from '@/providers/app-providers';
 import { useSession } from '@/providers/session-provider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -99,8 +100,10 @@ export default function RootLayout() {
   });
 
   return (
-    <AppProviders>
-      <RootLayoutNav fontsLoaded={fontsLoaded} fontError={fontError} />
-    </AppProviders>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppProviders>
+        <RootLayoutNav fontsLoaded={fontsLoaded} fontError={fontError} />
+      </AppProviders>
+    </GestureHandlerRootView>
   );
 }

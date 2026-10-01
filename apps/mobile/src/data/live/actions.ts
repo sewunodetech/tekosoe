@@ -145,8 +145,23 @@ export async function payDebt(account: LocalAccount, tripId: string, amount: big
   return indexed(await writeVault(account, 'payDebtWithPermit', [BigInt(tripId), amount, permit]));
 }
 
-/** Testnet: "Top up" (simulasi on-ramp) — faucet AUSD Agora, 10.000 per permintaan. Mainnet: on-ramp mitra. */
-export const topUpBalance = (account: LocalAccount) => requestDemoFunds(account);
+/** Batas satu kali Top up di testnet = jatah satu permintaan faucet AUSD Agora. */
+export const TOP_UP_MAX = usd(10_000);
+
+/**
+ * Testnet: "Top up" sebesar `amount` (simulasi on-ramp). Faucet AUSD Agora selalu mengirim 10.000,
+ * jadi kelebihannya langsung dikembalikan ke "bank" demo — saldo user naik tepat `amount`.
+ * Dua transaksi (faucet + pengembalian) kecuali `amount` = 10.000. Mainnet: on-ramp mitra.
+ */
+export async function topUpBalance(account: LocalAccount, amount: bigint) {
+  if (amount <= 0n || amount > TOP_UP_MAX) throw new Error('Top up between $1 and $10,000 at a time.');
+  const bank = env.cashOutAddress;
+  const before = await ausdBalance(account.address);
+  await requestDemoFunds(account);
+  const received = (await ausdBalance(account.address)) - before;
+  const extra = received - amount;
+  if (bank && extra > 0n) await transferAusd(account, bank, extra);
+}
 
 /**
  * Testnet: "Cash out" (simulasi off-ramp) — dolar sungguhan keluar dari saldo ke "bank" demo

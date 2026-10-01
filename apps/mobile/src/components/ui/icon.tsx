@@ -26,7 +26,8 @@ export type IconName =
   | 'train'
   | 'food'
   | 'music'
-  | 'offline';
+  | 'offline'
+  | 'archive';
 
 type Props = { name: IconName; size?: number; color?: ColorValue; strokeWidth?: number };
 
@@ -136,5 +137,12 @@ function glyph(name: IconName, s: object) {
       );
     case 'offline':
       return <Path d="M2 8.5a16 16 0 0 1 20 0M5.5 12a11 11 0 0 1 13 0M9 15.5a5.5 5.5 0 0 1 6 0M3 3l18 18" {...s} />;
+    case 'archive':
+      return (
+        <>
+          <Rect x={3} y={4} width={18} height={5} rx={1} {...s} />
+          <Path d="M5 9v11h14V9M10 13h4" {...s} />
+        </>
+      );
   }
 }

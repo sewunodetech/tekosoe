@@ -2,16 +2,17 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { AmountInput } from '@/components/amount-input';
 import { Teko } from '@/components/teko';
 import { Button } from '@/components/ui/button';
-import { ChoiceChips } from '@/components/ui/choice-chips';
 import { Icon } from '@/components/ui/icon';
 import { InfoBox, KeyValue, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import { useBalance, useCashOut } from '@/features/wallet/useFunds';
-import { money, usd } from '@/lib/money';
+import { money, parseAmountInput } from '@/lib/money';
+import { useNotifications } from '@/providers/notification-provider';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 
@@ -23,15 +24,31 @@ const STEPS = [
   { title: 'Arrives in your bank', body: 'Straight to your own account, no cash to carry around.' },
 ];
 
+const PRESETS = [
+  { label: '$20', value: '20' },
+  { label: '$50', value: '50' },
+  { label: '$100', value: '100' },
+];
+
 export default function CashOutScreen() {
   const balance = useBalance().data;
-  const [amount, setAmount] = useState<number>(50);
+  const [text, setText] = useState('50');
+  const amount = parseAmountInput(text) ?? 0n;
+  const valid = amount > 0n;
+
+  const { notify } = useNotifications();
   const cashOut = useCashOut();
   const tx = useTx(cashOut.mutateAsync, {
-    onSuccess: () => (router.canGoBack() ? router.back() : router.replace('/profile')),
+    onSuccess: () => {
+      notify({
+        title: 'Cash out successful',
+        body: `You sent ${money(amount)} to your bank.`,
+      });
+      router.canGoBack() ? router.back() : router.replace('/profile');
+    },
   });
 
-  const wanted = usd(amount);
+  const wanted = amount;
   const short = balance !== undefined && balance < wanted;
 
   return (
@@ -46,10 +63,10 @@ export default function CashOutScreen() {
               </Text>
             )}
             <Button
-              label={short ? 'Not enough dollars' : `Cash out $${amount}`}
-              onPress={() => tx.execute(wanted).catch(() => undefined)}
-              disabled={short || balance === undefined || tx.isProcessing}
-              style={short ? { opacity: 0.5 } : undefined}
+              label={!valid ? 'Enter an amount' : short ? 'Not enough dollars' : `Cash out ${money(amount)}`}
+              onPress={() => valid && !short && tx.execute(wanted).catch(() => undefined)}
+              disabled={!valid || short || balance === undefined || tx.isProcessing}
+              style={!valid || short ? { opacity: 0.5 } : undefined}
             />
           </View>
         }>
@@ -62,19 +79,20 @@ export default function CashOutScreen() {
           </View>
         </View>
 
-        <View style={{ alignItems: 'center', gap: 6 }}>
-          <Text style={styles.amount}>${amount}</Text>
-          <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-            From your {balance === undefined ? '…' : money(balance)}
-          </Text>
-        </View>
+        <AmountInput
+          value={text}
+          onChange={setText}
+          presets={PRESETS}
+          hint={`From your ${balance === undefined ? '…' : money(balance)}`}
+          accessibilityLabel="Amount to cash out, in dollars"
+        />
 
-        <ChoiceChips options={[20, 50, 100] as const} value={amount} onChange={setAmount} format={(v) => `$${v}`} center />
-
-        <Surface style={{ gap: 10 }}>
-          <KeyValue label="To" value="Your bank (demo)" />
-          <KeyValue label="Left in your dollars" value={balance === undefined ? '…' : money(short ? 0n : balance - wanted)} />
-        </Surface>
+        {valid && balance !== undefined && (
+          <Surface style={{ gap: 10 }}>
+            <KeyValue label="To" value="Your bank (demo)" />
+            <KeyValue label="Left in your dollars" value={money(short ? 0n : balance - wanted)} />
+          </Surface>
+        )}
 
         <Surface style={{ gap: 16 }}>
           {STEPS.map((step, i) => (
@@ -122,13 +140,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     top: 14,
-  },
-  amount: {
-    fontFamily: fonts.display,
-    fontSize: 56,
-    lineHeight: 58,
-    letterSpacing: -1.5,
-    color: colors.text,
   },
   step: {
     flexDirection: 'row',

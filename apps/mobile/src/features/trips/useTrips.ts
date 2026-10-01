@@ -16,8 +16,9 @@ export function useTrips() {
       // Simulasi latensi jaringan di mode demo.
       await new Promise((resolve) => setTimeout(resolve, 500));
       return {
-        list: Object.values(trips),
-        settled: [{ name: 'Bali Weekend', returnAmount: '$12.50' }],
+        list: Object.values(trips).filter(t => !t.settled),
+        settled: [{ id: 'bali', name: 'Bali Weekend', returnAmount: '$12.50' }],
+        totalGotBack: '$12.50',
       };
     },
     enabled: !isLive || Boolean(address),

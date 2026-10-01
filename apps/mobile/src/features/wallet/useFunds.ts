@@ -1,14 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { cashOut, topUpBalance } from '@/data/live/actions';
+import { cashOut, TOP_UP_MAX, topUpBalance } from '@/data/live/actions';
 import { ausdBalance } from '@/lib/chain';
 import { isLive } from '@/lib/env';
 import { usd } from '@/lib/money';
 
 import { requireAccount, useAccount } from '../use-account';
 
-/** Nominal satu kali "Top up" di testnet (faucet AUSD Agora memberi 10.000 per permintaan). */
-export const TOP_UP_AMOUNT = usd(10_000);
+/** Batas satu kali "Top up" di testnet (jatah satu permintaan faucet AUSD Agora). */
+export { TOP_UP_MAX };
 
 const balanceKey = (address: string) => ['ausd', 'balance', address] as const;
 
@@ -29,20 +29,20 @@ export function useBalance(demoDollars = 420) {
 }
 
 /**
- * "Top up" dari kartu saldo. Testnet: faucet AUSD (simulasi on-ramp dari mata uang lokal).
+ * "Top up" sebesar nominal pilihan user. Testnet: faucet AUSD (simulasi on-ramp dari mata uang lokal).
  * Demo: menambah angka cerita setelah jeda singkat.
  */
 export function useTopUp() {
   const queryClient = useQueryClient();
   const { account, address } = useAccount();
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (amount: bigint) => {
       if (isLive) {
-        await topUpBalance(requireAccount(account));
+        await topUpBalance(requireAccount(account), amount);
         return;
       }
       await new Promise((resolve) => setTimeout(resolve, 1200));
-      queryClient.setQueryData<bigint>(balanceKey(address), (current) => (current ?? 0n) + TOP_UP_AMOUNT);
+      queryClient.setQueryData<bigint>(balanceKey(address), (current) => (current ?? 0n) + amount);
     },
     onSuccess: () => {
       if (isLive) queryClient.invalidateQueries({ queryKey: ['ausd'] });

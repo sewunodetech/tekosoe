@@ -132,11 +132,12 @@ async function buildTrip(g: EnvioGroup, me: string, account?: LocalAccount): Pro
 export async function liveTrips(me: string, account?: LocalAccount) {
   const groups = await fetchMyGroups(me);
   const trips = await Promise.all(groups.map((g) => buildTrip(g, me, account)));
+  const settledTrips = trips.filter((t) => t.settled);
+  
   return {
     list: trips.filter((t) => !t.settled),
-    settled: trips
-      .filter((t) => t.settled)
-      .map((t) => ({ name: t.name, returnAmount: money(t.myBalance > 0n ? t.myBalance : 0n) })),
+    settled: settledTrips.map((t) => ({ id: t.id, name: t.name, returnAmount: money(t.myBalance > 0n ? t.myBalance : 0n) })),
+    totalGotBack: money(settledTrips.reduce((acc, t) => acc + (t.myBalance > 0n ? t.myBalance : 0n), 0n)),
   };
 }
 

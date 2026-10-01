@@ -111,45 +111,60 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
         </>
       ) : (
         <>
-          <View style={styles.actions}>
-            <ActionTile label="Add money" icon="plus" href={`/trip/${trip.id}/add-money`} />
-            <ActionTile label="Pay" icon="pay" href={`/trip/${trip.id}/pay`} primary />
-            <ActionTile label="Card" icon="card" href="/card" />
-          </View>
-
-          {trip.settleToday.length > 0 && (
-            <Surface style={{ gap: 10 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
-                <Link href={`/trip/${trip.id}/settled`}>
-                  <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
-                    Preview settle-up →
-                  </Text>
-                </Link>
+          {!trip.settled && (
+            <>
+              <View style={styles.actions}>
+                <ActionTile label="Add money" icon="plus" href={`/trip/${trip.id}/add-money`} />
+                <ActionTile label="Pay" icon="pay" href={`/trip/${trip.id}/pay`} primary />
+                <ActionTile label="Card" icon="card" href="/card" />
               </View>
-              {trip.settleToday.map((row) => (
-                <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
-              ))}
-            </Surface>
+
+              {trip.settleToday.length > 0 && (
+                <Surface style={{ gap: 10 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
+                    <Link href={`/trip/${trip.id}/settled`}>
+                      <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
+                        Preview settle-up →
+                      </Text>
+                    </Link>
+                  </View>
+                  {trip.settleToday.map((row) => (
+                    <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
+                  ))}
+                </Surface>
+              )}
+            </>
           )}
 
           <View style={{ gap: 4 }}>
             <View style={{ paddingBottom: 6 }}>
               <SectionLabel>Activity</SectionLabel>
             </View>
-            {trip.activity.map((spend, i) => (
-              <ActivityRow
-                key={spend.id}
-                spend={spend}
-                fresh={i === 0}
-                meta={
-                  i === 0
-                    ? `${spend.paidBy.name} · ${spend.forWhom} · ${spend.status === 'pending' ? 'waiting for a yes' : 'settled instantly'}`
-                    : undefined
-                }
-                href={spendHref(trip, spend)}
-              />
-            ))}
+            {trip.activity.length === 0 ? (
+              <Surface style={{ paddingVertical: 32, alignItems: 'center', gap: 4 }}>
+                <Text variant="bodyStrong" color={colors.textMuted}>No activity yet</Text>
+                {!trip.settled && (
+                  <Text variant="caption" color={colors.textMuted}>
+                    Pay from the pot to start!
+                  </Text>
+                )}
+              </Surface>
+            ) : (
+              trip.activity.map((spend, i) => (
+                <ActivityRow
+                  key={spend.id}
+                  spend={spend}
+                  fresh={i === 0}
+                  meta={
+                    i === 0
+                      ? `${spend.paidBy.name} · ${spend.forWhom} · ${spend.status === 'pending' ? 'waiting for a yes' : 'settled instantly'}`
+                      : undefined
+                  }
+                  href={spendHref(trip, spend)}
+                />
+              ))
+            )}
           </View>
         </>
       )}

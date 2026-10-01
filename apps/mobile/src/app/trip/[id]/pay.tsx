@@ -80,7 +80,8 @@ function PayView({ trip }: { trip: Trip }) {
     fallbackRoute: `/trip/${trip.id}`,
   });
 
-  const overLimit = amountVal > trip.approvalLimit;
+  const hasOtherMembers = trip.members.length > 1;
+  const overLimit = hasOtherMembers && amountVal > trip.approvalLimit;
 
   let customSum = 0;
   if (split === 'custom') {

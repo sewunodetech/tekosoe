@@ -91,6 +91,20 @@ export const trips: Record<string, Trip> = {
     activity: [],
     settleToday: [],
   },
+  bali: {
+    id: 'bali',
+    name: 'Bali Weekend',
+    pot: usd(0),
+    myBalance: usd(12.5),
+    members: [members.rina, members.jack],
+    countries: 'Indonesia · Australia',
+    status: 'Settled',
+    settlesOn: 'Oct 1',
+    approvalLimit: usd(50),
+    activity: [spends.ramen],
+    settleToday: [],
+    settled: true,
+  },
 };
 
 export const getTrip = (id?: string) => trips[id ?? ''] ?? trips.japan;

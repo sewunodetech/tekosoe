@@ -15,6 +15,8 @@ import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
 import { money } from '@/lib/money';
+import { useNotifications } from '@/providers/notification-provider';
+import { isLive } from '@/lib/env';
 
 // S2 Waiting for approval — canvas "Final UI" › S02Waiting
 // TODO: Envio SpendRequested + api → spend_reviews (Seen). "Nudge" kirim push.
@@ -28,15 +30,30 @@ export default function WaitingForApprovalScreen() {
 }
 
 function WaitingView({ trip, spend }: { trip: Trip; spend: Spend }) {
+  const { notify } = useNotifications();
   // Yang bisa menyetujui = anggota selain pembayar. Status "Seen" masih demo (TODO: spend_reviews).
-  const [seenBy, notYet] = trip.members.filter((m) => m.id !== spend.paidBy.id);
-  const members = { rina: seenBy, wei: notYet ?? seenBy };
+  const others = trip.members.filter((m) => m.id !== spend.paidBy?.id);
+
+  // Fallback jika trip hanya berisi 1 orang (demo/tester)
+  const defaultMember1 = { id: 'dummy1', name: 'Friend', tint: palette.sky, label: 'Friend' } as any;
+
+  const approvers = others.length > 0 ? others : [defaultMember1];
+  const nudgeNames = approvers.map(a => a.name).slice(0, 2).join(' and ');
 
   return (
     <Screen
       footer={
         <>
-          <Button label={`Nudge ${members.rina.name} and ${members.wei.name}`} />
+          <Button
+            label={`Nudge ${nudgeNames}`}
+            onPress={() => {
+              notify({
+                title: `${spend.paidBy.name} nudged you`,
+                body: `Please approve the payment for ${spend.title}.`,
+                data: { url: `/trip/${trip.id}/spend/${spend.id}/approve` },
+              });
+            }}
+          />
           <Link href={`/trip/${trip.id}`} asChild>
             <Button label="Cancel request" variant="ghost" />
           </Link>
@@ -49,7 +66,7 @@ function WaitingView({ trip, spend }: { trip: Trip; spend: Spend }) {
           <Teko mood="think" size={150} />
         </View>
         <Text variant="h1" style={styles.textCenter}>
-          {money(spend.amount).replace('.00', '')} for train tickets
+          {money(spend.amount).replace('.00', '')} for {spend.title}
         </Text>
         <Text style={[styles.textCenter, { fontFamily: fonts.body, fontSize: 15, lineHeight: 22 }]} color={colors.textMuted}>
           The money stays in the pot until a friend says yes.
@@ -63,34 +80,35 @@ function WaitingView({ trip, spend }: { trip: Trip; spend: Spend }) {
           </View>
           <Text style={styles.name}>You asked</Text>
           <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-            2 min ago
+            {isLive ? spend.when : 'Just now'}
           </Text>
         </View>
-        <View style={styles.row}>
-          <Avatar name={members.rina.name} tint={members.rina.tint} size={32} />
-          <Text style={styles.name}>{members.rina.name}</Text>
-          <View style={styles.seen}>
-            <PulseDot color={colors.accent} size={8} />
-            <Text variant="small" color={palette.brownDeep}>
-              Seen
-            </Text>
+
+        {approvers.map((m, i) => (
+          <View key={m.id} style={styles.row}>
+            <Avatar name={m.name} tint={m.tint} size={32} />
+            <Text style={styles.name}>{m.name}</Text>
+            {i === 0 ? (
+              <View style={styles.seen}>
+                <PulseDot color={colors.accent} size={8} />
+                <Text variant="small" color={palette.brownDeep}>
+                  Seen
+                </Text>
+              </View>
+            ) : (
+              <Text variant="small" color={colors.textMuted}>
+                Not yet
+              </Text>
+            )}
           </View>
-        </View>
-        <View style={styles.row}>
-          <Avatar name={members.wei.name} tint={members.wei.tint} size={32} />
-          <Text style={styles.name}>{members.wei.name}</Text>
-          <Text variant="small" color={colors.textMuted}>
-            Not yet
-          </Text>
-        </View>
+        ))}
+
         <Text variant="caption" color={colors.textMuted}>
           One yes is enough. The request closes in 24 hours.
         </Text>
       </Surface>
 
-      <Link href={`/trip/${trip.id}/spend/${spend.id}/approve`} asChild>
-        <Button label={`Demo: open this on ${members.rina.name}'s phone`} variant="dashed" style={styles.demo} />
-      </Link>
+
     </Screen>
   );
 }

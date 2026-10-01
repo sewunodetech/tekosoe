@@ -11,7 +11,7 @@ import { isLive } from '@/lib/env';
 import { money } from '@/lib/money';
 
 /**
- * Kartu "Your dollars" di Profile (ADR 0006): saldo pribadi di luar trip, lapisan sebelum pot.
+ * Kartu "Your balances" di Profile (ADR 0006): saldo pribadi di luar trip, lapisan sebelum pot.
  * Alur cross-border: mata uang lokal → Top up (on-ramp) → dolar di sini → "Add money" ke pot →
  * sisa setelah settle-up kembali ke sini → Cash out (off-ramp).
  */
@@ -22,16 +22,9 @@ export function BalanceCard() {
   return (
     <View style={styles.card}>
       <View style={styles.deco} />
-      <Bob duration={3600} style={styles.coinA}>
-        <Coin size={30} style={styles.coinInner} />
-      </Bob>
-      <Bob duration={4400} delay={700} style={styles.coinB}>
-        <Coin size={20} style={styles.coinInner} />
-      </Bob>
 
       <View style={styles.topRow}>
-        <Text style={styles.eyebrow}>Your dollars</Text>
-        {isLive && <Pill label="Test dollars" bg={palette.butter} color={palette.brownDeep} weight="bold" />}
+        <Text style={styles.eyebrow}>Your balances</Text>
       </View>
 
       <View style={{ gap: 4 }}>
@@ -39,10 +32,10 @@ export function BalanceCard() {
           style={styles.amount}
           numberOfLines={1}
           adjustsFontSizeToFit
-          accessibilityLabel={balance === undefined ? 'Loading your dollars' : `You have ${money(balance)}`}>
+          accessibilityLabel={balance === undefined ? 'Loading your balances' : `You have ${money(balance)}`}>
           {balance === undefined ? '$ …' : money(balance)}
         </Text>
-        <Text variant="caption" color={colors.textMuted}>
+        <Text variant="caption" color={colors.heroText}>
           {empty ? 'Top up to start chipping in on trips.' : 'Ready to put into any trip, from any country.'}
         </Text>
       </View>
@@ -50,7 +43,7 @@ export function BalanceCard() {
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Top up your dollars"
+          accessibilityLabel="Top up your balances"
           onPress={() => router.push('/balance/top-up')}
           style={({ pressed }) => [styles.action, styles.topUp, pressed && styles.topUpPressed]}>
           <Icon name="plus" size={18} color={colors.textOnPrimary} strokeWidth={2.6} />
@@ -75,32 +68,20 @@ export function BalanceCard() {
 const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
-    padding: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
     borderRadius: 26,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.hero,
     gap: 16,
   },
   deco: {
     position: 'absolute',
-    right: -40,
-    top: -50,
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    backgroundColor: palette.butter,
-  },
-  coinA: {
-    position: 'absolute',
-    right: 26,
-    top: 22,
-  },
-  coinB: {
-    position: 'absolute',
-    right: 68,
-    top: 52,
-  },
-  coinInner: {
-    position: 'relative',
+    right: -30,
+    top: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: colors.heroDeco,
   },
   topRow: {
     flexDirection: 'row',
@@ -110,7 +91,7 @@ const styles = StyleSheet.create({
   eyebrow: {
     fontFamily: fonts.bodyBold,
     fontSize: 13,
-    color: colors.textMuted,
+    color: colors.heroText,
   },
   amount: {
     ...typeScale.amountXL,
@@ -143,7 +124,6 @@ const styles = StyleSheet.create({
   },
   cashOut: {
     backgroundColor: colors.surface,
-    borderWidth: 1.5,
     borderColor: colors.border,
   },
   cashOutPressed: {
