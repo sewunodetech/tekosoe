@@ -1,8 +1,9 @@
-import { Link, type Href } from 'expo-router';
+import { Link, router, type Href } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Logo } from '@/components/logo';
 import { Teko } from '@/components/teko';
+import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Pill, Screen, SectionLabel } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
@@ -18,8 +19,31 @@ export default function CardScreen() {
   return (
     <QueryState query={useTrips()} tab headerAction="none">
       {/* Kartu memakai pot trip aktif pertama. TODO: pilih trip aktif bila lebih dari satu. */}
-      {({ list }) => <CardView trip={list[0]} />}
+      {({ list }) => (list[0] ? <CardView trip={list[0]} /> : <NoTripCard />)}
     </QueryState>
+  );
+}
+
+// Akun baru (mode live) belum punya trip, jadi belum ada pot untuk kartu.
+function NoTripCard() {
+  return (
+    <Screen tab footer={<Button label="Start a trip" onPress={() => router.push('/trip/new')} />}>
+      <View style={styles.header}>
+        <Text variant="h3" style={{ flex: 1 }}>
+          Trip card
+        </Text>
+        <Pill label="Simulated" bg={palette.butter} />
+      </View>
+      <View style={styles.empty}>
+        <Teko mood="think" size={120} />
+        <Text variant="h2" style={styles.textCenter}>
+          No pot to spend from yet
+        </Text>
+        <Text style={[styles.textCenter, { fontFamily: fonts.body, fontSize: 15 }]} color={colors.textMuted}>
+          Start or join a trip, and its card shows up here.
+        </Text>
+      </View>
+    </Screen>
   );
 }
 
@@ -163,6 +187,14 @@ const styles = StyleSheet.create({
     borderRadius: radius.iconTile,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  empty: {
+    alignItems: 'center',
+    gap: 12,
+    paddingTop: 40,
+  },
+  textCenter: {
+    textAlign: 'center',
   },
   footnote: {
     textAlign: 'center',
