@@ -30,6 +30,24 @@ export function useCreateSpend(tripId: string) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       return { spendId: 'new-spend', pending: false };
     },
+    onMutate: async (data) => {
+      const queryKey = ['trip', tripId, account?.address ?? ''];
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<any>(queryKey);
+      if (previous && !isLive) {
+        queryClient.setQueryData<any>(queryKey, {
+          ...previous,
+          pot: previous.pot - data.amount,
+          myBalance: previous.myBalance - data.amount,
+        });
+      }
+      return { previous, queryKey };
+    },
+    onError: (err, newReq, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(context.queryKey, context.previous);
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spends', tripId] });
       queryClient.invalidateQueries({ queryKey: ['trip', tripId] });

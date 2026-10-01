@@ -77,35 +77,15 @@ function HomeView({
         <TripCard key={trip.id} trip={trip} tone={idx % 2 === 0 ? 'mint' : 'violet'} />
       ))}
 
-      {settled.length > 0 && settled.length > drafts.length && (
-        <Text variant="caption" color={colors.textMuted} style={{ marginTop: 8, textAlign: 'center' }}>
-          Swipe left on a settled trip to archive it
-        </Text>
-      )}
-
-      {settled.filter(s => !drafts.includes(s.id)).map((s) => (
-        <Swipeable
-          key={s.id}
-          renderRightActions={() => (
-            <Pressable onPress={() => setDrafts([...drafts, s.id])} style={styles.draftAction}>
-              <Icon name="archive" color={colors.textOnPrimary} strokeWidth={2.4} />
-              <Text variant="caption" color={colors.textOnPrimary} style={{ fontFamily: fonts.bodyBold }}>Archive</Text>
-            </Pressable>
-          )}>
-          <Pressable style={styles.settledRow} onPress={() => router.push(`/trip/${s.id}`)}>
-            <View style={styles.checkCircle}>
-              <Icon name="check" color={colors.positive} strokeWidth={2.6} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{s.name}</Text>
-              <Text variant="caption" color={colors.textMuted}>
-                Settled · you got {s.returnAmount} back
-              </Text>
-            </View>
+      {settled.length > 0 && (
+        <Link href="/past-trips" asChild>
+          <Pressable style={styles.pastTripsRow}>
+            <Icon name="archive" size={20} color={colors.textMuted} strokeWidth={2} />
+            <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 15 }}>Past trips</Text>
             <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
           </Pressable>
-        </Swipeable>
-      ))}
+        </Link>
+      )}
 
       <View style={styles.tip}>
         <Teko mood="idle" size={64} />
@@ -229,22 +209,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  settledRow: {
-    paddingVertical: 18,
+  pastTripsRow: {
+    paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-  },
-  checkCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.positiveBg,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   tip: {
     paddingVertical: 16,
@@ -254,13 +226,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  draftAction: {
-    backgroundColor: colors.borderStrong,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    borderTopRightRadius: radius.card,
-    borderBottomRightRadius: radius.card,
   },
 });
