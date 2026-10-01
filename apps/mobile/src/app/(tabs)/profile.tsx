@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
+import { BalanceCard } from '@/components/balance-card';
 import { combine, QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
 import { Icon, type IconName } from '@/components/ui/icon';
@@ -64,6 +65,8 @@ function ProfileView({
           </Pressable>
         </Link>
       </View>
+
+      <BalanceCard />
 
       <View style={styles.stats}>
         <Stat label="Active trips" value={String(activeTrips)} />

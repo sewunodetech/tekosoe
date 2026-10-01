@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { Bob, Coin } from '@/components/decor';
 import { QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
+import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { ChoiceChips } from '@/components/ui/choice-chips';
 import { KeyValue, Screen, Surface } from '@/components/ui/layout';
@@ -44,6 +45,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
   });
 
   const balance = useBalance(320).data;
+  const short = balance !== undefined && balance < usd(amount);
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {
     onSuccess: () => {
@@ -65,7 +67,16 @@ function AddMoneyView({ trip }: { trip: Trip }) {
       <Screen
         gap={18}
         footer={
-          <Button label={`Add $${amount} to the pot`} onPress={handleAddMoney} disabled={depositTx.isProcessing} />
+          short ? (
+            // Dolar kurang: ajak Top up dulu (ADR 0006), bukan gagal di tengah transaksi.
+            <Button
+              label={`Top up to add $${amount}`}
+              icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />}
+              onPress={() => router.push('/balance/top-up')}
+            />
+          ) : (
+            <Button label={`Add $${amount} to the pot`} onPress={handleAddMoney} disabled={depositTx.isProcessing} />
+          )
         }>
         <ScreenHeader title="Add money" action="close" onPress={handleBack} />
 
@@ -88,7 +99,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
         <View style={{ alignItems: 'center', gap: 6 }}>
           <Text style={styles.amount}>${amount}</Text>
           <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-            From your balance of {balance === undefined ? '…' : money(balance)}
+            From your {balance === undefined ? '…' : money(balance)}
           </Text>
         </View>
 

@@ -71,6 +71,19 @@ export async function ausdAllowance(owner: Address): Promise<bigint> {
   });
 }
 
+/** Kirim AUSD dari akun ini (dipakai "Cash out", simulasi off-ramp ke "bank" demo). */
+export async function transferAusd(account: LocalAccount, to: Address, amount: bigint): Promise<TransactionReceipt> {
+  const { request } = await publicClient.simulateContract({
+    account,
+    address: env.ausdAddress,
+    abi: ausdAbi,
+    functionName: 'transfer',
+    args: [to, amount],
+  });
+  const wallet = createWalletClient({ account, chain: monadTestnet, transport });
+  return waitFor(await wallet.writeContract(request));
+}
+
 /** Permit EIP-2612 ke vault, dalam bentuk struct `PermitSig` GroupVault. Berlaku 30 menit. */
 export async function signAusdPermit(account: LocalAccount, value: bigint) {
   const nonce = await publicClient.readContract({
@@ -96,7 +109,7 @@ export async function signAusdPermit(account: LocalAccount, value: bigint) {
 
 /**
  * Testnet: faucet AUSD Agora mengirim 10.000 AUSD ke akun ini. Butuh sedikit MON (dari drip).
- * Dipanggil otomatis (`prefundAccount` setelah masuk, `ensureBalance` saat saldo kurang) — tidak ada tombol.
+ * Hanya lewat "Top up" di kartu saldo (simulasi on-ramp) — tidak diisi otomatis, supaya user merasakan alurnya.
  * Faucet punya cooldown global ±1 menit untuk semua pemanggil (teruji di testnet 30 Sep 2026).
  */
 export async function requestDemoFunds(account: LocalAccount): Promise<TransactionReceipt> {

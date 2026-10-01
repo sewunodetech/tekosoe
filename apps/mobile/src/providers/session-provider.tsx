@@ -4,7 +4,6 @@ import { createPasskeyWithPrfOutput, getPasskeyPrfOutput } from '@category-labs/
 import { reactNativeWebAuthnClient } from '@category-labs/mera/react-native-webauthn-client';
 import { bytesToHex, hexToBytes } from 'viem';
 
-import { prefundAccount } from '@/data/live/actions';
 import { api, clearApiSession } from '@/lib/api';
 import { env, isLive } from '@/lib/env';
 import type { Signer } from '@/wallet';
@@ -30,15 +29,12 @@ const CREDENTIAL_ID_KEY = 'tekosoe_credential_id';
 
 /**
  * FR-03: akun baru belum punya MON. api mengirim sedikit MON sekali per alamat (drip) supaya
- * transaksi pertama bisa jalan. Testnet: setelah itu saldo dolar diisi otomatis dari faucet.
- * Tidak menghalangi masuk — kalau gagal, dicoba lagi saat masuk berikutnya / saat menyetor.
+ * transaksi pertama bisa jalan. Saldo dolar sengaja TIDAK diisi otomatis: user "Top up" sendiri (ADR 0006).
+ * Tidak menghalangi masuk — kalau gagal, dicoba lagi saat masuk berikutnya.
  */
 function prepareAccount(signer: Signer) {
   if (!isLive || !env.apiUrl) return;
-  void api
-    .drip(signer.address)
-    .catch(() => undefined)
-    .then(() => prefundAccount(signer.account));
+  void api.drip(signer.address).catch(() => undefined);
 }
 
 export function SessionProvider({ children }: PropsWithChildren) {
