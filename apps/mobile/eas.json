@@ -1,21 +1,49 @@
 {
+  "cli": {
+    "version": ">= 16.9.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "android": {
+        "image": "sdk-57"
+      },
       "env": {
         "EXPO_PUBLIC_DATA_SOURCE": "demo"
       }
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "image": "sdk-57",
+        "buildType": "apk"
+      },
       "env": {
-        "EXPO_PUBLIC_DATA_SOURCE": "live"
+        "EXPO_PUBLIC_DATA_SOURCE": "live",
+        "EXPO_PUBLIC_SIGNER": "demo",
+        "EXPO_PUBLIC_MONAD_RPC_URL": "https://testnet-rpc.monad.xyz",
+        "EXPO_PUBLIC_ENVIO_GRAPHQL_URL": "https://graphql.mulalabs.biz.id/v1/graphql",
+        "EXPO_PUBLIC_API_URL": "https://api.mulalabs.biz.id",
+        "EXPO_PUBLIC_PASSKEY_DOMAIN": "demand-opened-binary-join.trycloudflare.com",
+        "EXPO_PUBLIC_DEMO_SHOP_ADDRESS": "0xe3436dDd9d00C6B426A12506c7db31d2a23cB89c",
+        "EXPO_PUBLIC_DISPUTE_WINDOW_SECONDS": "300"
       }
     },
     "production": {
+      "android": {
+        "image": "sdk-57"
+      },
       "env": {
-        "EXPO_PUBLIC_DATA_SOURCE": "live"
+        "EXPO_PUBLIC_DATA_SOURCE": "live",
+        "EXPO_PUBLIC_SIGNER": "demo",
+        "EXPO_PUBLIC_MONAD_RPC_URL": "https://testnet-rpc.monad.xyz",
+        "EXPO_PUBLIC_ENVIO_GRAPHQL_URL": "https://graphql.mulalabs.biz.id/v1/graphql",
+        "EXPO_PUBLIC_API_URL": "https://api.mulalabs.biz.id",
+        "EXPO_PUBLIC_PASSKEY_DOMAIN": "demand-opened-binary-join.trycloudflare.com",
+        "EXPO_PUBLIC_DEMO_SHOP_ADDRESS": "0xe3436dDd9d00C6B426A12506c7db31d2a23cB89c",
+        "EXPO_PUBLIC_DISPUTE_WINDOW_SECONDS": "300"
       }
     }
   },
