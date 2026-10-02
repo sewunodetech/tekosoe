@@ -6,6 +6,7 @@ import { Icon } from '@/components/ui/icon';
 import { Screen } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { EmptyState } from '@/components/ui/empty-state';
 import { colors, radius } from '@/constants/theme';
 import { useTrips } from '@/features/trips/useTrips';
 
@@ -24,9 +25,7 @@ function PastTripsView({ settled }: { settled: { id: string; name: string; retur
       <ScreenHeader title="Past trips" action="back" />
 
       {settled.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text variant="bodyStrong" color={colors.textMuted}>No past trips yet</Text>
-        </View>
+        <EmptyState mood="sleep" title="No past trips yet" description="Settled trips and their invoices show up here." />
       ) : (
         <View style={{ gap: 12 }}>
           {settled.map((s) => (
@@ -50,11 +49,6 @@ function PastTripsView({ settled }: { settled: { id: string; name: string; retur
 }
 
 const styles = StyleSheet.create({
-  emptyState: {
-    padding: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   settledRow: {
     paddingVertical: 18,
     paddingHorizontal: 20,

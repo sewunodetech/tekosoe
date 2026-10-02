@@ -21,9 +21,14 @@ type Props = Omit<PressableProps, 'children'> & {
  * - pill: pil putih kecil ("Copy link", "Share")
  * Bisa dipakai di dalam <Link asChild>.
  */
-export const Button = forwardRef<View, Props>(function Button({ label, variant = 'primary', icon, style, ...rest }, ref) {
-  const textColor =
-    variant === 'primary' ? colors.textOnPrimary : variant === 'ghost' ? colors.primary : colors.text;
+export const Button = forwardRef<View, Props>(function Button({ label, variant = 'primary', icon, style, disabled, ...rest }, ref) {
+  const textColor = disabled
+    ? colors.textMuted
+    : variant === 'primary'
+      ? colors.textOnPrimary
+      : variant === 'ghost'
+        ? colors.primary
+        : colors.text;
   const textStyle =
     variant === 'pill' || variant === 'dashed' ? { fontFamily: fonts.bodyBold, fontSize: 14 } : variant === 'outline' ? { ...typeScale.button, fontSize: 15 } : typeScale.button;
 
@@ -34,9 +39,11 @@ export const Button = forwardRef<View, Props>(function Button({ label, variant =
       style={(state) => [
         styles.base,
         styles[variant],
-        state.pressed && pressedStyles[variant],
+        disabled && styles.disabled,
+        state.pressed && !disabled && pressedStyles[variant],
         typeof style === 'function' ? style(state) : style,
       ]}
+      disabled={disabled}
       {...rest}>
       {icon}
       <Text style={textStyle} color={textColor}>
@@ -79,6 +86,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 22,
     backgroundColor: colors.surface,
+  },
+  disabled: {
+    backgroundColor: colors.surfaceMuted,
+    borderColor: colors.surfaceMuted,
+    opacity: 0.8,
   },
 });
 

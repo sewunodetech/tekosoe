@@ -32,7 +32,7 @@ const PRESETS = [
 
 export default function CashOutScreen() {
   const balance = useBalance().data;
-  const [text, setText] = useState('50');
+  const [text, setText] = useState('');
   const amount = parseAmountInput(text) ?? 0n;
   const valid = amount > 0n;
 
@@ -66,7 +66,6 @@ export default function CashOutScreen() {
               label={!valid ? 'Enter an amount' : short ? 'Not enough dollars' : `Cash out ${money(amount)}`}
               onPress={() => valid && !short && tx.execute(wanted).catch(() => undefined)}
               disabled={!valid || short || balance === undefined || tx.isProcessing}
-              style={!valid || short ? { opacity: 0.5 } : undefined}
             />
           </View>
         }>

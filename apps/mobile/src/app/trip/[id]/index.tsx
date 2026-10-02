@@ -10,6 +10,7 @@ import { Icon, type IconName } from '@/components/ui/icon';
 import { AvatarStack, Screen, SectionLabel, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { EmptyState } from '@/components/ui/empty-state';
 import { colors, fonts, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
@@ -142,14 +143,10 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
               <SectionLabel>Activity</SectionLabel>
             </View>
             {trip.activity.length === 0 ? (
-              <Surface style={{ paddingVertical: 32, alignItems: 'center', gap: 4 }}>
-                <Text variant="bodyStrong" color={colors.textMuted}>No activity yet</Text>
-                {!trip.settled && (
-                  <Text variant="caption" color={colors.textMuted}>
-                    Pay from the pot to start!
-                  </Text>
-                )}
-              </Surface>
+              <EmptyState
+                title="No activity yet"
+                description={!trip.settled ? "Pay from the pot to start!" : undefined}
+              />
             ) : (
               trip.activity.map((spend, i) => (
                 <ActivityRow

@@ -34,7 +34,7 @@ const PRESETS = [
 
 export default function TopUpScreen() {
   const balance = useBalance().data;
-  const [text, setText] = useState('100');
+  const [text, setText] = useState('');
   const amount = parseAmountInput(text) ?? 0n;
   const tooMuch = amount > TOP_UP_MAX;
   const valid = amount > 0n && !tooMuch;
@@ -71,7 +71,6 @@ export default function TopUpScreen() {
               icon={valid ? <Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} /> : undefined}
               onPress={() => valid && tx.execute(amount).catch(() => undefined)}
               disabled={!valid || tx.isProcessing}
-              style={!valid ? { opacity: 0.5 } : undefined}
             />
           </View>
         }>

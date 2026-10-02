@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Pill, Screen, SectionLabel } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { EmptyState } from '@/components/ui/empty-state';
 import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
@@ -34,15 +35,11 @@ function NoTripCard() {
         </Text>
         <Pill label="Simulated" bg={palette.butter} />
       </View>
-      <View style={styles.empty}>
-        <Teko mood="think" size={120} />
-        <Text variant="h2" style={styles.textCenter}>
-          No pot to spend from yet
-        </Text>
-        <Text style={[styles.textCenter, { fontFamily: fonts.body, fontSize: 15 }]} color={colors.textMuted}>
-          Start or join a trip, and its card shows up here.
-        </Text>
-      </View>
+      <EmptyState
+        mood="think"
+        title="No pot to spend from yet"
+        description="Start or join a trip, and its card shows up here."
+      />
     </Screen>
   );
 }
@@ -187,14 +184,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.iconTile,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  empty: {
-    alignItems: 'center',
-    gap: 12,
-    paddingTop: 40,
-  },
-  textCenter: {
-    textAlign: 'center',
   },
   footnote: {
     textAlign: 'center',

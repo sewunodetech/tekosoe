@@ -27,6 +27,27 @@ export function sanitizeAmountInput(text: string): string {
   return rest.length ? `${trimmedWhole || '0'}.${rest.join('').slice(0, 2)}` : trimmedWhole;
 }
 
+/** Maks. angka dolar utuh di isian nominal ($99,999). */
+const MAX_WHOLE_DIGITS = 5;
+
+/**
+ * Ketikan dari isian nominal yang menampilkan pemisah ribuan → teks isian polos, atau `null` kalau
+ * melebihi batas digit (ketikan diabaikan). Koma terakhir tanpa titik dianggap desimal (keyboard lokal).
+ */
+export function cleanAmountTyping(typed: string): string | null {
+  const decimalComma = typed.endsWith(',') && !typed.includes('.');
+  const plain = (decimalComma ? `${typed.slice(0, -1)}.` : typed).replace(/,/g, '');
+  if ((plain.split('.')[0] ?? '').length > MAX_WHOLE_DIGITS) return null;
+  return sanitizeAmountInput(plain);
+}
+
+/** Teks isian polos → tampilan dengan pemisah ribuan ("1234.5" → "1,234.5"). */
+export function groupAmountInput(text: string): string {
+  const [whole = '', ...rest] = text.split('.');
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return rest.length ? `${grouped}.${rest.join('')}` : grouped;
+}
+
 /** bigint AUSD → teks isian tanpa "$" dan tanpa pemisah ribuan ("1234.5"). */
 export const amountToInput = (amount: bigint) => formatDollars(amount).replace(/[$,]/g, '').replace(/\.00$/, '');
 
