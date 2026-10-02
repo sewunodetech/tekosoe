@@ -26,6 +26,12 @@ contracts:
       - event: Pulled(uint256 indexed groupId, address indexed member, uint256 amount, uint256 remainingDebt)
       - event: Refunded(uint256 indexed groupId, address indexed member, uint256 amount, uint256 remainingCredit)
       - event: DebtPaid(uint256 indexed groupId, address indexed member, uint256 amount)
+  # AUSD (Agora) — hanya Transfer dari/ke faucet dan ke "bank" Cash out (filter `where` di handler),
+  # untuk baris Top up / Cash out di layar Activity (ADR 0006).
+  - name: Ausd
+    handler: ./src/EventHandlers.ts
+    events:
+      - event: Transfer(address indexed from, address indexed to, uint256 value)
 
 # Nilai per lingkungan dari env (awalan wajib ENVIO_, lihat .env.example). Default = GroupVault v1 testnet.
 chains:
@@ -42,3 +48,5 @@ chains:
     contracts:
       - name: GroupVault
         address: "${ENVIO_GROUP_VAULT_ADDRESS:-0x1467c9de54C1e4570AF062E80E860F94852BB7ee}"
+      - name: Ausd
+        address: "${ENVIO_AUSD_ADDRESS:-0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC}"
