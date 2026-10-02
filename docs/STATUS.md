@@ -28,7 +28,7 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 ## Mobile (tim kita) — lihat `apps/mobile/ROADMAP.md`
 
 - [x] UI semua layar Final UI + maskot Teko + sistem desain (data demo) — branch `mobile-dev`
-- [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko — *Home di `/trips` ✅; sisa: merge, eas.json, dev build, ikon*
+- [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko — *Home di `/trips` ✅; ikon app, adaptive icon, splash, favicon + ikon web/OG dari `tekosoe-mark.svg` ✅ (`scripts/brand-assets.mjs`); sisa: merge, eas.json, dev build*
 - [x] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/error lewat `QueryState` — semua layar lepas dari data demo
 - [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil — *ADR 0003 + kode ada; belum terverifikasi di dev build 2 HP*
 - [x] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate route selesai. Blocker SecureStore sudah diputuskan (menggunakan requireAuthentication: true).*
