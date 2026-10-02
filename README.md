@@ -12,7 +12,8 @@
   <a href="#-how-it-works">How it works</a> ·
   <a href="#-sponsor-integrations">Sponsor integrations</a> ·
   <a href="#-live-on-monad-testnet">Live on testnet</a> ·
-  <a href="#-architecture">Architecture</a>
+  <a href="#-architecture">Architecture</a> ·
+  <a href="#-team">Team</a>
 </p>
 
 <p align="center">
@@ -21,6 +22,12 @@
   <img alt="AUSD" src="https://img.shields.io/badge/Money-AUSD_(Agora)-ff9a62?style=flat-square" />
   <img alt="Mera passkey" src="https://img.shields.io/badge/Sign--in-Mera_passkey-1d2426?style=flat-square" />
   <img alt="Envio" src="https://img.shields.io/badge/Data-Envio_HyperIndex-1d2426?style=flat-square" />
+  <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-5f6b6d?style=flat-square" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/showcase.png" alt="Five Tekosoe screens: sign in with a passkey, the shared pot, paying and asking for approval, the automatic settle-up, and a verifiable invoice" width="100%" />
+  <br/><sub>Real screens from the app in demo mode. Each one is also in <a href="docs/assets/screens/">docs/assets/screens</a>.</sub>
 </p>
 
 ---
@@ -57,7 +64,7 @@ The judge path through the app (each screen is a real route in `apps/mobile`):
 
 ```
 Welcome → Sign in (passkey) → Home → Japan Trip → Pay from pot → Request approval
-  → open on "Rina's phone" → Approve → pot runs out → Preview settle-up → See your invoice
+  → Rina approves on her phone → pot runs out → Preview settle-up → See your invoice
 ```
 
 | Step | What you'll see |
@@ -113,7 +120,7 @@ sequenceDiagram
 
 ## 🤝 Sponsor integrations
 
-Each sponsor has one clear job in the product. Everything runs on Monad testnet; nothing is mocked.
+Each sponsor has one clear job in the product, and every integration runs for real on Monad testnet. The only simulated parts are the card network and the bank side of Top up / Cash out, and the app labels them as simulated.
 
 | Sponsor | Role in Tekosoe | Where |
 | --- | --- | --- |
@@ -128,10 +135,22 @@ Each sponsor has one clear job in the product. Everything runs on Monad testnet;
 
 | | Address / URL |
 | --- | --- |
-| **GroupVault v1** | [`0x1467c9de54C1e4570AF062E80E860F94852BB7ee`](https://testnet.monadexplorer.com/address/0x1467c9de54C1e4570AF062E80E860F94852BB7ee) (block 66921819) |
-| **AUSD (Agora)** | [`0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`](https://testnet.monadexplorer.com/address/0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC) |
+| **GroupVault v1** | [`0x1467c9de54C1e4570AF062E80E860F94852BB7ee`](https://testnet.monadvision.com/address/0x1467c9de54C1e4570AF062E80E860F94852BB7ee) (block 66921819) |
+| **AUSD (Agora)** | [`0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`](https://testnet.monadvision.com/address/0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC) |
 | **Envio GraphQL** | https://graphql.mulalabs.biz.id/v1/graphql |
 | **API** | https://api.mulalabs.biz.id/health |
+
+**Real transactions you can open right now.** Every step of the trip lifecycle, executed against `GroupVault` v1 and decoded from the transaction input:
+
+| Step | Contract call | Transaction |
+| --- | --- | --- |
+| Create a trip | `createGroup` | [`0x8faaf19c…5962`](https://testnet.monadvision.com/tx/0x8faaf19c87c306a9cef5d6a11e21f089ebb3dc5829b2b21c4d5dddd3936f5962) |
+| Join + first deposit + safety net, one signature | `joinGroupWithPermit` | [`0x29472de8…db2`](https://testnet.monadvision.com/tx/0x29472de8eca137ba15b599a4e8d771fd3e02eb3df82626535d2d17ebf4519db2) |
+| Add money to the pot | `depositWithPermit` | [`0xf5b3d0d9…bc6`](https://testnet.monadvision.com/tx/0xf5b3d0d9b697aadb260a6afa8689ddf6acaf5a58e86aafc6ee69c21fdf9f4bc6) |
+| Pay from the pot | `spend` | [`0x388389f5…be15`](https://testnet.monadvision.com/tx/0x388389f500143088cabd228325bd0911cc593214ac9158b8dc248e9ee56dbe15) |
+| A friend approves a big payment | `approveSpend` | [`0x5e44d659…7812`](https://testnet.monadvision.com/tx/0x5e44d659130939566f6b3e06e0fbb4aa554d8222f56616ad1f37981f8bdf7812) |
+| The trip settles itself | `settle` | [`0x46c58b52…1ec9`](https://testnet.monadvision.com/tx/0x46c58b52fe57d92fbc650d057cef1026d7a5b4dcf122edf237f1b4ef60681ec9) |
+| Pay a remaining bill, one signature | `payDebtWithPermit` | [`0x7cae1e5f…483d`](https://testnet.monadvision.com/tx/0x7cae1e5f89413868dc432b8566526adcf7939564d9dd27fb5e457c1de865483d) |
 
 **What's built**
 
@@ -140,7 +159,7 @@ Each sponsor has one clear job in the product. Everything runs on Monad testnet;
 - [x] API deployed: settle scheduler, MON drip, SIWE login, trip/spend labels bound to on-chain hashes, invoices, push tokens.
 - [x] Mobile app: every screen of the final design, live mode against testnet, invoices with PDF + verifiable QR, invite deep links, activity feed, top up / cash out.
 - [x] Web companion: invoice verification, invite links, passkey domain files.
-- [ ] In progress: encrypted receipt upload, on-device passkey check on 3 phones, EAS release build.
+- [ ] In progress: Mera passkey sign-in verified in a release build on physical iOS and Android phones (the code path is in [`src/wallet`](apps/mobile/src/wallet); web and Expo Go fall back to an on-device demo key), encrypted receipt upload, EAS release build.
 
 Full progress: [`docs/STATUS.md`](docs/STATUS.md).
 
@@ -216,7 +235,7 @@ Port 8080 clashes with `envio dev`, so stop that stack first (`envio stop`). Hos
 
 ### Brand assets
 
-App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosoe-mark.svg`](apps/mobile/assets/tekosoe-mark.svg) and [`tekosoe-logo.svg`](apps/mobile/assets/tekosoe-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
+App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosoe-mark.svg`](apps/mobile/assets/tekosoe-mark.svg), [`tekosoe-mark-mono.svg`](apps/mobile/assets/tekosoe-mark-mono.svg) and [`tekosoe-logo.svg`](apps/mobile/assets/tekosoe-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
 
 ---
 
@@ -226,6 +245,27 @@ App icons, Android adaptive icon, splash, favicons, the web Open Graph image and
 - **A card for the pot:** pay at a shop in Japan straight from the trip pot (simulated in the demo today).
 - **Private receipts:** receipt photos and notes encrypted with a key derived from the passkey (Mera PRF), readable only by the trip.
 - **Beyond trips:** families and teams spread across countries sharing a recurring pot.
+
+**How it could make money (proposed):** a small fee per settle-up, a share of the on/off-ramp spread through partners, and card interchange once the pot has a real card. The free path stays free: chipping in and paying friends back costs nothing beyond network fees, which we sponsor.
+
+---
+
+## 👥 Team
+
+| | Who | Built |
+| --- | --- | --- |
+| <img src="https://github.com/kikik27.png" width="48" alt="" /> | **Kyy** · [@kikik27](https://github.com/kikik27) | Product, the mobile app, the `GroupVault` contract, the Envio indexer, the web companion |
+| <img src="https://github.com/Dapoodap.png" width="48" alt="" /> | **MasDapa** · [@Dapoodap](https://github.com/Dapoodap) | The backend API: auth, gas drip, settle-up scheduler, profiles, receipts, push |
+
+Full history: [contributors](https://github.com/sewunodetech/tekosoe/graphs/contributors).
+
+## 🤖 Use of AI tools
+
+We used AI coding assistants throughout the hackathon, mainly Claude (via Claude Code), which appears as a co-author on many commits. It helped with planning documents, code, tests, docs and the brand assets. Every change was reviewed and merged by the team, and the product decisions are ours. The apps started from the official `create-expo-app` and `create-next-app` templates.
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 sewunodetech
 
 <p align="center"><sub>Built for <b>Monad Metropolis</b> · Consumer Products &amp; Payments · by <a href="https://github.com/sewunodetech">sewunodetech</a></sub></p>
 

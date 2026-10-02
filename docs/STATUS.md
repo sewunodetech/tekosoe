@@ -2,12 +2,14 @@
 
 Maintained by the team and agents. Tick an item only once it's done **and** verified on testnet. Add notes under each phase.
 
+Legend: ✅ done · 🟡 in progress · ⏳ not started
+
 ## Timeline
 
 | Dates | Focus | Done when | Status |
 | --- | --- | --- | --- |
-| 27–29 Sep | Mera spike (passkey + PRF on iOS/Android), AUSD faucet, gas test; contract v0 + unit tests | One AUSD transaction from a Mera account without the user holding MON | ⏳ |
-| 30 Sep – 2 Oct | Complete contract + fuzz tests, testnet deployment, Envio indexer | Every event indexed, indexer balances = contract | ⏳ |
+| 27–29 Sep | Mera spike (passkey + PRF on iOS/Android), AUSD faucet, gas test; contract v0 + unit tests | One AUSD transaction from a Mera account without the user holding MON | 🟡 contract, faucet and gas drip done; Mera still to verify in a release build on phones |
+| 30 Sep – 2 Oct | Complete contract + fuzz tests, testnet deployment, Envio indexer | Every event indexed, indexer balances = contract | ✅ GroupVault v1 deployed, indexer hosted and matching the contract |
 | 3–6 Oct | App P0: onboarding, trips, deposits, spending, settle-up | Demo scenario end to end on testnet | ⏳ |
 | 7–8 Oct | Real-time feed (P1); start encryption (P2) if safe | Feed updates without a manual refresh | ⏳ |
 | 9–10 Oct | E2E testing, UX testing with non-crypto users, Slither | Every P0 test passes | ⏳ |
@@ -92,7 +94,7 @@ Maintained by the team and agents. Tick an item only once it's done **and** veri
 | AUSD testnet faucet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)` |
 | Envio GraphQL | `https://graphql.mulalabs.biz.id/v1/graphql` (`docker-compose.yml`) |
 | API | `https://api.mulalabs.biz.id` (`docker-compose.yml`) |
-| Sample transaction hash | — |
+| Sample transactions | createGroup [0x8faaf19c…](https://testnet.monadvision.com/tx/0x8faaf19c87c306a9cef5d6a11e21f089ebb3dc5829b2b21c4d5dddd3936f5962) · joinGroupWithPermit [0x29472de8…](https://testnet.monadvision.com/tx/0x29472de8eca137ba15b599a4e8d771fd3e02eb3df82626535d2d17ebf4519db2) · depositWithPermit [0xf5b3d0d9…](https://testnet.monadvision.com/tx/0xf5b3d0d9b697aadb260a6afa8689ddf6acaf5a58e86aafc6ee69c21fdf9f4bc6) · spend [0x388389f5…](https://testnet.monadvision.com/tx/0x388389f500143088cabd228325bd0911cc593214ac9158b8dc248e9ee56dbe15) · pproveSpend [0x5e44d659…](https://testnet.monadvision.com/tx/0x5e44d659130939566f6b3e06e0fbb4aa554d8222f56616ad1f37981f8bdf7812) · settle [0x46c58b52…](https://testnet.monadvision.com/tx/0x46c58b52fe57d92fbc650d057cef1026d7a5b4dcf122edf237f1b4ef60681ec9) · payDebtWithPermit [0x7cae1e5f…](https://testnet.monadvision.com/tx/0x7cae1e5f89413868dc432b8566526adcf7939564d9dd27fb5e457c1de865483d). All succeeded; function decoded from the transaction input (2 Oct) |
 
 ## Blockers and open questions
 
