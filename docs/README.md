@@ -13,6 +13,7 @@ Everything we planned, decided and built, in one place. Start with the PRD if yo
 | [07-development-plan.md](07-development-plan.md) | Bounty targets, P0–P3 scope, architecture, test plan, timeline, submission checklist and risks |
 | [ROADMAP.md](ROADMAP.md) | Goal, scope, phases and work packages for every team, plus the hand-offs between them |
 | [../apps/mobile/ROADMAP.md](../apps/mobile/ROADMAP.md) | The detailed mobile roadmap: architecture, data needed from other teams, work packages M0–M12 |
+| [user-testing.md](user-testing.md) | The 15-minute session script, tasks, observation sheet and follow-up questions for testing with non-crypto users |
 | [STATUS.md](STATUS.md) | Live progress: what's done, contract addresses and open blockers |
 | [decisions/](decisions/) | Architecture decision records (ADRs): what we chose and why |
 | [assets/](assets/) | Images used by the root README |

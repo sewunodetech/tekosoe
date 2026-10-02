@@ -8,11 +8,13 @@
 </p>
 
 <p align="center">
+  <a href="#-who-its-for">Who it's for</a> ·
   <a href="#-try-it">Try it</a> ·
   <a href="#-how-it-works">How it works</a> ·
   <a href="#-sponsor-integrations">Sponsor integrations</a> ·
   <a href="#-live-on-monad-testnet">Live on testnet</a> ·
   <a href="#-architecture">Architecture</a> ·
+  <a href="#-testing-with-real-people">User testing</a> ·
   <a href="#-team">Team</a>
 </p>
 
@@ -55,6 +57,27 @@
 | Someone holds your money | n/a | Yes | Yes | **No.** The contract holds it, your key stays on your phone |
 
 > **Demo video:** _link coming 11 Oct_ · **Android APK:** _link coming 11 Oct_
+
+---
+
+## 🎯 Who it's for
+
+**Primary user: a mixed-nationality group of 3 to 10 friends on one shared trip.** They met studying abroad, at work or online, they live in different countries now, and once or twice a year they meet somewhere new. None of them think of themselves as crypto users. Most have never held a stablecoin.
+
+What happens to them today:
+
+- **One person becomes the bank.** Whoever books the villa or the train pays up front, then keeps a spreadsheet or a Splitwise group for the rest of the trip.
+- **Settling up drags on for weeks.** After the trip that person chases three or four transfers across different banks and currencies, each with a fee and an exchange-rate loss, and most of the awkwardness lands on them.
+- **Local apps stop at the border.** GoPay, PayNow and PayID each only work in one country, so the group has no shared way to pay.
+- **Nobody wants a crypto wallet** just to split a dinner.
+
+What Tekosoe changes for them: money goes in **before** the trip, any member can pay from the pot, and the **last day settles itself**. Nobody plays banker, nobody chases anyone, and nobody has to learn what a wallet is.
+
+| Segment | Why they need it | When |
+| --- | --- | --- |
+| **Friends from several countries on one trip** | Shared money across borders, without a banker friend | Now (the demo story) |
+| Groups from one country travelling abroad | One pot to spend from at the destination | Next, once the pot has a card |
+| Families and teams spread across countries | A recurring pot for events and shared costs | Later |
 
 ---
 
@@ -236,6 +259,33 @@ Port 8080 clashes with `envio dev`, so stop that stack first (`envio stop`). Hos
 ### Brand assets
 
 App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosoe-mark.svg`](apps/mobile/assets/tekosoe-mark.svg), [`tekosoe-mark-mono.svg`](apps/mobile/assets/tekosoe-mark-mono.svg) and [`tekosoe-logo.svg`](apps/mobile/assets/tekosoe-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
+
+---
+
+## 🧪 Testing with real people
+
+The bar for this track is a non-crypto user finishing the core flow **without help**. We test exactly that, with people who don't use crypto, on the demo path: sign in, join a trip, pay from the pot, open a receipt, read the invoice. Script, tasks and the observation sheet: [`docs/user-testing.md`](docs/user-testing.md).
+
+| | Result |
+| --- | --- |
+| People tested | _to fill: number, countries, crypto experience_ |
+| Finished the core flow without help | _to fill: x of y_ |
+| Time to first payment | _to fill: median_ |
+| Where people hesitated | _to fill_ |
+| What we changed because of it | _to fill_ |
+
+Changes already made from internal walkthroughs: every form now starts empty instead of pre-filled, disabled buttons say what is missing ("Choose your safety net"), and every word that hinted at a blockchain (fingerprints "on Monad", "view proof", "transaction") was replaced with plain language.
+
+---
+
+## 📣 How the next 100 users find us
+
+1. **Every trip recruits its own users.** A trip only works when friends join it, so each person who starts a trip brings 2 to 9 new people through the invite link, and that link is the whole onboarding. Around 20 trip creators are enough to reach 100 users.
+2. **Start where mixed-nationality trips are planned.** Student associations abroad and exchange-alumni groups, travel group chats, and digital-nomad communities in places like Bali are full of friend groups planning their next meetup.
+3. **Group-trip organisers.** Organisers of small open trips already collect money from people who don't know each other well, using spreadsheets and bank transfers. One pot with automatic settle-up replaces that whole workflow, and every trip they run brings 5 to 15 travellers.
+4. **Show the moment it settles.** Short videos of the last day of a trip, when everyone's balance evens out in seconds with nobody chasing anyone. That moment is easy to understand and easy to share.
+
+What we will watch: trips started, the share of invitees who actually join, and how many groups start a second trip.
 
 ---
 
