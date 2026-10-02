@@ -42,15 +42,15 @@ export default function HomePage() {
         </div>
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#dcf0ea] text-[#16574e] text-xs font-bold tracking-wide uppercase">
-          ⚡ Powered by Monad Metropolis
+          ⚡ For friends travelling across borders
         </div>
 
         <h1 className="font-display text-4xl sm:text-6xl font-black tracking-tight leading-[1.1] max-w-2xl text-[#1d2426]">
-          The cross-border trip wallet that settles itself.
+          One pot for the whole trip. It settles up by itself.
         </h1>
 
         <p className="text-base sm:text-xl text-[#5f6b6d] max-w-xl leading-relaxed">
-          Put dollars in one shared pot. Anyone spends freely, and smart contracts calculate and settle who owes whom at the end of the trip.
+          Everyone puts dollars into one shared pot, from any country. Anyone can pay from it, and on the last day Tekosoe works out who owes whom and pays everyone back.
         </p>
 
         {/* CTA Buttons */}
@@ -75,7 +75,7 @@ export default function HomePage() {
             <div className="w-11 h-11 rounded-2xl bg-[#dcf0ea] flex items-center justify-center text-[#1f7a6e] text-xl font-bold">
               🔑
             </div>
-            <h3 className="font-display font-extrabold text-lg text-[#1d2426]">Zero Seed Phrases</h3>
+            <h3 className="font-display font-extrabold text-lg text-[#1d2426]">Sign in with a passkey</h3>
             <p className="text-sm text-[#5f6b6d] leading-relaxed">
               Log in with your device passkey: Face ID, fingerprint or PIN. Nothing to install, nothing to pay for.
             </p>
@@ -87,7 +87,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-display font-extrabold text-lg text-[#1d2426]">One Shared Pot</h3>
             <p className="text-sm text-[#5f6b6d] leading-relaxed">
-              Deposit AUSD into a single transparent group vault. Spending over the threshold requires approval.
+              Everyone sees every payment as it happens. Big payments wait for one friend to say yes.
             </p>
           </div>
 
@@ -95,9 +95,9 @@ export default function HomePage() {
             <div className="w-11 h-11 rounded-2xl bg-[#cfe9e1] flex items-center justify-center text-[#16574e] text-xl font-bold">
               🧾
             </div>
-            <h3 className="font-display font-extrabold text-lg text-[#1d2426]">Verifiable Settle-up</h3>
+            <h3 className="font-display font-extrabold text-lg text-[#1d2426]">Settles up by itself</h3>
             <p className="text-sm text-[#5f6b6d] leading-relaxed">
-              Contracts compute net debts automatically. Anyone can verify the cryptographic proof of every invoice.
+              No chasing friends for money. Everyone gets an invoice, and anyone can check it hasn&apos;t been changed.
             </p>
           </div>
         </div>

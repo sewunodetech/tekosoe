@@ -143,9 +143,9 @@ function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
           <View style={styles.row}>
             {unlocked && <View style={styles.dot} />}
             <View style={{ flex: 1 }}>
-              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{unlocked ? 'Fingerprint matches Monad' : 'Fingerprint on Monad'}</Text>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{unlocked ? 'Matches the original' : "Can't be swapped"}</Text>
               <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-                {unlocked ? `Same file ${attachedBy} attached, not changed since` : 'Proves this receipt has not been swapped'}
+                {unlocked ? `The same photo ${attachedBy} added, not changed since` : 'Locked in the moment it was added'}
               </Text>
             </View>
           </View>

@@ -115,10 +115,7 @@ function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
       <View style={styles.proof}>
         <View style={styles.dot} />
         <Text variant="caption" color={colors.textMuted}>
-          Recorded on Monad ·{' '}
-          <Text variant="caption" style={{ fontFamily: fonts.bodyBold }} color={colors.primary}>
-            view proof
-          </Text>
+          Recorded · can&apos;t be changed later
         </Text>
       </View>
     </Screen>
