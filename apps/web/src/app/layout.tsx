@@ -15,7 +15,7 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   metadataBase: new URL("https://tekosoe.xyz"),
   title: "Tekosoe — One pot for the whole trip",
-  description: "Friends in different countries share one pot in dollars, pay with Face ID, and the trip settles up by itself.",
+  description: "Friends in different countries share one pot in dollars, pay with a passkey (Face ID, fingerprint or PIN), and the trip settles up by itself.",
 };
 
 export default function RootLayout({

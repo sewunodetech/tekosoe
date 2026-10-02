@@ -135,7 +135,7 @@ function banner(w, h) {
   const iconY = (h - iconSize) / 2;
   const top = h * 0.25;
 
-  const chips = ['Face ID sign-in', 'Dollars (AUSD)', 'Settles itself on Monad'];
+  const chips = ['Passkey sign-in', 'Dollars (AUSD)', 'Settles itself on Monad'];
   let chipX = pad;
   const chipY = top + wordH + titleSize * 2.9;
   const chipH = subSize * 2;

@@ -77,7 +77,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-display font-extrabold text-lg text-[#1d2426]">Zero Seed Phrases</h3>
             <p className="text-sm text-[#5f6b6d] leading-relaxed">
-              Log in seamlessly with your device passkey (Face ID or Biometrics). No gas tokens needed.
+              Log in with your device passkey: Face ID, fingerprint or PIN. Nothing to install, nothing to pay for.
             </p>
           </div>
 

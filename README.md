@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>A shared trip pot that settles up by itself.</b><br/>
-  Friends from different countries put dollars into one pot, spend it with Face ID, and on the trip's last day a smart contract on Monad works out who owes whom and pays everyone back.
+  Friends from different countries put dollars into one pot, spend it with a passkey (Face ID, fingerprint or PIN), and on the trip's last day a smart contract on Monad works out who owes whom and pays everyone back.
 </p>
 
 <p align="center">
@@ -31,7 +31,7 @@
 
 **Tekosoe.** One pot for the whole trip:
 
-1. **Sign in with Face ID.** No seed phrase, no wallet app, no gas token.
+1. **Sign in with a passkey:** Face ID, fingerprint or the phone's PIN. No seed phrase, no wallet app, no gas token.
 2. **Everyone puts dollars in** (AUSD), from any country.
 3. **Anyone pays from the pot.** Every payment is recorded automatically. Big payments need a friend's approval, and anyone left out of a payment can dispute their share.
 4. **On the trip's end date the pot settles itself.** The contract works out each person's share, refunds whoever put in too much, and collects the rest within the limit each person agreed to. Everyone gets an invoice: *Paid*, *Refunded* or *Due*.
@@ -44,7 +44,7 @@
 | Moves real money | ❌ IOUs only | One country | ✅ | ✅ |
 | Works across borders | Notes only | ❌ | Slow, fees, FX | ✅ Same dollar for everyone |
 | Settles up | Manually | Manually | Days | **Automatically, in seconds** |
-| Needs crypto knowledge | No | No | No | **No, just Face ID** |
+| Needs crypto knowledge | No | No | No | **No, just a passkey** |
 | Someone holds your money | n/a | Yes | Yes | **No.** The contract holds it, your key stays on your phone |
 
 > **Demo video:** _link coming 11 Oct_ · **Android APK:** _link coming 11 Oct_
@@ -56,14 +56,14 @@
 The judge path through the app (each screen is a real route in `apps/mobile`):
 
 ```
-Welcome → Sign in (Face ID) → Home → Japan Trip → Pay from pot → Request approval
+Welcome → Sign in (passkey) → Home → Japan Trip → Pay from pot → Request approval
   → open on "Rina's phone" → Approve → pot runs out → Preview settle-up → See your invoice
 ```
 
 | Step | What you'll see |
 | --- | --- |
-| **Sign in** | One Face ID prompt. The passkey derives the account key on the device (Mera). |
-| **New trip / Invite** | Pick an end date and an approval limit, share a link. Friends join with one tap and one Face ID. |
+| **Sign in** | One passkey prompt (Face ID, fingerprint or PIN). The passkey derives the account key on the device (Mera). |
+| **New trip / Invite** | Pick an end date and an approval limit, share a link. Friends join with one tap and one passkey confirmation. |
 | **Join + put in** | Choose a deposit and a **safety net** (the most the trip may pull from you at settle-up), in one confirmation. |
 | **Pay from pot** | Amount, who it was for, optional receipt photo. Above the limit → a friend approves on their phone. |
 | **Trip** | Live pot balance, activity feed, "who owes whom" preview, all read from the Envio indexer. |
@@ -85,9 +85,9 @@ sequenceDiagram
     participant E as Envio HyperIndex
     participant S as Settle scheduler
 
-    R->>App: Face ID
+    R->>App: Passkey (Face ID / fingerprint / PIN)
     App->>V: createGroup(endDate, approvalLimit, safetyNet)
-    W->>App: Opens invite link + Face ID
+    W->>App: Opens invite link + passkey
     App->>V: joinGroupWithPermit(inviteSig, deposit, safetyNet)<br/>one transaction, no "approve" step
     R->>App: Pay $42 dinner for everyone
     App->>V: spend(amount, participants, noteHash)
@@ -104,7 +104,7 @@ sequenceDiagram
 
 - **Settle-up can never get stuck.** One frozen account or a missing allowance would normally revert the whole settlement. `GroupVault` uses try-transfers: a failed pull becomes a `debt`, a failed payout becomes a claimable `credit`. Invariants are fuzz-tested in Foundry.
 - **Invites can't be replayed or front-run.** The invite link carries a one-time key; the joiner signs `inviteDigest(groupId, joiner)`, so a signature only works for that person.
-- **One Face ID per action.** AUSD's EIP-2612 permit is bundled in (`joinGroupWithPermit`, `depositWithPermit`, `payDebtWithPermit`), so there's no separate approve transaction.
+- **One passkey confirmation per action.** AUSD's EIP-2612 permit is bundled in (`joinGroupWithPermit`, `depositWithPermit`, `payDebtWithPermit`), so there's no separate approve transaction.
 - **No gas token for users.** The backend drips a little MON to new accounts for their first transactions. It holds gas keys only, never user keys or user funds.
 - **Money lives only on-chain.** Balances, spends and settlement come from the contract via Envio. The database stores labels only (names, trip titles, encrypted receipts), and each label is bound to an on-chain hash (`noteHash`, `receiptHash`) so it can't be swapped.
 - **No crypto words in the UI.** Users see "pot", "safety net", "receipt", "invoice" and dollar amounts. Never "wallet", "gas", "token" or "hash".
