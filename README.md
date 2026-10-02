@@ -121,7 +121,6 @@ Each sponsor has one clear job in the product. Everything runs on Monad testnet;
 | **Monad** | Settlement layer. Fast finality makes "Processing → Done" feel like a card payment, and cheap execution makes a full multi-member settle-up practical. | [`packages/contracts`](packages/contracts) |
 | **Mera (Category Labs)** | The entire account layer: passkey → PRF → on-device secp256k1 signing session → viem account. No other wallet, no extension, no seed phrase, no custody. | [`src/wallet`](apps/mobile/src/wallet), [ADR 0003](docs/decisions/0003-mera-passkey-api.md) |
 | **Envio HyperIndex** | The app's read model for money: pot balance, activity feed, positions and "who owes whom" all come from indexed `GroupVault` + AUSD events. | [`packages/indexer`](packages/indexer), [`envio.ts`](apps/mobile/src/lib/envio.ts) |
-| **Alchemy** _(stretch)_ | Planned: Webhooks → push notifications for approvals and settle-up. | [Roadmap](docs/ROADMAP.md) |
 
 ---
 
@@ -174,7 +173,7 @@ packages/shared     ABI, addresses, chain, money helpers, metadata schemas (zod)
 docs/               BRD, PRD, technical spec, user stories, flows, screen map, ADRs
 ```
 
-Planning docs (in Indonesian) live in [`docs/`](docs/README.md); design decisions are in [`docs/decisions/`](docs/decisions/).
+Product, design and planning docs live in [`docs/`](docs/README.md); design decisions are in [`docs/decisions/`](docs/decisions/).
 
 ---
 

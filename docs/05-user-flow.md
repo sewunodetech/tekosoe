@@ -1,41 +1,37 @@
 # Tekosoe — User Flow
 
-App punya dua flow utama: masuk dan bergabung ke grup (termasuk setor dana dan memilih batas jaminan), lalu memakai kas bersama sampai tanggal grup berakhir, saat settle-up berjalan otomatis. Daftar layar di bagian akhir menjadi dasar wireframe.
+The app has two main flows. First, signing in and joining a trip (including the first deposit and picking a safety net). Second, spending from the pot until the end date, when settle-up runs by itself. The screen list at the end was the basis for the wireframes.
 
-## Flow 1 — Masuk dan bergabung ke grup
+## Flow 1 — Sign in and join a trip
 
-Ada dua pintu masuk, dan keduanya melewati layar Face ID yang sama: membuka app langsung, atau membuka link undangan dari teman. Akun baru langsung mengisi profil (nama, kota, negara, warna avatar) di layar P1 tepat setelah passkey dibuat, lalu masuk Home atau lanjut ke layar gabung.
+There are two ways in, and both go through the same passkey screen: opening the app directly, or opening an invite link from a friend. A new account fills in its profile (name, city, country, avatar colour) on screen P1 right after the passkey is created, then lands on Home or continues to the join screen.
 
-&#91;embedded content: flow masuk dan bergabung · 7 layar\]
+People who arrive through a link skip Home. After the passkey they see the join confirmation straight away, pick a safety net and put in their first deposit, all on one screen. It's the fastest path and the most important one for the demo.
 
-User yang datang lewat link tidak melewati Beranda; setelah Face ID ia langsung melihat konfirmasi gabung, memilih batas jaminan, dan menyetor dana awal dalam satu layar. Ini jalur tercepat dan paling penting untuk demo.
+## Flow 2 — Inside a trip
 
-## Flow 2 — Di dalam grup
+The trip screen is the heart of the app. Anyone can spend from the pot while it has enough money. Every payment is recorded in the contract immediately, and payments above the trip's limit wait for one other member's approval.
 
-Detail grup adalah pusat app. Siapa pun bisa memakai kas selama isinya cukup; setiap pemakaian langsung tercatat di kontrak, dan pemakaian di atas batas grup menunggu persetujuan satu anggota lain.
+On the end date, nobody has to press a button. The scheduler runs settle-up, overpayments are refunded, shortfalls are collected up to each safety net, and anything left becomes a bill. If the pot runs dry before the end date, payments are declined and the app nudges members to add money.
 
-&#91;embedded content: flow di dalam grup · 9 layar, 1 keputusan\]
+## Screen list for the wireframes
 
-Di tanggal berakhir, tidak ada anggota yang perlu menekan tombol: penjadwal memanggil settle-up, kelebihan dikembalikan, kekurangan ditarik sampai batas jaminan, dan sisanya jadi tagihan. Kalau kas habis sebelum tanggal berakhir, pemakaian ditolak dan app mengajak anggota menambah dana.
+13 screens in total. Wireframes were done in priority order: the P0 screens in the demo first, the simulated card (P2) last.
 
-## Daftar layar untuk wireframe
-
-Total 13 layar. Wireframe dikerjakan sesuai urutan prioritas: layar P0 yang muncul di demo lebih dulu, kartu simulasi (P2) terakhir.
-
-| No | Layar | Isi utama | Aksi utama | FR |
+| No | Screen | Main content | Main action | FR |
 | --- | --- | --- | --- | --- |
-| 1 | Buka Tekosoe | Logo, satu kalimat nilai produk | Mulai | FR-01 |
-| 2 | Masuk dengan Face ID | Penjelasan singkat bahwa tidak perlu password | Lanjut dengan Face ID; Sudah punya akun | FR-01, FR-02 |
-| 3 | Beranda | Daftar grup: isi kas, saldo saya, sisa hari sampai berakhir | Buka grup; Buat grup | FR-13 |
-| 4 | Buat grup | Nama, tanggal berakhir, batas persetujuan, link undangan | Buat; Bagikan link | FR-04, FR-05 |
-| 5 | Link undangan | Nama grup, pengundang, anggota, tanggal berakhir | Gabung dengan Face ID | FR-05 |
-| 6 | Gabung + setor | Batas jaminan, nominal setoran awal | Gabung dan setor | FR-05, FR-06 |
-| 7 | Detail grup | Isi kas, saldo bersih saya, feed, perkiraan hasil settle-up, hitung mundur | Tambah dana, Pakai kas, Kartu | FR-13, FR-14, FR-15 |
-| 8 | Tambah dana | Nominal dalam dolar | Setor | FR-06 |
-| 9 | Pakai kas | Penerima (anggota atau alamat), nominal, catatan, foto struk, untuk siapa (default semua), rata/manual | Bayar dari kas | FR-07, FR-08, FR-17 |
-| 10 | Menunggu persetujuan | Detail pemakaian di atas batas | Setujui; Tolak | FR-09 |
-| 11 | Detail pemakaian | Rincian untuk siapa, sisa waktu keberatan | Tolak bagian saya | FR-10 |
-| 12 | Kartu (simulasi) | Kartu virtual Tekosoe dengan label simulasi, daftar toko demo | Bayar di toko | FR-16 |
-| 13 | Hasil settle-up | Setor, pakai, saldo bersih tiap anggota; pengembalian dan tarikan yang sudah terjadi | Lunasi tagihan (kalau ada) | FR-11, FR-12 |
+| 1 | Welcome | Logo and one line on what the product does | Get started | FR-01 |
+| 2 | Sign in with a passkey | A short note that there's no password | Continue with passkey; I already have an account | FR-01, FR-02 |
+| 3 | Home | List of trips: pot, my balance, days left | Open a trip; Create a trip | FR-13 |
+| 4 | New trip | Name, end date, approval limit, invite link | Create; Share link | FR-04, FR-05 |
+| 5 | Invite link | Trip name, who invited you, members, end date | Join with passkey | FR-05 |
+| 6 | Join and put in | Safety net, first deposit | Join and put in | FR-05, FR-06 |
+| 7 | Trip | Pot, my net balance, feed, settle-up preview, countdown | Add money, Pay from pot, Card | FR-13, FR-14, FR-15 |
+| 8 | Add money | Amount in dollars | Put in | FR-06 |
+| 9 | Pay from pot | Recipient (member or address), amount, note, receipt photo, who it's for (everyone by default), even or manual split | Pay from pot | FR-07, FR-08, FR-17 |
+| 10 | Waiting for approval | Details of the payment above the limit | Approve; Decline | FR-09 |
+| 11 | Payment details | Who it was for, time left to dispute | Reject my share | FR-10 |
+| 12 | Card (simulated) | Virtual Tekosoe card labelled as simulated, list of demo shops | Pay at shop | FR-16 |
+| 13 | Settle-up result | Each member's put in, spent and net; refunds and charges already made | Pay bill (if any) | FR-11, FR-12 |
 
-**Status transaksi di semua layar:** tampilkan "Memproses" lalu "Selesai" dalam hitungan detik, tanpa kata hash, gas, atau blockchain.
+**Payment status on every screen:** show "Processing", then "Done", within seconds. Never the words hash, gas or blockchain.

@@ -1,98 +1,98 @@
-# Tekosoe — User Stories & Acceptance Criteria
+# Tekosoe — User Stories and Acceptance Criteria
 
-Setiap story selesai kalau semua acceptance criteria-nya lolos di Monad testnet. Nomor FR merujuk ke tab PRD.
+A story is done when every acceptance criterion passes on Monad testnet. FR numbers refer to the [PRD](02-prd.md).
 
 ## Epic 1 — Onboarding (P0)
 
-**US-01. Sebagai pengguna baru, saya ingin membuat akun dengan Face ID, supaya saya tidak perlu mengurus seed phrase.** (FR-01, FR-03)
+**US-01. As a new user, I want to create an account with a passkey, so I never have to deal with a seed phrase.** (FR-01, FR-03)
 
-- [ ] Akun jadi setelah satu kali prompt passkey
-- [ ] Tidak ada layar seed phrase, extension, atau permintaan membeli token gas
-- [ ] Transaksi pertama berhasil walaupun akun tidak punya MON
+- [ ] The account exists after a single passkey prompt
+- [ ] No seed phrase screen, no extension, no request to buy a gas token
+- [ ] The first payment succeeds even though the account holds no MON
 
-**US-02. Sebagai pengguna, saya ingin masuk di ponsel lain dan melihat akun yang sama.** (FR-02)
+**US-02. As a user, I want to sign in on another phone and see the same account.** (FR-02)
 
-- [ ] Passkey yang sama di perangkat kedua menghasilkan alamat yang sama
-- [ ] Grup dan saldo yang sama tampil di perangkat kedua
+- [ ] The same passkey on a second device gives the same address
+- [ ] The same trips and balances show up on the second device
 
-## Epic 2 — Grup (P0)
+## Epic 2 — Trips (P0)
 
-**US-03. Sebagai pembuat grup, saya ingin membuat grup dengan tanggal berakhir dan membagikan link undangan.** (FR-04, FR-05)
+**US-03. As a trip creator, I want to create a trip with an end date and share an invite link.** (FR-04, FR-05)
 
-- [ ] Grup dibuat dengan nama, tanggal berakhir, dan batas persetujuan
-- [ ] Tanggal berakhir harus di masa depan
-- [ ] Link undangan bisa dibagikan lewat aplikasi chat
+- [ ] The trip is created with a name, an end date and an approval limit
+- [ ] The end date must be in the future
+- [ ] The invite link can be shared through any chat app
 
-**US-04. Sebagai teman yang diundang, saya ingin bergabung dengan Face ID dan langsung menyetor dana.** (FR-05, FR-06)
+**US-04. As an invited friend, I want to join with my passkey and put money in right away.** (FR-05, FR-06)
 
-- [ ] Dari link sampai jadi anggota hanya dengan passkey
-- [ ] Saya memilih batas jaminan, dijelaskan sebagai "jaminan maksimal kalau kamu kurang bayar di akhir trip"
-- [ ] Link dengan rahasia yang salah ditolak; grup maksimal 10 anggota
+- [ ] From link to member with nothing but a passkey
+- [ ] I pick a safety net, explained as "the most the trip can collect from you if you're short at the end"
+- [ ] A link with the wrong secret is rejected; a trip has at most 10 members
 
-## Epic 3 — Kas bersama (P0)
+## Epic 3 — The shared pot (P0)
 
-**US-05. Sebagai anggota, saya ingin menyetor atau menambah dana ke kas kapan saja sebelum grup berakhir.** (FR-06, FR-13)
+**US-05. As a member, I want to put money in or top up the pot any time before the trip ends.** (FR-06, FR-13)
 
-- [ ] Setoran masuk ke kas dan tercatat sebagai setoran saya
-- [ ] Nominal tampil dalam dolar tanpa istilah kripto
+- [ ] The deposit goes into the pot and is recorded as mine
+- [ ] Amounts are shown in dollars with no crypto terms
 
-**US-06. Sebagai anggota, saya ingin memakai kas walaupun setoran saya sudah terpakai, selama kas masih ada.** (FR-07, FR-08)
+**US-06. As a member, I want to keep spending from the pot even after my own deposit is used up, as long as the pot has money.** (FR-07, FR-08)
 
-- [ ] Pemakaian berhasil selama nominal tidak melebihi isi kas, apa pun setoran saya
-- [ ] Pemakaian ditolak kalau kas tidak cukup, dan app menawarkan "Tambah dana"
-- [ ] Saya memilih untuk siapa: default semua anggota, bisa sebagian (misalnya A dan C saja), bagi rata atau manual
-- [ ] Total pembagian harus sama dengan nominal
-- [ ] Pemakaian tercatat otomatis di kontrak; tidak ada langkah pencatatan terpisah
+- [ ] A payment succeeds as long as it doesn't exceed the pot, whatever I put in
+- [ ] A payment is rejected when the pot is short, and the app offers "Add money"
+- [ ] I choose who it was for: everyone by default, or some people (for example only A and C), split evenly or by hand
+- [ ] The shares must add up to the amount
+- [ ] The payment is recorded in the contract automatically; there is no separate logging step
 
-**US-07. Sebagai anggota, saya ingin pemakaian besar disetujui anggota lain, supaya kas aman.** (FR-09)
+**US-07. As a member, I want big payments approved by someone else, so the pot stays safe.** (FR-09)
 
-- [ ] Pemakaian di atas batas grup menunggu persetujuan
-- [ ] Satu anggota selain pemakai bisa menyetujui atau menolak
-- [ ] Pemakaian yang disetujui langsung dibayar; yang ditolak tidak mengubah kas
+- [ ] A payment above the trip's limit waits for approval
+- [ ] Any one member other than the payer can approve or reject it
+- [ ] An approved payment is paid immediately; a rejected one leaves the pot untouched
 
-**US-08. Sebagai anggota yang tidak ikut, saya ingin menolak bagian saya dari suatu pemakaian.** (FR-10)
+**US-08. As a member who wasn't part of a payment, I want to reject my share of it.** (FR-10)
 
-- [ ] Tombol tolak hanya tersedia bagi peserta, selama jendela keberatan
-- [ ] Bagian saya pindah ke pemakai, dan saldo kami berdua berubah sesuai
+- [ ] The reject button is only available to participants, during the dispute window
+- [ ] My share moves to the payer, and both our balances update accordingly
 
-## Epic 4 — Settle-up otomatis (P0)
+## Epic 4 — Automatic settle-up (P0)
 
-**US-09. Sebagai anggota, saya ingin semua saldo selesai otomatis di tanggal grup berakhir tanpa saya melakukan apa pun.** (FR-11)
+**US-09. As a member, I want every balance to settle automatically on the end date without me doing anything.** (FR-11)
 
-- [ ] Settle-up berjalan otomatis setelah tanggal berakhir dan jendela keberatan terakhir
-- [ ] Yang lebih bayar menerima kelebihannya langsung ke akunnya
-- [ ] Yang kurang bayar ditarik otomatis sampai batas jaminannya
-- [ ] Hasil akhir sama dengan hitungan manual (lihat contoh A, B, C di Spesifikasi Teknis)
+- [ ] Settle-up runs automatically after the end date and the last dispute window
+- [ ] Whoever overpaid gets the difference straight to their account
+- [ ] Whoever underpaid is charged automatically, up to their safety net
+- [ ] The result matches the math done by hand (see the A, B, C example in the [technical spec](03-technical-spec.md))
 
-**US-10. Sebagai anggota yang kurang bayar melebihi batas jaminan, saya ingin melihat dan melunasi tagihan saya.** (FR-12)
+**US-10. As a member who owes more than my safety net, I want to see and pay my bill.** (FR-12)
 
-- [ ] Tagihan menampilkan nominal dan kepada siapa uang itu akan dibagikan
-- [ ] Pelunasan langsung dibagikan ke anggota yang masih punya hak
+- [ ] The bill shows the amount and who the money will go to
+- [ ] Payment goes straight to the members who are still owed
 
-## Epic 5 — Aktivitas real-time (P1)
+## Epic 5 — Real-time activity (P1)
 
-**US-11. Sebagai anggota, saya ingin melihat aktivitas dan perkiraan hasil settle-up tanpa refresh.** (FR-14, FR-15)
+**US-11. As a member, I want to see activity and the settle-up preview without refreshing.** (FR-14, FR-15)
 
-- [ ] Setoran, pemakaian, persetujuan, dan penolakan muncul di feed semua anggota
-- [ ] Saldo tiap anggota (setor, pakai, saldo bersih) sama dengan data kontrak
+- [ ] Deposits, payments, approvals and rejections appear in every member's feed
+- [ ] Each member's position (put in, spent, net) matches the contract
 
-## Epic 6 — Kartu simulasi (P2)
+## Epic 6 — Simulated card (P2)
 
-**US-12. Sebagai anggota, saya ingin membayar di toko langsung dari kas dengan kartu Tekosoe.** (FR-16)
+**US-12. As a member, I want to pay at a shop straight from the pot with the Tekosoe card.** (FR-16)
 
-- [ ] Pembayaran ke toko demo memotong kas secara nyata di testnet
-- [ ] Saya tetap memilih untuk siapa pembayaran itu
-- [ ] Layar kartu menampilkan label "Kartu (simulasi)" dan tidak memakai logo Visa
+- [ ] Paying the demo shop really debits the pot on testnet
+- [ ] I still choose who the payment was for
+- [ ] The card screen is labelled "Card (simulated)" and doesn't use the Visa logo
 
-## Epic 7 — Privasi (P2)
+## Epic 7 — Privacy (P2)
 
-**US-13. Sebagai anggota, saya ingin catatan dan struk tidak bisa dibaca orang luar.** (FR-17)
+**US-13. As a member, I want notes and receipts to be unreadable to outsiders.** (FR-17)
 
-- [ ] On-chain hanya menyimpan hash atau ciphertext
-- [ ] Anggota grup bisa membuka catatan; alamat di luar grup tidak bisa
+- [ ] On-chain storage holds only hashes or ciphertext
+- [ ] Trip members can open notes; addresses outside the trip can't
 
-## Epic 8 — Notifikasi (P3)
+## Epic 8 — Notifications (P3)
 
-**US-14. Sebagai anggota, saya ingin diberi tahu saat ada pemakaian baru, permintaan persetujuan, dan hasil settle-up.** (FR-18)
+**US-14. As a member, I want to be notified about new payments, approval requests and settle-up results.** (FR-18)
 
-- [ ] Notifikasi terkirim ke anggota yang terlibat
+- [ ] Notifications reach the members involved

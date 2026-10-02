@@ -6,7 +6,7 @@ This is an Expo/React Native mobile application. Prioritize mobile-first pattern
 
 Lihat juga `AGENTS.md` di root. App ini memegang **semua interaksi user**; transaksi ditandatangani di perangkat lewat Mera lalu dikirim langsung ke Monad.
 
-- **Layar**: ikuti `docs/06-peta-layar.md` persis — nama layar dan label tombol dalam bahasa Inggris seperti di desain (01 Welcome … 13 Settled, R1–R3, I1–I3, S1–S6). Jalur demo utama: 01 → 02 → 03 → 07 → 09 → S2 → 10 → S1 → 13 → I1. Maskot "Teko" punya ekspresi per layar (fill, worry, think, sleep, sad, cheer, love).
+- **Layar**: ikuti `docs/06-screen-map.md` persis — nama layar dan label tombol dalam bahasa Inggris seperti di desain (01 Welcome … 13 Settled, R1–R3, I1–I3, S1–S6). Jalur demo utama: 01 → 02 → 03 → 07 → 09 → S2 → 10 → S1 → 13 → I1. Maskot "Teko" punya ekspresi per layar (fill, worry, think, sleep, sad, cheer, love).
 - **Tanpa istilah kripto** di teks yang terlihat user: tidak ada "wallet", "gas", "seed phrase", "blockchain", "token", "hash", "transaction". Status transaksi: "Processing" → "Done". Istilah yang dipakai: pot, trip, safety net, receipt, invoice.
 - **Uang**: `bigint` AUSD 6 desimal; tampilkan hanya lewat `formatDollars` dari `@tekosoe/shared`.
 - **Sumber data**: saldo/feed/status dari Envio (TanStack Query + `graphql-request`, polling beberapa detik); label (nama, judul, struk) dari `apps/api` — **jangan pernah** terhubung ke database langsung. Gabungkan lewat `groupId`/`spendId`. Kalau api mati: nama → alamat singkat, judul → "Payment".

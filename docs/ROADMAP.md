@@ -1,75 +1,73 @@
-# Roadmap Tekosoe (semua tim)
+# Tekosoe roadmap (all teams)
 
-Gambaran besar untuk semua tim. Detail per tim:
-- **Mobile** → [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md) (tim kita)
-- Kontrak, indexer, api, database, web → paket kerja di bawah; aturan lokal di `AGENTS.md` masing-masing folder
+The big picture for every team. Per-team detail:
+- **Mobile** → [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md)
+- Contract, indexer, api, database, web → the work packages below; local rules live in each folder's `AGENTS.md`
 
-Progres dicentang di [`STATUS.md`](STATUS.md). Deadline submit **12 Okt 2026** (resmi 13 Okt 23.59 ET).
+Progress is ticked off in [`STATUS.md`](STATUS.md). We submit on **12 Oct 2026** (official deadline: 13 Oct, 23:59 ET).
 
 ## 1. Goal
 
-**Produk v0.1:** skenario "tiga teman, tiga negara, trip Jepang" jalan **end-to-end di Monad testnet dengan AUSD asli**, tanpa langkah manual di belakang layar:
-onboarding Face ID → buat trip + undang → gabung + setor + safety net → bayar dari pot (di atas batas butuh approval) → keberatan → settle-up otomatis di tanggal akhir → invoice per anggota.
+**Product v0.1:** the "three friends, three countries, a trip to Japan" scenario runs **end to end on Monad testnet with real AUSD**, with no manual steps behind the scenes:
+passkey onboarding → create a trip + invite → join + deposit + safety net → pay from the pot (approval above the limit) → dispute → automatic settle-up on the end date → per-member invoices.
 
-**Kompetisi:** masuk 3 besar track Consumer Products & Payments dan menang bounty Agora. Bounty pendukung sesuai prioritas: Mera UX, Envio, Mera PRF, Alchemy.
+**Competition:** top 3 in the Consumer Products & Payments track and the Agora bounty. Supporting bounties, in priority order: Mera UX, Envio, Mera PRF.
 
-**Definisi selesai v0.1** (PRD › Kriteria rilis):
-- FR-01 sampai FR-13 jalan di testnet, termasuk settle-up otomatis.
-- Unit + fuzz test kontrak lolos; Slither tanpa temuan serius.
-- Tidak ada istilah kripto di layar user.
-- README, video demo, dan profil project lengkap.
+**Definition of done for v0.1** (PRD › Release criteria):
+- FR-01 to FR-13 work on testnet, including automatic settle-up.
+- Contract unit + fuzz tests pass; Slither with no serious findings.
+- No crypto terms on any screen.
+- README, demo video and project profile complete.
 
 ## 2. Scope
 
-| Lapisan | Isi | Bounty |
+| Layer | What's in it | Bounty |
 | --- | --- | --- |
-| **P0** | Kontrak GroupVault lengkap · onboarding Mera + gas tanpa MON · grup/undang/gabung/setor · spend + approval + keberatan · settle otomatis + tagihan · metadata lewat api · struk terenkripsi + `attachReceipt` · invoice in-app | Track, Agora, Mera UX |
-| **P1** | Indexer Envio untuk 12 event · feed real-time · saldo & perkiraan settle dari indexer | Envio |
-| **P2** | Kartu simulasi · kunci enkripsi turunan PRF + kunci grup | Mera PRF |
-| **P3** | Alchemy Gas Manager (maks. ½ hari) · Webhooks → push | Alchemy |
+| **P0** | Complete GroupVault contract · Mera onboarding + gas without MON · trips/invite/join/deposit · spend + approval + dispute · automatic settle-up + bills · metadata through the api · encrypted receipts + `attachReceipt` · in-app invoices | Track, Agora, Mera UX |
+| **P1** | Envio indexer for all events · real-time feed · balances and settle-up preview from the indexer | Envio |
+| **P2** | Simulated card · PRF-derived encryption key + trip key | Mera PRF |
 
-**Di luar scope:** approval untuk setiap spend · mainnet · token selain AUSD · kartu sungguhan · on/off-ramp fiat.
+**Out of scope:** approval for every payment · mainnet · currencies other than AUSD · a real card · fiat on/off-ramp.
 
-**Aturan potong:** fase molor lebih dari 1 hari → potong P3, lalu P2. P0 tidak pernah dipotong. Lapisan berikutnya baru dimulai setelah lapisan sebelumnya jalan end-to-end di testnet.
+**Cutting rule:** if a phase slips by more than a day, cut from the lowest layer (P2). P0 is never cut. The next layer only starts once the previous one runs end to end on testnet.
 
-## 3. Fase & paket kerja
+## 3. Phases and work packages
 
-| Fase | Tanggal | Tim | Paket kerja | Selesai kalau |
+| Phase | Dates | Team | Work packages | Done when |
 | --- | --- | --- | --- | --- |
-| **0 Spike risiko** | 28–29 Sep | semua | Mera di React Native (dikerjakan mobile, WP M2) · alamat & faucet AUSD · pilihan gas (drip MON / relayer / Alchemy, ADR 0003) · provider DB (ADR 0002) | 1 transaksi AUSD dari akun Mera tanpa MON milik user; ADR 0002 & 0003 diterima |
-| **1 Kontrak** | 28 Sep – 2 Okt | kontrak | **C-1** grup & setoran · **C-2** spend & approval · **C-3** keberatan & struk · **C-4** settle & utang · **C-5** fuzz/invariant + reentrancy + Slither · **C-6** deploy testnet + ABI final ke `packages/shared` | Contoh A/B/C spesifikasi tepat; invariant saldo lolos; alamat di `STATUS.md` |
-| **2 Data** | 30 Sep – 3 Okt | indexer, backend | **D-1** indexer 12 event · **D-2** api metadata + auth EIP-191 + validasi `noteHash` · **D-3** drip gas · **D-4** penjadwal settle + tabel invoices | `Member.net` di indexer = `balanceOf` di kontrak; grup uji ter-settle otomatis |
-| **3 Mobile** | 28 Sep – 11 Okt | mobile | M0–M11, lihat [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md) | Jalur demo juri jalan di mode live di 3 HP |
-| **4 Web** | 3–8 Okt | web | **W-1** `.well-known` passkey (apple-app-site-association, assetlinks.json) · **W-2** halaman undangan yang membuka app · **W-3** verifikasi invoice dari QR | Passkey native jalan di domain; link undangan membuka app |
-| **5 Uji & submit** | 9–12 Okt | semua | **Q-1** E2E 3 HP di testnet · **Q-2** uji UX non-kripto · **Q-3** build EAS · **Q-4** README (alamat, hash, bagian per sponsor, pengungkapan AI), video ≤ 3 menit, profil project | Checklist submission di `07-rencana-pengembangan.md` lengkap |
+| **0 De-risking** | 28–29 Sep | everyone | Mera in React Native (mobile, WP M2) · AUSD address & faucet · gas option (MON drip / relayer / Alchemy, ADR 0003) · database provider (ADR 0002) | One AUSD transaction from a Mera account without the user holding MON; ADRs 0002 & 0003 accepted |
+| **1 Contract** | 28 Sep – 2 Oct | contract | **C-1** trips & deposits · **C-2** spend & approval · **C-3** disputes & receipts · **C-4** settle-up & debt · **C-5** fuzz/invariants + reentrancy + Slither · **C-6** testnet deployment + final ABI in `packages/shared` | The spec's A/B/C example is exact; balance invariants hold; address in `STATUS.md` |
+| **2 Data** | 30 Sep – 3 Oct | indexer, backend | **D-1** indexer for all events · **D-2** metadata api + EIP-191 auth + `noteHash` validation · **D-3** gas drip · **D-4** settle-up scheduler + invoices table | `Member.net` in the indexer = `balanceOf` in the contract; a test trip settles automatically |
+| **3 Mobile** | 28 Sep – 11 Oct | mobile | M0–M12, see [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md) | The judges' demo path runs in live mode on 3 phones |
+| **4 Web** | 3–8 Oct | web | **W-1** passkey `.well-known` files (apple-app-site-association, assetlinks.json) · **W-2** an invite page that opens the app · **W-3** invoice verification from a QR code | Native passkeys work on the domain; invite links open the app |
+| **5 Test & submit** | 9–12 Oct | everyone | **Q-1** E2E on 3 phones on testnet · **Q-2** UX test with non-crypto users · **Q-3** EAS build · **Q-4** README (addresses, hashes, a section per sponsor, AI disclosure), video ≤ 3 minutes, project profile | The submission checklist in [`07-development-plan.md`](07-development-plan.md) is complete |
 
-## 4. Dependensi & serah-terima antar tim
+## 4. Dependencies and hand-offs between teams
 
 ```
 C-1..C-5 ─> C-6 deploy + ABI ─┬─> D-1 indexer ─┐
-                              └─> D-2 api ─────┼─> Mobile M6 (data live)
-Spike Mera (M2) ─> gas (D-3) ─> Mobile M3/M4   │
-C-4 + D-1 + D-2 ─> D-4 penjadwal settle ───────┴─> Mobile M8 (invoice)
-W-1 .well-known ─> Mobile M3 (passkey) & M9 (deep link)
+                              └─> D-2 api ─────┼─> Mobile M6 (live data)
+Mera spike (M2) ─> gas (D-3) ─> Mobile M3/M4   │
+C-4 + D-1 + D-2 ─> D-4 settle-up scheduler ────┴─> Mobile M8 (invoices)
+W-1 .well-known ─> Mobile M3 (passkey) & M9 (deep links)
 ```
 
-Titik serah-terima dicatat di `STATUS.md` › Catatan deploy, dan diumumkan ke tim mobile:
+Hand-offs are recorded in `STATUS.md` › Deployments and announced to the mobile team:
 
-| Serah-terima | Dari | Ke |
+| Hand-off | From | To |
 | --- | --- | --- |
-| Alamat `GroupVault` + ABI final di `packages/shared/src/abi/groupVault.ts` | kontrak | indexer, api, mobile |
-| URL GraphQL Envio + skema entitas | indexer | mobile |
-| URL api + tipe request/response di `packages/shared` | backend | mobile |
-| Domain passkey + file `.well-known` | web | mobile |
+| `GroupVault` address + final ABI in `packages/shared/src/abi/groupVault.ts` | contract | indexer, api, mobile |
+| Envio GraphQL URL + entity schema | indexer | mobile |
+| api URL + request/response types in `packages/shared` | backend | mobile |
+| Passkey domain + `.well-known` files | web | mobile |
 
-Kebutuhan data mobile yang rinci ada di [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md) › bagian 4.
+The mobile team's detailed data needs are in [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md) › section 4.
 
-## 5. Risiko utama
+## 5. Main risks
 
-| Risiko | Jalan keluar |
+| Risk | Way out |
 | --- | --- |
-| Mera / PRF tidak jalan di React Native | Diputuskan di spike hari pertama; cadangan: langkah Mera di in-app browser dengan domain yang sama |
-| Alchemy Gas Manager tidak cocok dengan EOA Mera | Batas ½ hari, lalu drip MON atau relayer sendiri |
-| Faucet AUSD testnet terbatas | Tanya tim Agora di Discord sejak hari pertama |
-| Backend terlambat | Mobile jalan di mode demo; integrasi live dikejar 3–6 Okt |
-| Waktu habis | Potong P3, lalu P2; P0 tidak pernah dipotong |
+| Mera / PRF doesn't run in React Native | Decided in the day-one spike; fallback: run the Mera step in an in-app browser on the same domain |
+| The testnet AUSD faucet is limited | Ask the Agora team on Discord from day one |
+| The backend runs late | Mobile runs in demo mode; live integration catches up 3–6 Oct |
+| Time runs out | Cut P2; P0 is never cut |

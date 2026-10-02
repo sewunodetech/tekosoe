@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 /// @title IGroupVault
-/// @notice Kas bersama per grup dalam AUSD. Spesifikasi: docs/03-spesifikasi-teknis.md, perubahan: ADR 0005.
+/// @notice Kas bersama per grup dalam AUSD. Spesifikasi: docs/03-technical-spec.md, perubahan: ADR 0005.
 /// Invariant sebelum settle: sum(deposited - used) semua anggota == pool.
 /// Invariant setelah settle: sum(credit) == sum(debt) + pool (pool = dana yang ditahan untuk kreditur).
 interface IGroupVault {

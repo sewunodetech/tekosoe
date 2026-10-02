@@ -3,7 +3,7 @@ import { z } from "zod";
 
 /**
  * Metadata off-chain yang disimpan di database (Postgres) lewat apps/api.
- * Setiap baris dikunci ke data on-chain lewat groupId dan noteHash (docs/03-spesifikasi-teknis.md › Database off-chain).
+ * Setiap baris dikunci ke data on-chain lewat groupId dan noteHash (docs/03-technical-spec.md › Off-chain database).
  */
 
 const address = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
