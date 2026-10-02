@@ -1,6 +1,6 @@
 /**
  * Generate semua aset brand (ikon app, adaptive icon Android, splash, favicon, ikon web, banner README)
- * dari SVG sumber di apps/mobile/assets (tekosoe-mark.svg, tekosoe-logo.svg).
+ * dari SVG sumber di apps/mobile/assets (tekosoe-mark.svg, tekosoe-mark-mono.svg, tekosoe-logo.svg).
  *
  * Butuh sharp + opentype.js + font Manrope (tidak dipasang di workspace supaya lockfile tetap ramping):
  *   mkdir /tmp/brand && cd /tmp/brand && npm i sharp opentype.js @expo-google-fonts/manrope
@@ -29,23 +29,28 @@ const out = (...p) => {
 };
 
 // --- Sumber -------------------------------------------------------------------------------------
-/** Mark "t" + titik. Isi viewBox asli (18 18 84 84) berpusat di (60, 60), radius isi ±46. */
-function mark({ stroke = C.teal, dot = C.orange } = {}) {
-  return `<g transform="translate(-2.5 1)"><path d="M50 26V76a16 16 0 0 0 16 16h10" fill="none" stroke="${stroke}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 48H73" fill="none" stroke="${stroke}" stroke-width="15" stroke-linecap="round"/><circle cx="92" cy="70" r="9.5" fill="${dot}"/></g>`;
-}
-/** Mark ditaruh berpusat di (cx, cy) dengan tinggi kotak 84 unit = `size` px. */
-const placeMark = (cx, cy, size, opts) => {
-  const s = size / 84;
-  return `<g transform="translate(${cx - 60 * s} ${cy - 60 * s}) scale(${s})">${mark(opts)}</g>`;
+// Semua bentuk diambil apa adanya dari file SVG di apps/mobile/assets, jadi ganti logo = ganti file
+// lalu jalankan ulang skrip ini.
+const readSvg = (name) => {
+  const src = readFileSync(join(mobile, name), 'utf8');
+  return { viewBox: src.match(/viewBox="([^"]+)"/)[1], body: src.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '') };
 };
+const markColor = readSvg('tekosoe-mark.svg');
+const markMono = readSvg('tekosoe-mark-mono.svg');
+const logo = readSvg('tekosoe-logo.svg');
 
-const logoSvg = readFileSync(join(mobile, 'tekosoe-logo.svg'), 'utf8');
-const wordPath = logoSvg.match(/<path d="([^"]+)"/)[1];
-/** Wordmark (viewBox 379.68 × 74.06) dengan kiri-atas di (x, y) dan tinggi `h` px. */
-const placeWordmark = (x, y, h, color = C.teal, dot = C.orange) => {
-  const s = h / 74.06;
-  return `<g transform="translate(${x} ${y}) scale(${s})"><path d="${wordPath}" fill="${color}"/><circle cx="363.95" cy="38.04" r="15.72" fill="${dot}"/></g>`;
-};
+/** SVG sumber ditaruh di kotak persegi `size` px yang berpusat di (cx, cy). */
+const place = (src, cx, cy, size) =>
+  `<svg x="${cx - size / 2}" y="${cy - size / 2}" width="${size}" height="${size}" viewBox="${src.viewBox}">${src.body}</svg>`;
+
+/** Wordmark saja (logo tanpa grup Teko di depannya), dipotong rapat ke isinya, sebagai PNG. */
+async function wordmarkPng(height) {
+  const textOnly = logo.body.replace(/^<g[\s\S]*?<\/g>/, '');
+  const [, , w, h] = logo.viewBox.split(/\s+/).map(Number);
+  const src = `<svg xmlns="http://www.w3.org/2000/svg" width="${w * 8}" height="${h * 8}" viewBox="${logo.viewBox}">${textOnly}</svg>`;
+  const trimmed = await sharp(Buffer.from(src)).trim().png().toBuffer();
+  return sharp(trimmed).resize({ height }).png().toBuffer();
+}
 
 /** `Path.toPathData` di opentype.js 2.0 kadang menulis `NaN` saat membulatkan, jadi serialisasi sendiri. */
 function pathData(path) {
@@ -74,28 +79,43 @@ function text(str, x, y, size, color, font = manrope) {
 const textWidth = (str, size, font = manrope) => font.getAdvanceWidth(str, size);
 
 const svg = (w, h, body) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
-const tealBg = (w, h, r = 0) =>
-  `<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26897b"/><stop offset="1" stop-color="${C.teal}"/></linearGradient></defs><rect width="${w}" height="${h}" rx="${r}" fill="url(#bg)"/>`;
+/** Latar ikon: teal dengan cahaya mint lembut di tengah supaya Teko (badan mint) tetap menonjol. */
+const iconBg = (w, h, r = 0, shadow = true) =>
+  `<defs><radialGradient id="bg" cx="0.5" cy="0.42" r="0.75"><stop offset="0" stop-color="#2a9583"/><stop offset="1" stop-color="${C.teal}"/></radialGradient></defs><rect width="${w}" height="${h}" rx="${r}" fill="url(#bg)"/>` +
+  (shadow ? `<ellipse cx="${w / 2}" cy="${h * 0.79}" rx="${w * 0.27}" ry="${h * 0.035}" fill="${C.tealDeep}" opacity="0.45"/>` : '');
 
 const png = (s, file, size) => sharp(Buffer.from(s)).resize(size, size).png({ compressionLevel: 9 }).toFile(file);
 
 // --- Ikon app ------------------------------------------------------------------------------------
 const ICON = 1024;
-/** Ikon utama: kotak teal, mark putih + titik oranye (iOS menambah sudut bulat sendiri). */
-const appIcon = svg(ICON, ICON, tealBg(ICON, ICON) + placeMark(512, 512, 600, { stroke: C.white }));
+// Isi Teko berpusat di tengah viewBox mark; titik terjauh (corong) ±0.51 × sisi viewBox dari pusat.
+/** Ikon utama: Teko di atas teal (iOS menambah sudut bulat sendiri). */
+const appIcon = svg(ICON, ICON, iconBg(ICON, ICON) + place(markColor, 512, 500, 860));
 /** Android adaptive: isi harus di dalam lingkaran aman 66/108 → radius ±313 px dari 1024. */
-const fg = svg(ICON, ICON, placeMark(512, 512, 520, { stroke: C.white }));
-const bg = svg(ICON, ICON, tealBg(ICON, ICON));
-const mono = svg(ICON, ICON, placeMark(512, 512, 520, { stroke: C.white, dot: C.white }));
-/** Splash: mark berwarna di atas latar ivory (warna latar diatur di app.json). */
-const splash = svg(ICON, ICON, placeMark(512, 512, 1000));
+const fg = svg(ICON, ICON, place(markColor, 512, 512, 600));
+const bg = svg(ICON, ICON, iconBg(ICON, ICON, 0, false));
+/** Splash: Teko berwarna di atas latar ivory (warna latar diatur di app.json). */
+const splash = svg(ICON, ICON, place(markColor, 512, 512, 1024));
 /** Favicon kecil: kotak bulat supaya tetap terbaca di tab browser. */
-const favicon = svg(ICON, ICON, tealBg(ICON, ICON, 224) + placeMark(512, 512, 640, { stroke: C.white }));
+const favicon = svg(ICON, ICON, iconBg(ICON, ICON, 224) + place(markColor, 512, 500, 900));
+
+/** Monokrom Android = garis tinta dari versi mono (tinta → buram, putih → transparan), diwarnai putih. */
+async function monochrome(file) {
+  const lines = await sharp(Buffer.from(svg(ICON, ICON, `<rect width="${ICON}" height="${ICON}" fill="#fff"/>` + place(markMono, 512, 512, 600))))
+    .greyscale()
+    .negate({ alpha: false })
+    .extractChannel(0)
+    .toBuffer();
+  await sharp({ create: { width: ICON, height: ICON, channels: 3, background: '#ffffff' } })
+    .joinChannel(lines)
+    .png({ compressionLevel: 9 })
+    .toFile(file);
+}
 
 await png(appIcon, join(mobile, 'images/icon.png'), 1024);
 await png(fg, join(mobile, 'images/android-icon-foreground.png'), 1024);
 await png(bg, join(mobile, 'images/android-icon-background.png'), 1024);
-await png(mono, join(mobile, 'images/android-icon-monochrome.png'), 1024);
+await monochrome(join(mobile, 'images/android-icon-monochrome.png'));
 await png(splash, join(mobile, 'images/splash-icon.png'), 1024);
 await png(favicon, join(mobile, 'images/favicon.png'), 48);
 
@@ -125,9 +145,9 @@ icoSizes.forEach((s, i) => {
 writeFileSync(webApp('favicon.ico'), Buffer.concat([header, ...icoPngs]));
 
 // --- Banner README + gambar Open Graph ----------------------------------------------------------
-function banner(w, h) {
+async function banner(w, h, file) {
   const pad = Math.round(w * 0.075);
-  const wordH = Math.round(h * 0.15);
+  const wordH = Math.round(h * 0.13);
   const titleSize = Math.round(h * 0.075);
   const subSize = Math.round(h * 0.036);
   const iconSize = Math.round(h * 0.56);
@@ -149,24 +169,26 @@ function banner(w, h) {
     })
     .join('');
 
-  const s = iconSize / ICON;
-  return svg(
+  const tekoSize = iconSize * 1.15;
+  const base = svg(
     w,
     h,
     `<rect width="${w}" height="${h}" fill="${C.ivory}"/>` +
-      `<circle cx="${w - pad * 0.2}" cy="${h * 0.08}" r="${h * 0.42}" fill="${C.mint}" opacity="0.7"/>` +
-      `<circle cx="${iconX - h * 0.02}" cy="${h * 0.86}" r="${h * 0.035}" fill="${C.orange}"/>` +
-      placeWordmark(pad, top, wordH) +
+      `<circle cx="${iconX + iconSize / 2}" cy="${h / 2}" r="${iconSize * 0.55}" fill="${C.mint}"/>` +
+      `<circle cx="${iconX - h * 0.02}" cy="${h * 0.86}" r="${h * 0.03}" fill="${C.orange}"/>` +
+      `<circle cx="${w - pad * 0.6}" cy="${h * 0.16}" r="${h * 0.018}" fill="${C.orange}" opacity="0.7"/>` +
       text('One pot for the whole trip.', pad, top + wordH + titleSize * 1.55, titleSize, C.ink) +
       text('It settles up by itself.', pad, top + wordH + titleSize * 2.55, titleSize, C.teal) +
       chipSvg +
-      `<g transform="translate(${iconX} ${iconY + 10})"><rect width="${iconSize}" height="${iconSize}" rx="${iconSize * 0.225}" fill="${C.tealDeep}" opacity="0.18"/></g>` +
-      `<defs><clipPath id="sq"><rect x="${iconX}" y="${iconY}" width="${iconSize}" height="${iconSize}" rx="${iconSize * 0.225}"/></clipPath></defs>` +
-      `<g clip-path="url(#sq)"><g transform="translate(${iconX} ${iconY}) scale(${s})">${tealBg(ICON, ICON)}${placeMark(512, 512, 600, { stroke: C.white })}</g></g>`,
+      place(markColor, iconX + iconSize / 2, h / 2 + iconSize * 0.02, tekoSize),
   );
+  await sharp(Buffer.from(base))
+    .composite([{ input: await wordmarkPng(wordH), left: pad, top: Math.round(top) }])
+    .png({ compressionLevel: 9 })
+    .toFile(file);
 }
 
-await sharp(Buffer.from(banner(1280, 640))).png({ compressionLevel: 9 }).toFile(out('docs/assets/banner.png'));
-await sharp(Buffer.from(banner(1200, 630))).png({ compressionLevel: 9 }).toFile(webApp('opengraph-image.png'));
+await banner(1280, 640, out('docs/assets/banner.png'));
+await banner(1200, 630, webApp('opengraph-image.png'));
 
 console.log('brand assets generated');
