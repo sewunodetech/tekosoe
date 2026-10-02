@@ -12,9 +12,9 @@ Dokumen perencanaan ada di [`docs/`](docs/README.md). Baca dokumen yang relevan 
 | --- | --- |
 | Memilih pekerjaan berikutnya | [`docs/ROADMAP.md`](docs/ROADMAP.md) (semua tim) · **mobile:** [`apps/mobile/ROADMAP.md`](apps/mobile/ROADMAP.md) |
 | Fitur apa pun | [`docs/STATUS.md`](docs/STATUS.md) (apa yang sudah/belum), [`docs/02-prd.md`](docs/02-prd.md) (FR/NFR) |
-| Kontrak, indexer, backend, DB | [`docs/03-spesifikasi-teknis.md`](docs/03-spesifikasi-teknis.md) (di sana "Supabase" = database metadata; provider belum final, lihat ADR 0002) |
-| Layar app | [`docs/06-peta-layar.md`](docs/06-peta-layar.md), [`docs/05-user-flow.md`](docs/05-user-flow.md), [`docs/04-user-stories.md`](docs/04-user-stories.md) |
-| Prioritas, uji, timeline | [`docs/07-rencana-pengembangan.md`](docs/07-rencana-pengembangan.md) |
+| Kontrak, indexer, backend, DB | [`docs/03-technical-spec.md`](docs/03-technical-spec.md) (di sana "Supabase" = database metadata; provider belum final, lihat ADR 0002) |
+| Layar app | [`docs/06-screen-map.md`](docs/06-screen-map.md), [`docs/05-user-flow.md`](docs/05-user-flow.md), [`docs/04-user-stories.md`](docs/04-user-stories.md) |
+| Prioritas, uji, timeline | [`docs/07-development-plan.md`](docs/07-development-plan.md) |
 | Alasan bisnis | [`docs/01-brd.md`](docs/01-brd.md) |
 | Keputusan yang sudah diambil | [`docs/decisions/`](docs/decisions/) |
 

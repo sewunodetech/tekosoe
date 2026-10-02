@@ -1,21 +1,21 @@
-# 0004 — apps/api memakai Express, Drizzle, dan Neon
+# 0004 — apps/api uses Express, Drizzle and Neon
 
-- Status: diusulkan (perlu konfirmasi tim)
-- Tanggal: 2026-09-30
+- Status: proposed (awaiting team confirmation)
+- Date: 2026-09-30
 
-## Konteks
+## Context
 
-ADR 0001 dan Spesifikasi Teknis memilih Hono untuk `apps/api`, dan `apps/api` baru berisi skeleton Hono kosong. Backend yang benar-benar dibangun (PR #5, awalnya di folder `backend/`) memakai Express 5 dan sudah punya auth, drip, penjadwal settle, profil, struk, kunci grup, push, test, dan OpenAPI.
+ADR 0001 and the technical spec chose Hono for `apps/api`, and `apps/api` only held an empty Hono skeleton. The backend that was actually built (PR #5, originally in a `backend/` folder) uses Express 5 and already has auth, the gas drip, the settle-up scheduler, profiles, receipts, trip keys, push, tests and OpenAPI.
 
-## Keputusan
+## Decision
 
-- Backend Express dipindah ke `apps/api` dan menggantikan skeleton Hono; nama paket `@tekosoe/api`, satu `package-lock.json` di root.
-- Stack api: Express 5, Drizzle ORM + `pg`, migrasi `drizzle-kit` di `apps/api/drizzle/`, S3-compatible untuk ciphertext struk (`S3_*`), login SIWE → JWT HS256.
-- Docker dibangun dari root repo: `docker build -f apps/api/Dockerfile .`.
+- Move the Express backend into `apps/api`, replacing the Hono skeleton; the package is `@tekosoe/api`, with a single `package-lock.json` at the root.
+- api stack: Express 5, Drizzle ORM + `pg`, `drizzle-kit` migrations in `apps/api/drizzle/`, S3-compatible storage for receipt ciphertext, SIWE sign-in → HS256 JWT.
+- Docker builds from the repo root: `docker build -f apps/api/Dockerfile .`.
 
-## Konsekuensi
+## Consequences
 
-- ADR 0001 (bagian `apps/api`) dan Spesifikasi Teknis masih menyebut Hono — perbarui dokumen live setelah disetujui.
-- Pilihan ini ikut menjawab sebagian ADR 0002 (driver: Drizzle + `pg`; storage: S3-compatible), tapi Neon vs Supabase masih terbuka.
-- Skema DB hanya di `apps/api/src/db/schema.ts` (migrasi di `apps/api/drizzle/`); folder `database/` dihapus. Kunci grup memakai `member_enc_keys` + `group_key_wraps`, bukan `group_keys` dari draf spesifikasi.
-- Push memakai Expo Push API (bukan Web Push), sesuai `push_subs` di spesifikasi.
+- ADR 0001 (the `apps/api` part) and the technical spec still mention Hono; the planning documents are updated once this is approved.
+- This also answers part of ADR 0002 (driver: Drizzle + `pg`; storage: S3-compatible), though Neon vs Supabase is still open.
+- The database schema lives only in `apps/api/src/db/schema.ts` (migrations in `apps/api/drizzle/`); the `database/` folder is gone. Trip keys use `member_enc_keys` + `group_key_wraps` instead of the spec draft's `group_keys`.
+- Push goes through the Expo Push API (not Web Push), matching `push_subs` in the spec.

@@ -1,131 +1,130 @@
 # Tekosoe — Business Requirements Document (BRD)
 
-Sep 27, 2026 · @Kyy
+_27 Sep 2026_
 
-Tekosoe adalah aplikasi mobile untuk uang grup lintas negara: patungan, mencatat pengeluaran, saling bayar, dan settle-up dalam AUSD dengan settlement instan di Monad, tanpa user perlu memahami blockchain.
+Tekosoe is a mobile app for group money across borders. Friends chip in, track spending, pay each other and settle up in AUSD, with instant settlement on Monad, and nobody has to understand blockchains to use it.
 
-## Latar belakang & masalah bisnis
+## Background and business problem
 
-Orang yang bepergian atau berkegiatan bersama lintas negara belum punya cara yang mudah untuk mengelola uang bersama. Pencatatan dan pembayaran terpisah, dan pembayarannya lambat serta mahal.
+People who travel or do things together across borders have no easy way to manage shared money. Tracking and paying happen in different places, and the paying part is slow and expensive.
 
-**Kondisi saat ini**
+**How it works today**
 
-- Aplikasi split bill seperti Splitwise hanya mencatat utang (IOU). Pelunasannya tetap lewat transfer bank.
-- Transfer bank antar negara lambat, kena biaya, dan kena selisih kurs.
-- Dompet digital lokal seperti GoPay hanya berlaku di satu negara, jadi tidak bisa dipakai bersama teman dari negara lain.
-- Aplikasi kripto yang bisa lintas negara masih menuntut seed phrase, extension, dan token gas, sehingga tidak ramah bagi orang awam.
+- Bill-splitting apps like Splitwise only record debts (IOUs). Paying them back still means a bank transfer.
+- International bank transfers are slow, charge fees and lose money on the exchange rate.
+- Local e-wallets like GoPay only work in one country, so friends from other countries can't use them together.
+- Crypto apps do cross borders, but they still demand seed phrases, browser extensions and gas tokens. That shuts out everyday users.
 
-**Contoh kasus.** Tiga teman dari Indonesia, Singapura, dan Australia liburan bersama di Jepang. Mereka harus mencatat siapa bayar apa, menghitung utang, lalu saling transfer lewat bank di tiga negara berbeda setelah trip selesai.
+**Example.** Three friends from Indonesia, Singapore and Australia go on holiday in Japan. They have to log who paid for what, work out who owes whom, and then send each other bank transfers across three countries once the trip is over.
 
-## Tujuan bisnis & ukuran keberhasilan
+## Business goals and success measures
 
-Tujuan jangka pendek adalah memenangkan hackathon Monad Metropolis; tujuan jangka panjang adalah membawa Tekosoe menjadi produk nyata lewat program residensi dan dukungan ekosistem Monad.
+In the short term we want to win Monad Metropolis. In the long term we want to turn Tekosoe into a real product through a residency program and support from the Monad ecosystem.
 
-| Tujuan | Ukuran keberhasilan | Jangka |
+| Goal | Success measure | Horizon |
 | --- | --- | --- |
-| Masuk 3 besar track Consumer Products & Payments | Pengumuman pemenang 3 November 2026 | Hackathon |
-| Memenangkan bounty Agora Cross-Border | Semua syarat bounty terpenuhi dan terlihat di demo | Hackathon |
-| Memenangkan bounty pendukung (Mera UX, Mera PRF, Envio, Alchemy) | Integrasi real di testnet, dijelaskan per sponsor di README | Hackathon |
-| Membuktikan orang awam bisa memakai tanpa bantuan | Satu penguji non-kripto menyelesaikan transaksi pertama tanpa dibantu | Hackathon |
-| Mendapat undangan residensi dan dukungan ekosistem Monad | Undangan dari Monad Foundation | Setelah hackathon |
-| Siap dipakai dengan uang sungguhan | Kontrak diaudit, deploy ke mainnet, on-ramp dan off-ramp tersedia | Setelah hackathon |
+| Top 3 in the Consumer Products & Payments track | Winners announced 3 Nov 2026 | Hackathon |
+| Win the Agora Cross-Border bounty | Every bounty requirement is met and visible in the demo | Hackathon |
+| Win the supporting bounties (Mera UX, Mera PRF, Envio, Alchemy) | Real testnet integrations, each explained per sponsor in the README | Hackathon |
+| Prove everyday users can use it unaided | One non-crypto tester completes a first payment with no help | Hackathon |
+| Get a residency invitation and ecosystem support | Invitation from the Monad Foundation | After the hackathon |
+| Be ready for real money | Audited contract, mainnet deployment, fiat on-ramp and off-ramp | After the hackathon |
 
-## Pengguna sasaran & pemangku kepentingan
+## Target users and stakeholders
 
-Pengguna utama adalah kelompok teman dari negara berbeda yang bepergian atau berkegiatan bersama, dan yang bukan pengguna kripto.
+Our primary users are groups of friends from different countries who travel or do things together, and who don't use crypto.
 
-**Segmen pengguna**
+**User segments**
 
-| Segmen | Kebutuhan | Prioritas |
+| Segment | Need | Priority |
 | --- | --- | --- |
-| Teman dari beberapa negara yang liburan bersama | Patungan dan saling bayar lintas negara tanpa bank | Utama (fokus demo) |
-| Rombongan dari satu negara yang liburan ke luar negeri | Kas bersama dan belanja di negara tujuan | Berikutnya (butuh kartu) |
-| Keluarga atau tim yang tersebar di beberapa negara | Kas bersama untuk acara atau kebutuhan rutin | Berikutnya |
+| Friends from several countries on holiday together | Chip in and pay each other across borders without banks | Primary (demo focus) |
+| A group from one country travelling abroad | A shared pot for spending at the destination | Next (needs a card) |
+| Families or teams spread across countries | A shared pot for events or recurring costs | Next |
 
-**Pemangku kepentingan**
+**Stakeholders**
 
-| Pihak | Kepentingan |
+| Who | What they care about |
 | --- | --- |
-| Pengguna akhir | Uang aman, cepat sampai, mudah dipakai |
-| Juri track | Kualitas produk, teknis, integrasi Monad, kecocokan track, inovasi |
-| Agora (AUSD) | Pemakaian AUSD untuk pembayaran lintas negara |
-| Monad Foundation / Category Labs (Mera) | Mera sebagai seluruh account layer; penggunaan kreatif kunci turunan passkey |
-| Envio | Data on-chain dari HyperIndex menggerakkan fitur inti |
-| Alchemy | Integrasi layanan Alchemy di Monad |
-| Tim Tekosoe | Menang hackathon dan melanjutkan produk |
+| End users | Money that is safe, arrives fast and is easy to use |
+| Track judges | Product quality, technical depth, Monad integration, track fit, innovation |
+| Agora (AUSD) | AUSD used for cross-border payments |
+| Monad Foundation / Category Labs (Mera) | Mera as the entire account layer; creative use of passkey-derived keys |
+| Envio | HyperIndex data powering core features |
+| Tekosoe team | Win the hackathon and keep building the product |
 
-## Proposisi nilai & pembeda
+## Value proposition and differentiation
 
-Tekosoe menyatukan pencatatan dan pelunasan: yang dipindahkan adalah uang sungguhan dalam dolar digital, lintas negara, dalam hitungan detik.
+Tekosoe brings tracking and paying back together. What moves is real money in digital dollars, across borders, in seconds.
 
-| Aspek | Splitwise | Dompet digital lokal (GoPay) | Transfer bank | Tekosoe |
+| | Splitwise | Local e-wallet (GoPay) | Bank transfer | Tekosoe |
 | --- | --- | --- | --- | --- |
-| Mencatat pengeluaran grup | Ya | Terbatas | Tidak | Ya |
-| Memindahkan uang sungguhan | Tidak (hanya IOU) | Ya, satu negara | Ya | Ya |
-| Lintas negara | Hanya catatan | Tidak | Lambat, berbiaya, kena kurs | Ya, dalam AUSD |
-| Kecepatan pelunasan | Tergantung bank | Instan, satu negara | Hari | Detik |
-| Perlu pengetahuan kripto | Tidak | Tidak | Tidak | Tidak (Face ID saja) |
-| Pihak ketiga memegang dana | Tidak berlaku | Ya | Ya | Tidak; dana di kontrak, kunci di perangkat user |
+| Tracks group spending | Yes | Limited | No | Yes |
+| Moves real money | No (IOUs only) | Yes, in one country | Yes | Yes |
+| Works across borders | Records only | No | Slow, with fees and FX loss | Yes, in AUSD |
+| Settlement speed | Depends on the bank | Instant, in one country | Days | Seconds |
+| Needs crypto knowledge | No | No | No | No, just a passkey |
+| A third party holds the money | n/a | Yes | Yes | No. Funds sit in the contract, keys stay on the user's phone |
 
-**Pembeda utama**
+**What sets us apart**
 
-Tekosoe adalah shared wallet yang settle-up sendiri: anggota memakai satu kas bersama sampai habis, lalu di tanggal grup berakhir kontrak menghitung dan menyelesaikan siapa harus bayar ke siapa.
+Tekosoe is a shared pot that settles up by itself. Members spend from one pot until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back.
 
-- Pelunasan uang sungguhan, bukan sekadar catatan utang.
-- Satu mata uang (AUSD) untuk semua anggota, jadi tidak ada selisih kurs di antara mereka.
-- Masuk dengan Face ID lewat passkey; tanpa seed phrase dan tanpa token gas.
-- Catatan dan struk pengeluaran terenkripsi, jadi pengeluaran grup tidak terbuka untuk publik.
+- Real money changes hands, not just a list of debts.
+- One currency (AUSD) for every member, so nobody loses money on exchange rates between friends.
+- Sign in with a passkey (Face ID, fingerprint or PIN). No seed phrase, no gas token.
+- Spending notes and receipts are encrypted, so the group's spending isn't public.
 
-## Kebutuhan bisnis tingkat tinggi
+## High-level business requirements
 
-Setiap kebutuhan bisnis di bawah diturunkan menjadi kebutuhan fungsional di PRD.
+Each business requirement below becomes one or more functional requirements in the PRD.
 
-| ID | Kebutuhan bisnis | Alasan |
+| ID | Business requirement | Why |
 | --- | --- | --- |
-| BR-01 | User bisa mulai tanpa pengetahuan kripto: tanpa seed phrase, extension, atau token gas | Target pengguna awam; syarat track dan bounty Mera UX |
-| BR-02 | Semua nilai uang memakai AUSD | Satu mata uang lintas negara; syarat bounty Agora |
-| BR-03 | Anggota grup di negara berbeda bisa menyetor ke dan memakai satu kas bersama | Inti kasus lintas negara |
-| BR-04 | Setiap pemakaian kas tercatat transparan bagi anggota dan bisa ditolak oleh yang tidak ikut | Kepercayaan tanpa perantara |
-| BR-05 | Di tanggal grup berakhir, saldo diselesaikan otomatis dengan uang sungguhan | Pembeda dari aplikasi pencatat utang |
-| BR-06 | Transaksi selesai dalam hitungan detik | Syarat "instant settlement" Agora; pembeda dari bank |
-| BR-07 | Tidak ada pihak yang memegang kunci atau dana user selain kontrak; pemakaian besar butuh persetujuan anggota lain | Aman dan sesuai syarat "no custody backend" |
-| BR-08 | Catatan dan struk pengeluaran tidak terbaca publik | Privasi; bounty Mera PRF |
-| BR-09 | Semua integrasi sponsor berjalan nyata di Monad testnet | Syarat penilaian bounty |
-| BR-10 | Kas bisa dipakai siapa pun sampai habis, dan pemakaian tercatat otomatis tanpa input manual | Inti konsep shared wallet |
-| BR-11 | Demo menunjukkan belanja langsung dari kas di toko lewat kartu simulasi | Menunjukkan visi produk; kartu sungguhan di roadmap |
+| BR-01 | Users can start with zero crypto knowledge: no seed phrase, extension or gas token | Everyday users are the target; required by the track and the Mera UX bounty |
+| BR-02 | Every amount of money is in AUSD | One currency across borders; required by the Agora bounty |
+| BR-03 | Members in different countries can pay into and spend from one shared pot | The heart of the cross-border use case |
+| BR-04 | Every payment from the pot is visible to members, and people who weren't part of it can dispute it | Trust without a middleman |
+| BR-05 | On the trip's end date, balances settle automatically with real money | What separates us from debt-tracking apps |
+| BR-06 | Payments complete in seconds | Agora's "instant settlement" requirement; what separates us from banks |
+| BR-07 | Nobody but the contract holds user keys or funds; large payments need another member's approval | Safety, and the "no custody backend" requirement |
+| BR-08 | Spending notes and receipts are not publicly readable | Privacy; the Mera PRF bounty |
+| BR-09 | Every sponsor integration runs for real on Monad testnet | Required for bounty judging |
+| BR-10 | Anyone can spend from the pot until it runs out, and every payment is recorded automatically | The core shared-pot idea |
+| BR-11 | The demo shows paying at a shop straight from the pot with a simulated card | Shows the product vision; a real card is on the roadmap |
 
-## Model bisnis, batasan & asumsi
+## Business model, constraints and assumptions
 
-Model bisnis belum diputuskan dan tidak dibutuhkan untuk hackathon, tetapi juri yang berasal dari investor kemungkinan akan menanyakannya.
+We haven't chosen a business model and don't need one for the hackathon, but investor judges will probably ask.
 
-**Kandidat model bisnis (usulan, belum diputuskan)**
+**Business model candidates (proposed, not decided)**
 
-- Biaya kecil per settle-up atau per transfer lintas negara.
-- Komisi dari on-ramp dan off-ramp fiat lewat mitra.
-- Pendapatan dari kartu untuk belanja di negara tujuan.
+- A small fee per settle-up or per cross-border transfer.
+- A commission on fiat on-ramp and off-ramp through partners.
+- Revenue from a card for spending at the destination.
 
-**Batasan**
+**Constraints**
 
-- Deadline submission 13 Oktober 2026 pukul 23.59 ET.
-- Hanya Monad testnet; tidak ada uang sungguhan selama hackathon.
-- Account layer hanya Mera; tidak memakai Privy atau wallet lain.
-- On-ramp dan off-ramp (misalnya Mercuryo) hanya di roadmap; kartu hanya disimulasikan di demo, kartu sungguhan (misalnya lewat mitra Visa) di roadmap.
+- Submission deadline: 13 Oct 2026, 23:59 ET.
+- Monad testnet only; no real money during the hackathon.
+- Mera is the only account layer; no Privy or other wallets.
+- On-ramp and off-ramp (for example Mercuryo) are roadmap only. The card is simulated in the demo; a real card (for example through a Visa partner) is on the roadmap.
 
-**Asumsi**
+**Assumptions**
 
-- AUSD dan faucet-nya tersedia di Monad testnet.
-- Mera bisa dipakai di perangkat mobile dengan passkey yang tersinkron.
-- Gas bisa disponsori tanpa backend memegang kunci user.
+- AUSD and its faucet are available on Monad testnet.
+- Mera works on mobile devices with synced passkeys.
+- Gas can be sponsored without the backend holding user keys.
 
-**Pertanyaan terbuka**
+**Open questions**
 
-- [ ] Model bisnis mana yang dipilih untuk pitch?
-- [x] Apakah app dibangun native (Expo/React Native) atau PWA? Diputuskan: native dengan Expo.
-- [ ] Aspek regulasi transfer lintas negara untuk versi mainnet
+- [ ] Which business model do we pitch?
+- [x] Native app (Expo/React Native) or PWA? Decided: native, with Expo.
+- [ ] Regulatory requirements for cross-border transfers on mainnet
 
-## Dokumen terkait
+## Related documents
 
-- Kebutuhan produk: PRD
-- Spesifikasi teknis: Spesifikasi Teknis
-- User stories: User Stories
-- Rencana pengembangan, uji, timeline, dan checklist submission: Monad Metropolis — Dokumen Pengembangan
+- Product requirements: [PRD](02-prd.md)
+- Technical specification: [Technical spec](03-technical-spec.md)
+- User stories: [User stories](04-user-stories.md)
+- Development plan, testing, timeline and submission checklist: [Development plan](07-development-plan.md)

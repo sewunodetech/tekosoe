@@ -1,19 +1,22 @@
-# ADR 0003: Mera Passkey API Integration
+# 0003 — Mera passkey API integration
 
-## Konteks
+- Status: accepted
+- Date: 2026-09-29
 
-Kita perlu menggunakan `@category-labs/mera` untuk membuat akun passkey, mendapatkan `prfOutput`, dan menggunakannya untuk membuat *signing session* `secp256k1` yang akan menandatangani transaksi ke jaringan Monad (EVM).
+## Context
 
-Karena platformnya adalah React Native, kita juga harus memakai *client* khusus yang disediakan oleh Mera untuk lingkungan tersebut.
+We need `@category-labs/mera` to create a passkey account, get its `prfOutput`, and use that to open a `secp256k1` signing session that signs transactions for Monad (EVM).
 
-## Keputusan
+Because the app runs on React Native, we also need the WebAuthn client Mera provides for that environment.
 
-Kita menggunakan API resmi dari SDK `@category-labs/mera` dengan pengaturan khusus untuk React Native sebagai berikut:
+## Decision
 
-1. **Client Khusus React Native**:
-   Menggunakan `reactNativeWebAuthnClient` dari `@category-labs/mera/react-native-webauthn-client` (membutuhkan instalasi `react-native-passkey`).
+We use the official `@category-labs/mera` SDK API, set up for React Native as follows:
 
-2. **Membuat Passkey (Registrasi)**:
+1. **React Native client.**
+   Use `reactNativeWebAuthnClient` from `@category-labs/mera/react-native-webauthn-client` (requires `react-native-passkey`).
+
+2. **Create a passkey (registration).**
    ```ts
    import { createPasskeyWithPrfOutput } from '@category-labs/mera';
    import { reactNativeWebAuthnClient } from '@category-labs/mera/react-native-webauthn-client';
@@ -25,31 +28,31 @@ Kita menggunakan API resmi dari SDK `@category-labs/mera` dengan pengaturan khus
    });
    ```
 
-3. **Mendapatkan Passkey (Login)**:
+3. **Use an existing passkey (sign-in).**
    ```ts
    import { getPasskeyPrfOutput } from '@category-labs/mera';
-   
+
    const { prfOutput, credentialId } = await getPasskeyPrfOutput({
      rpId: 'tekosoe.xyz',
-     credential: { credentialId, transports }, // opsional
+     credential: { credentialId, transports }, // optional
      webAuthnClient: reactNativeWebAuthnClient,
    });
    ```
 
-4. **Signing Session & Alamat EVM**:
+4. **Signing session and EVM address.**
    ```ts
    import { createSecp256k1SigningSession, getEvmAddress } from '@category-labs/mera';
 
-   // Buat session
+   // Open a session
    using session = createSecp256k1SigningSession({ privateKey: prfOutput });
-   
-   // Dapatkan alamat EVM
+
+   // Get the EVM address
    const address = getEvmAddress(session.publicKey);
 
-   // Tanda tangani digest
+   // Sign a digest
    const signature = await session.signDigest(digest);
    ```
 
-## Status
+## Consequences
 
-**Disetujui.** Sesuai dengan hasil Spike (M2), ini adalah bentuk integrasi *passkey* PRF dan kriptografi EVM menggunakan SDK Mera di lingkungan React Native.
+This is the shape of the passkey PRF and EVM signing integration with the Mera SDK on React Native, as confirmed by the spike (WP M2). It still has to be verified in a development build on physical phones.

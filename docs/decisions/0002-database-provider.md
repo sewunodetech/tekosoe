@@ -1,25 +1,26 @@
-# 0002 — Provider database metadata
+# 0002 — Metadata database provider
 
-- Status: diusulkan (belum final)
-- Tanggal: 2026-09-28
+- Status: proposed (not final)
+- Date: 2026-09-28
 
-## Konteks
+## Context
 
-Spesifikasi Teknis memilih Supabase (Postgres + Storage) untuk metadata off-chain. Tim mempertimbangkan Neon. Neon hanya menyediakan Postgres — tidak ada object storage dan tidak ada role `anon`/`service_role` bawaan.
+The technical spec picked Supabase (Postgres + Storage) for off-chain metadata. The team considered Neon instead. Neon only provides Postgres: no object storage and no built-in `anon`/`service_role` roles.
 
-## Keputusan sementara
+## Interim decision
 
-- Folder `supabase/` diganti `database/`; SQL ditulis sebagai Postgres standar.
-- `apps/api` terhubung lewat satu `DATABASE_URL` (bukan `SUPABASE_URL` + service role key).
-- Struk terenkripsi disimpan di object storage terpisah, dikonfigurasi lewat env `RECEIPTS_STORAGE_*`.
+- The `supabase/` folder becomes `database/`; SQL is written as standard Postgres.
+- `apps/api` connects through a single `DATABASE_URL` (instead of a Supabase URL + service role key).
+- Encrypted receipts live in separate object storage, configured through environment variables.
 
-## Yang masih harus diputuskan
+## Still to decide
 
-- [ ] Neon atau Supabase untuk Postgres.
-- [ ] Object storage untuk ciphertext struk kalau memakai Neon (mis. Cloudflare R2 atau S3-compatible lain).
-- [ ] Driver/ORM di `apps/api` (mis. `@neondatabase/serverless`, `postgres`, Drizzle).
+- [ ] Neon or Supabase for Postgres.
+- [ ] Object storage for receipt ciphertext if we use Neon (for example Cloudflare R2 or another S3-compatible service).
+- [ ] Driver/ORM in `apps/api` (for example `@neondatabase/serverless`, `postgres`, Drizzle).
 
-## Konsekuensi
+## Consequences
 
-- Dokumen perencanaan di Claude Docs masih menyebut Supabase; perbarui setelah keputusan final.
-- Aturan inti tidak berubah: database hanya metadata, tidak pernah saldo; hanya `apps/api` yang mengakses.
+- The team's planning documents still mention Supabase; update them once this is final.
+- The core rules don't change: the database holds metadata only, never balances, and only `apps/api` can reach it.
+- Partly answered by [ADR 0004](0004-api-express.md): Drizzle + `pg` as the driver, S3-compatible storage for receipts, and Neon as the host in the current deployment.

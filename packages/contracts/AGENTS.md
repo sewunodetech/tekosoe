@@ -1,6 +1,6 @@
 # packages/contracts
 
-Kontrak `GroupVault` (Foundry + OpenZeppelin v5). Spesifikasi: `docs/03-spesifikasi-teknis.md` › Model data, Spesifikasi fungsi kontrak, Event, Keamanan — dengan perubahan di [ADR 0005](../../docs/decisions/0005-groupvault-v1.md).
+Kontrak `GroupVault` (Foundry + OpenZeppelin v5). Spesifikasi: `docs/03-technical-spec.md` › Model data, Spesifikasi fungsi kontrak, Event, Keamanan — dengan perubahan di [ADR 0005](../../docs/decisions/0005-groupvault-v1.md).
 
 ## Status
 
@@ -28,7 +28,7 @@ Kontrak `GroupVault` (Foundry + OpenZeppelin v5). Spesifikasi: `docs/03-spesifik
 
 ## Uji
 
-Checklist di `docs/07-rencana-pengembangan.md` › Rencana uji › Kontrak. Minimal: unit test jalur sukses + setiap revert, contoh A/B/C dari spesifikasi (A −10, B −10, C +20), fuzz invariant saldo, uji reentrancy, `slither .` bersih sebelum deploy final.
+Checklist di `docs/07-development-plan.md` › Rencana uji › Kontrak. Minimal: unit test jalur sukses + setiap revert, contoh A/B/C dari spesifikasi (A −10, B −10, C +20), fuzz invariant saldo, uji reentrancy, `slither .` bersih sebelum deploy final.
 
 ## Setelah mengubah fungsi/event
 

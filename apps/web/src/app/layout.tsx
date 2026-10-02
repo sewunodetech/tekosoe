@@ -13,8 +13,9 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Tekosoe — Shared trip wallet that settles itself",
-  description: "Shared group wallet on Monad testnet. One pot in digital dollars, automatic settle-up, passkey login with zero gas.",
+  metadataBase: new URL("https://tekosoe.xyz"),
+  title: "Tekosoe — One pot for the whole trip",
+  description: "Friends in different countries share one pot in dollars, pay with a passkey (Face ID, fingerprint or PIN), and the trip settles up by itself.",
 };
 
 export default function RootLayout({

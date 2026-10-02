@@ -1,115 +1,115 @@
 # Tekosoe — Product Requirements Document (PRD)
 
-## Ringkasan & tujuan produk
+## Summary and product goals
 
-Versi hackathon Tekosoe (v0.1) adalah shared wallet yang settle-up sendiri: tiga orang di tiga negara menyetor AUSD ke satu kas, memakai kas bersama sampai habis, lalu di tanggal grup berakhir kontrak otomatis menghitung dan menyelesaikan siapa harus bayar ke siapa. Semua di Monad testnet, hanya dengan Face ID.
+The hackathon version of Tekosoe (v0.1) is a shared pot that settles up by itself. Three people in three countries put AUSD into one pot and spend from it until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back. It all runs on Monad testnet, and all anyone needs is a passkey.
 
-**Pernyataan produk.** Untuk teman dan keluarga yang tersebar di beberapa negara, Tekosoe adalah dompet grup yang mencatat sekaligus melunasi pengeluaran bersama dalam dolar digital, dalam hitungan detik, tanpa bank dan tanpa pengetahuan kripto.
+**Product statement.** For friends and families spread across countries, Tekosoe is a group pot that records *and* settles shared spending in digital dollars, in seconds, with no bank and no crypto knowledge.
 
-**Tujuan produk v0.1**
+**v0.1 product goals**
 
-1. Onboarding dari link undangan sampai jadi anggota grup dalam satu alur, tanpa seed phrase dan tanpa token gas.
-2. Setiap anggota bisa memakai kas bersama selama saldonya ada, tanpa mencatat apa pun selain memilih "untuk siapa".
-3. Semua perpindahan uang terjadi dalam AUSD dan final dalam hitungan detik.
-4. Di tanggal berakhir, settle-up berjalan otomatis dan hasilnya sama dengan hitungan manual.
+1. Go from an invite link to trip member in one flow, with no seed phrase and no gas token.
+2. Let any member spend from the pot while there is money in it. The only thing they record is who the payment was for.
+3. Move every dollar in AUSD, final within seconds.
+4. Settle up automatically on the end date, with a result that matches the math done by hand.
 
-## Persona & perjalanan pengguna
+## Personas and user journey
 
-Demo memakai tiga persona dari cerita utama: tiga teman dari Indonesia, Singapura, dan Australia yang liburan bersama di Jepang.
+The demo uses three personas from our main story: three friends from Indonesia, Singapore and Australia on holiday in Japan.
 
-| Persona | Peran di grup | Yang ia butuhkan |
+| Persona | Role in the trip | What they need |
 | --- | --- | --- |
-| Teman dari Indonesia | Pembuat grup, sering membayar di tempat | Membuat grup cepat, mengundang teman, mencatat pengeluaran di jalan |
-| Teman dari Singapura | Anggota | Bergabung tanpa ribet, tahu berapa yang harus dibayar |
-| Teman dari Australia | Anggota, belum pernah memakai kripto | Masuk dengan Face ID, tidak perlu memahami istilah kripto |
+| Friend from Indonesia | Creates the trip, often pays on the spot | Create a trip fast, invite friends, record spending on the go |
+| Friend from Singapore | Member | Join without hassle and know what they owe |
+| Friend from Australia | Member, has never used crypto | Sign in with a passkey and never meet a crypto term |
 
-**Perjalanan pengguna**
+**User journey**
 
-| Tahap | Yang dilakukan user | Yang terjadi di balik layar |
+| Stage | What the user does | What happens behind the scenes |
 | --- | --- | --- |
-| 1. Sebelum trip | Pembuat grup membuat grup "Trip Jepang", memilih tanggal berakhir, lalu membagikan link | Akun Mera dari passkey; `createGroup` |
-| 2. Bergabung | Anggota membuka link, Face ID, memilih batas jaminan, lalu setor dana awal | `joinGroup` + `approve` batas izin tarik; `deposit` AUSD; gas disponsori |
-| 3. Memakai kas | Anggota membayar dari kas (ganti ke teman yang bayar di tempat, atau ke penerima lain) dan memilih untuk siapa | `spend`; tercatat otomatis; feed diperbarui lewat Envio |
-| 4. Nominal besar | Pemakaian di atas batas grup menunggu persetujuan satu anggota lain | `spend` berstatus Pending, lalu `approveSpend` |
-| 5. Belanja di toko (P2) | Anggota tap kartu Tekosoe (simulasi) di toko demo | `spend` dari kas ke alamat toko demo |
-| 6. Keberatan | Anggota yang tidak ikut menolak bagiannya | `disputeShare` dalam jendela keberatan |
-| 7. Kas menipis | App mengajak anggota menambah dana | `deposit` tambahan |
-| 8. Tanggal berakhir | Tidak ada yang perlu dilakukan; semua anggota menerima ringkasan dan pengembalian otomatis | Penjadwal memanggil `settle`; kekurangan ditarik dalam batas jaminan; kelebihan dikembalikan |
-| 9. Sisa tagihan | Anggota yang kurang melebihi batas jaminan melunasi tagihannya | `payDebt` |
+| 1. Before the trip | The creator sets up "Japan Trip", picks an end date and shares the link | Mera account from a passkey; `createGroup` |
+| 2. Joining | A member opens the link, confirms with their passkey, picks a safety net and puts in a first deposit | `joinGroup` + AUSD `approve` for the safety net; AUSD `deposit`; gas sponsored |
+| 3. Spending | A member pays from the pot (paying back a friend who covered something, or paying someone else) and picks who it was for | `spend`; recorded automatically; feed updated through Envio |
+| 4. Big payments | A payment above the trip's limit waits for one other member to approve it | `spend` with status Pending, then `approveSpend` |
+| 5. Paying at a shop (P2) | A member taps the Tekosoe card (simulated) at a demo shop | `spend` from the pot to the demo shop's address |
+| 6. Disputes | A member who wasn't part of a payment rejects their share | `disputeShare` within the dispute window |
+| 7. Pot running low | The app nudges members to top up | Additional `deposit` |
+| 8. End date | Nobody has to do anything. Every member gets a summary and any refund automatically | The scheduler calls `settle`; shortfalls are pulled up to each safety net; overpayments are refunded |
+| 9. Remaining debt | A member who owes more than their safety net pays the rest | `payDebt` |
 
-## Kebutuhan fungsional
+## Functional requirements
 
-Prioritas mengikuti lapisan scope: P0 wajib untuk track dan bounty utama, P1 untuk Envio, P2 untuk Mera PRF, P3 untuk Alchemy.
+Priorities follow the scope layers: P0 is required for the track and main bounties, P1 is Envio, P2 is Mera PRF, P3 is Alchemy.
 
-| ID | Kebutuhan | BRD | Prioritas |
+| ID | Requirement | BRD | Priority |
 | --- | --- | --- | --- |
-| FR-01 | User membuat akun dengan passkey (Face ID/sidik jari) tanpa seed phrase | BR-01 | P0 |
-| FR-02 | User masuk kembali di perangkat lain dengan passkey yang sama dan mendapat akun yang sama | BR-01 | P0 |
-| FR-03 | User bertransaksi tanpa pernah memegang atau membeli token gas | BR-01, BR-07 | P0 |
-| FR-04 | User membuat grup dengan nama, tanggal berakhir, dan batas persetujuan | BR-03 | P0 |
-| FR-05 | User mengundang anggota lewat link; penerima bergabung dengan passkey dan memilih batas jaminan | BR-03, BR-05 | P0 |
-| FR-06 | Anggota menyetor AUSD ke kas kapan saja sebelum tanggal berakhir | BR-02, BR-03 | P0 |
-| FR-07 | Anggota memakai kas selama saldonya cukup, tanpa melihat jumlah setorannya sendiri | BR-10 | P0 |
-| FR-08 | Setiap pemakaian mencatat penerima, nominal, dan untuk siapa (default semua anggota, pembagian rata atau manual) | BR-04, BR-10 | P0 |
-| FR-09 | Pemakaian di atas batas grup butuh persetujuan satu anggota lain | BR-07 | P0 |
-| FR-10 | Peserta bisa menolak bagiannya dalam jendela keberatan; bagian itu pindah ke pemakai | BR-04 | P0 |
-| FR-11 | Di tanggal berakhir, settle-up berjalan otomatis: kekurangan ditarik dalam batas jaminan, kelebihan dikembalikan | BR-05 | P0 |
-| FR-12 | Kekurangan di atas batas jaminan menjadi tagihan yang bisa dilunasi di app | BR-05 | P0 |
-| FR-13 | Semua nominal ditampilkan dalam dolar tanpa istilah kripto | BR-01 | P0 |
-| FR-14 | Feed aktivitas grup diperbarui tanpa refresh manual | BR-04 | P1 |
-| FR-15 | Saldo tiap anggota (setor, pakai, saldo bersih) dan perkiraan hasil settle-up | BR-04, BR-05 | P1 |
-| FR-16 | Kartu Tekosoe (simulasi) untuk membayar toko demo langsung dari kas | BR-11 | P2 |
-| FR-17 | Catatan dan foto struk dienkripsi dengan kunci turunan passkey; hanya anggota yang bisa membuka | BR-08 | P2 |
-| FR-18 | Push notification untuk pemakaian baru, permintaan persetujuan, dan hasil settle-up | BR-04 | P3 |
-| FR-19 | Pemakai bisa melampirkan struk dari penjual (foto atau PDF, lebih dari satu halaman) saat membayar atau sesudahnya; struk dienkripsi di HP dan fingerprint-nya dicatat on-chain lewat attachReceipt | BR-04, BR-08 | P0 |
-| FR-20 | Anggota membuka struk dengan Face ID; Activity menandai "Receipt" atau "No receipt"; penyetuju melihat peringatan kalau pengeluaran besar belum punya struk | BR-04, BR-08 | P0 |
-| FR-21 | OCR di HP membaca nominal, toko, dan tanggal dari struk, lalu memberi peringatan kalau nominalnya berbeda dengan pembayaran | BR-04 | P1 |
-| FR-22 | Setelah settle, tiap anggota mendapat invoice in-app: status Paid, Refunded, atau Due; setiap baris tertaut ke transaksinya; invoice Due punya tombol Pay yang memanggil payDebt; bisa disimpan sebagai PDF lewat expo-print | BR-04, BR-05 | P0 |
-| FR-23 | PDF invoice dibuat di server dan dikirim lewat email, dengan perkiraan mata uang lokal (kurs dikunci saat settle, berlabel approx) | BR-05 | P1 |
+| FR-01 | Users create an account with a passkey (Face ID, fingerprint or PIN), with no seed phrase | BR-01 | P0 |
+| FR-02 | Users sign back in on another device with the same passkey and get the same account | BR-01 | P0 |
+| FR-03 | Users transact without ever holding or buying a gas token | BR-01, BR-07 | P0 |
+| FR-04 | Users create a trip with a name, an end date and an approval limit | BR-03 | P0 |
+| FR-05 | Users invite members by link; invitees join with a passkey and pick a safety net | BR-03, BR-05 | P0 |
+| FR-06 | Members add AUSD to the pot any time before the end date | BR-02, BR-03 | P0 |
+| FR-07 | Members spend from the pot while it has enough money, regardless of how much they put in themselves | BR-10 | P0 |
+| FR-08 | Every payment records the recipient, the amount and who it was for (all members by default, split evenly or by hand) | BR-04, BR-10 | P0 |
+| FR-09 | Payments above the trip's limit need one other member's approval | BR-07 | P0 |
+| FR-10 | Participants can reject their share within the dispute window; that share moves to the person who paid | BR-04 | P0 |
+| FR-11 | On the end date, settle-up runs automatically: shortfalls are pulled up to each safety net, overpayments are refunded | BR-05 | P0 |
+| FR-12 | A shortfall beyond the safety net becomes a bill the member can pay in the app | BR-05 | P0 |
+| FR-13 | Every amount is shown in dollars, with no crypto terms | BR-01 | P0 |
+| FR-14 | The trip's activity feed updates without a manual refresh | BR-04 | P1 |
+| FR-15 | Each member's position (put in, spent, net) and a preview of the settle-up | BR-04, BR-05 | P1 |
+| FR-16 | A Tekosoe card (simulated) to pay a demo shop straight from the pot | BR-11 | P2 |
+| FR-17 | Notes and receipt photos are encrypted with a passkey-derived key; only members can open them | BR-08 | P2 |
+| FR-18 | Push notifications for new payments, approval requests and settle-up results | BR-04 | P3 |
+| FR-19 | The payer can attach the seller's receipt (photo or multi-page PDF) when paying or later; the receipt is encrypted on the phone and its fingerprint is recorded on-chain with `attachReceipt` | BR-04, BR-08 | P0 |
+| FR-20 | Members open receipts with their passkey; Activity marks each payment "Receipt" or "No receipt"; approvers see a warning when a large payment has no receipt | BR-04, BR-08 | P0 |
+| FR-21 | On-device OCR reads the amount, shop and date from a receipt and warns when the amount doesn't match the payment | BR-04 | P1 |
+| FR-22 | After settle-up, each member gets an in-app invoice with status Paid, Refunded or Due; every line links to its transaction; a Due invoice has a Pay button that calls `payDebt`; invoices can be saved as PDF with expo-print | BR-04, BR-05 | P0 |
+| FR-23 | A server-generated invoice PDF sent by email, with an estimate in local currency (rate locked at settle-up, labelled "approx.") | BR-05 | P1 |
 
-## Kebutuhan non-fungsional
+## Non-functional requirements
 
-Angka target di bawah adalah target tim untuk demo, bukan jaminan; angka nyata diukur saat uji integrasi.
+The targets below are the team's goals for the demo, not guarantees. Real numbers are measured during integration testing.
 
-| ID | Kategori | Kebutuhan |
+| ID | Category | Requirement |
 | --- | --- | --- |
-| NFR-01 | Keamanan | Kunci user tidak pernah meninggalkan perangkat; tidak ada backend yang menyimpan kunci atau dana |
-| NFR-02 | Keamanan | Kontrak: state diubah sebelum transfer, `nonReentrant`, `SafeERC20`, hanya anggota yang bisa bertindak |
-| NFR-03 | Integritas | Jumlah saldo bersih semua anggota selalu sama dengan isi kas, dan isi kas selalu sama dengan saldo AUSD grup di kontrak |
-| NFR-04 | Privasi | Catatan dan struk tidak pernah disimpan sebagai teks biasa on-chain |
-| NFR-05 | Kinerja | Transaksi tampil di feed semua anggota dalam beberapa detik (diukur saat uji) |
-| NFR-06 | Kegunaan | Penguji non-kripto menyelesaikan transaksi pertama tanpa bantuan |
-| NFR-07 | Kegunaan | Tidak ada kata "wallet", "gas", "seed phrase", atau "blockchain" di layar user |
-| NFR-08 | Platform | App native iOS dan Android, dibangun dengan Expo (React Native) |
-| NFR-09 | Keterverifikasian | Alamat kontrak dan hash transaksi testnet tercantum di README; repo publik dengan riwayat commit selama hackathon |
+| NFR-01 | Security | User keys never leave the device; no backend stores keys or funds |
+| NFR-02 | Security | Contract: state changes before transfers, `nonReentrant`, `SafeERC20`, only members can act |
+| NFR-03 | Integrity | The sum of all members' net balances always equals the pot, and the pot always equals the trip's AUSD balance in the contract |
+| NFR-04 | Privacy | Notes and receipts are never stored on-chain as plain text |
+| NFR-05 | Performance | A payment appears in every member's feed within a few seconds (measured during testing) |
+| NFR-06 | Usability | A non-crypto tester completes their first payment without help |
+| NFR-07 | Usability | The words "wallet", "gas", "seed phrase" and "blockchain" never appear on screen |
+| NFR-08 | Platform | Native iOS and Android app, built with Expo (React Native) |
+| NFR-09 | Verifiability | Contract addresses and testnet transaction hashes are listed in the README; the repo is public with its commit history from the hackathon |
 
-## Metrik keberhasilan & kriteria rilis
+## Success metrics and release criteria
 
-v0.1 siap disubmit kalau semua kebutuhan P0 lolos uji dan skenario demo berjalan end-to-end di testnet tanpa langkah manual di belakang layar.
+v0.1 is ready to submit when every P0 requirement passes testing and the demo scenario runs end to end on testnet with no manual steps behind the scenes.
 
-**Metrik yang diukur saat uji**
+**Metrics measured during testing**
 
-- Waktu dari membuka link undangan sampai menjadi anggota grup.
-- Waktu dari transaksi dikirim sampai tampil di feed anggota lain.
-- Jumlah langkah di mana penguji non-kripto meminta bantuan (target: nol).
-- Selisih antara hasil settle-up di app dan hitungan manual (target: nol).
+- Time from opening an invite link to being a member.
+- Time from sending a payment to it appearing in other members' feeds.
+- Number of steps where a non-crypto tester asks for help (target: zero).
+- Difference between the app's settle-up and the math done by hand (target: zero).
 
-**Kriteria rilis v0.1**
+**v0.1 release criteria**
 
-- [ ] FR-01 sampai FR-13 berfungsi di Monad testnet, termasuk settle-up otomatis
-- [ ] Unit dan fuzz test kontrak lolos; scan Slither tanpa temuan serius
-- [ ] Skenario tiga negara berjalan end-to-end dengan AUSD asli testnet
-- [ ] Tidak ada istilah kripto di layar user
-- [ ] README, video demo, dan profil project di dashboard lengkap
+- [ ] FR-01 to FR-13 work on Monad testnet, including automatic settle-up
+- [ ] Contract unit and fuzz tests pass; Slither scan with no serious findings
+- [ ] The three-country scenario runs end to end with real testnet AUSD
+- [ ] No crypto terms on any screen
+- [ ] README, demo video and project profile on the dashboard are complete
 
-## Di luar scope & fase berikutnya
+## Out of scope and next phases
 
-Fitur di bawah sengaja tidak dibangun di v0.1 supaya produk inti selesai dengan rapi sebelum deadline.
+These features are deliberately left out of v0.1 so the core product ships polished before the deadline.
 
-| Fitur | Alasan ditunda | Fase |
+| Feature | Why it waits | Phase |
 | --- | --- | --- |
-| Persetujuan untuk setiap pemakaian | Membebani UX; cukup untuk nominal di atas batas grup | Tidak direncanakan |
-| On-ramp dan off-ramp fiat (misalnya Mercuryo) | Bukan bounty; butuh integrasi mitra dan KYC | Setelah hackathon |
-| Kartu sungguhan (misalnya lewat mitra issuer Visa) | Butuh mitra penerbit kartu dan KYC; di demo diganti kartu simulasi | Setelah hackathon |
-| Token selain AUSD | Tidak diperlukan untuk kasus inti | Setelah hackathon |
-| Mainnet | Kontrak belum diaudit | Setelah audit |
+| Approval for every payment | Too much friction; approval above the trip's limit is enough | Not planned |
+| Fiat on-ramp and off-ramp (for example Mercuryo) | Not a bounty; needs a partner integration and KYC | After the hackathon |
+| A real card (for example through a Visa issuing partner) | Needs a card issuer and KYC; the demo uses a simulated card | After the hackathon |
+| Currencies other than AUSD | Not needed for the core use case | After the hackathon |
+| Mainnet | The contract hasn't been audited | After an audit |

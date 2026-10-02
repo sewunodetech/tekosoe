@@ -1,21 +1,20 @@
-# Dokumentasi Tekosoe
+# Tekosoe documentation
 
-Snapshot dari dokumen perencanaan di Claude Docs (diekspor 28 Sep 2026). Dokumen live tetap sumber utama; perbarui snapshot di sini kalau ada perubahan.
+Everything we planned, decided and built, in one place. Start with the PRD if you want to know *what* Tekosoe does, the technical spec for *how*, and STATUS for *where we are today*.
 
-| File | Isi | Sumber |
-| --- | --- | --- |
-| [01-brd.md](01-brd.md) | Masalah bisnis, tujuan, pemangku kepentingan, BR-01..BR-11 | Tekosoe — Dokumen Produk › BRD |
-| [02-prd.md](02-prd.md) | Persona, perjalanan user, FR-01..FR-23, NFR-01..NFR-09, kriteria rilis | › PRD |
-| [03-spesifikasi-teknis.md](03-spesifikasi-teknis.md) | Stack, struktur repo, model data, fungsi & event kontrak, skema Envio, Supabase, Mera, gas, enkripsi, keamanan, `.env` | › Spesifikasi Teknis |
-| [04-user-stories.md](04-user-stories.md) | US-01..US-14 dengan acceptance criteria | › User Stories |
-| [05-user-flow.md](05-user-flow.md) | Flow masuk/bergabung dan di dalam grup | › User Flow |
-| [06-peta-layar.md](06-peta-layar.md) | Setiap layar: fungsi, navigasi, kontrak & data | › Peta Layar |
-| [07-rencana-pengembangan.md](07-rencana-pengembangan.md) | Target bounty, scope P0–P3, arsitektur, rencana uji, timeline, checklist submission, risiko | Monad Metropolis — Dokumen Pengembangan |
-| [ROADMAP.md](ROADMAP.md) | Goal, scope, fase & paket kerja semua tim, serah-terima antar tim | Dipelihara di repo |
-| [../apps/mobile/ROADMAP.md](../apps/mobile/ROADMAP.md) | Roadmap mobile detail: arsitektur, kebutuhan data dari tim lain, WP M0–M11 | Dipelihara di repo |
-| [STATUS.md](STATUS.md) | Progres hidup: apa yang sudah jadi, alamat kontrak, blocker | Dipelihara di repo |
-| [decisions/](decisions/) | Catatan keputusan (ADR) | Dipelihara di repo |
+| File | What's inside |
+| --- | --- |
+| [01-brd.md](01-brd.md) | The business case: the problem, goals, stakeholders and business requirements BR-01..BR-11 |
+| [02-prd.md](02-prd.md) | The product: personas, user journey, FR-01..FR-23, NFR-01..NFR-09 and release criteria |
+| [03-technical-spec.md](03-technical-spec.md) | The build: stack, repo layout, data model, contract functions and events, indexer schema, metadata database, passkeys, gas, encryption, security, configuration |
+| [04-user-stories.md](04-user-stories.md) | US-01..US-14 with acceptance criteria |
+| [05-user-flow.md](05-user-flow.md) | How people sign in, join a trip and use the pot |
+| [06-screen-map.md](06-screen-map.md) | Every screen: what it's for, where it leads, which contract calls and data it uses |
+| [07-development-plan.md](07-development-plan.md) | Bounty targets, P0–P3 scope, architecture, test plan, timeline, submission checklist and risks |
+| [ROADMAP.md](ROADMAP.md) | Goal, scope, phases and work packages for every team, plus the hand-offs between them |
+| [../apps/mobile/ROADMAP.md](../apps/mobile/ROADMAP.md) | The detailed mobile roadmap: architecture, data needed from other teams, work packages M0–M12 |
+| [STATUS.md](STATUS.md) | Live progress: what's done, contract addresses and open blockers |
+| [decisions/](decisions/) | Architecture decision records (ADRs): what we chose and why |
+| [assets/](assets/) | Images used by the root README |
 
-Desain UI: canvas "Tekosoe — Wireframe" di Claude (layar 01–13, R1–R3, I1–I3, S1–S6).
-
-Catatan: diagram yang tertanam di dokumen asli (flow, arsitektur) tidak ikut terekspor dan tampil sebagai placeholder.
+The UI design lives on the "Tekosoe — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.

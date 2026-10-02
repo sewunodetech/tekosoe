@@ -1,6 +1,6 @@
 # apps/api — cakupan, celah, dan asumsi
 
-Review saat backend dipindah dari `backend/` ke `apps/api` (30 Sep 2026), beserta status perbaikannya. Rujukan: `AGENTS.md`, `apps/api/AGENTS.md`, `packages/contracts/src/interfaces/IGroupVault.sol`, `docs/03-spesifikasi-teknis.md` › Database off-chain / Invoice.
+Review saat backend dipindah dari `backend/` ke `apps/api` (30 Sep 2026), beserta status perbaikannya. Rujukan: `AGENTS.md`, `apps/api/AGENTS.md`, `packages/contracts/src/interfaces/IGroupVault.sol`, `docs/03-technical-spec.md` › Database off-chain / Invoice.
 
 ## Sudah diperbaiki (30 Sep)
 
