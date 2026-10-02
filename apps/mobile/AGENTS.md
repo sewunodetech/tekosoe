@@ -55,6 +55,7 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 | P2 Profile | `(tabs)/profile.tsx` | P02Profile; tab ketiga; kartu "Your dollars" (`components/balance-card.tsx`) |
 | B1 Top up | `balance/top-up.tsx` | Di luar Final UI (ADR 0006), modal; simulasi on-ramp |
 | B2 Cash out | `balance/cash-out.tsx` | Di luar Final UI (ADR 0006), modal; simulasi off-ramp |
+| A1 Activity | `activity.tsx` | Di luar Final UI (ADR 0007); lonceng di 03; "Needs you" + riwayat per hari (`useFeed`) |
 
 ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri: `/` → Sign in → Home → Japan Trip → Pay → Request approval → "Demo: open this on Rina's phone" → Approve → (pot kosong) → Preview settle-up → See your invoice.
 

@@ -150,17 +150,18 @@ export const TOP_UP_MAX = usd(10_000);
 
 /**
  * Testnet: "Top up" sebesar `amount` (simulasi on-ramp). Faucet AUSD Agora selalu mengirim 10.000,
- * jadi kelebihannya langsung dikembalikan ke "bank" demo — saldo user naik tepat `amount`.
+ * jadi kelebihannya langsung dikembalikan ke faucet — saldo user naik tepat `amount`.
  * Dua transaksi (faucet + pengembalian) kecuali `amount` = 10.000. Mainnet: on-ramp mitra.
+ * Pengembalian sengaja ke faucet (bukan "bank" Cash out) supaya indexer bisa membedakan
+ * Top up (faucet → user, dikurangi user → faucet) dari Cash out (user → bank).
  */
 export async function topUpBalance(account: LocalAccount, amount: bigint) {
   if (amount <= 0n || amount > TOP_UP_MAX) throw new Error('Top up between $1 and $10,000 at a time.');
-  const bank = env.cashOutAddress;
   const before = await ausdBalance(account.address);
   await requestDemoFunds(account);
   const received = (await ausdBalance(account.address)) - before;
   const extra = received - amount;
-  if (bank && extra > 0n) await transferAusd(account, bank, extra);
+  if (extra > 0n) await transferAusd(account, env.ausdFaucetAddress, extra);
 }
 
 /**

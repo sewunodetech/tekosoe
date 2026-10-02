@@ -163,6 +163,34 @@ export async function fetchGroup(id: string): Promise<EnvioGroup | null> {
   return data.Group[0] ?? null;
 }
 
+/** Top up / Cash out dari Transfer AUSD (faucet & alamat cash out), lihat packages/indexer. */
+export type EnvioBalanceActivity = {
+  id: string;
+  kind: 'TopUp' | 'CashOut';
+  amount: string;
+  timestamp: string;
+  txHash: string;
+};
+
+const BALANCE_ACTIVITY = gql`
+  query BalanceActivity($address: String!) {
+    BalanceActivity(where: { account: { _eq: $address } }, order_by: { timestamp: desc }, limit: 50) {
+      id
+      kind
+      amount
+      timestamp
+      txHash
+    }
+  }
+`;
+
+export async function fetchBalanceActivity(address: string): Promise<EnvioBalanceActivity[]> {
+  const data = await query<{ BalanceActivity: EnvioBalanceActivity[] }>(BALANCE_ACTIVITY, {
+    address: address.toLowerCase(),
+  });
+  return data.BalanceActivity;
+}
+
 const META = gql`
   query Meta {
     _meta {

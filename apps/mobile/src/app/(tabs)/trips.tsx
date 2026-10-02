@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { AvatarStack, Pill, Screen } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
+import { EmptyState } from '@/components/ui/empty-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Profile, Trip } from '@/data/types';
+import { useFeed } from '@/features/activity/useFeed';
 import { useProfile } from '@/features/profile/useProfile';
 import { useTrips } from '@/features/trips/useTrips';
 import { money, signed } from '@/lib/money';
@@ -43,6 +45,8 @@ function HomeView({
 }) {
   const [drafts, setDrafts] = useState<string[]>([]);
   const me = { name: profile?.name ?? 'there', tint: profile?.tint ?? palette.sky };
+  // Titik di lonceng = ada permintaan bayar yang menunggu persetujuanmu.
+  const needsYou = useFeed().data?.some((item) => item.needsYou) ?? false;
 
   return (
     <Screen
@@ -63,19 +67,27 @@ function HomeView({
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Notifications"
+          accessibilityLabel="Activity"
           style={styles.circle}
-          onPress={() => router.push('/notifications')}>
+          onPress={() => router.push('/activity')}>
           <Icon name="bell" strokeWidth={2} />
-          <View style={styles.badgeDot} />
+          {needsYou && <View style={styles.badgeDot} />}
         </Pressable>
       </View>
 
       <Text variant="h2">Your trips</Text>
 
-      {list.map((trip, idx) => (
-        <TripCard key={trip.id} trip={trip} tone={idx % 2 === 0 ? 'mint' : 'violet'} />
-      ))}
+      {list.length === 0 ? (
+        <EmptyState
+          mood="wink"
+          title="No active trips"
+          description="Start a pot and share the link. Friends join with passkey."
+        />
+      ) : (
+        list.map((trip, idx) => (
+          <TripCard key={trip.id} trip={trip} tone={idx % 2 === 0 ? 'mint' : 'violet'} />
+        ))
+      )}
 
       {settled.length > 0 && (
         <Link href="/past-trips" asChild>
@@ -87,12 +99,14 @@ function HomeView({
         </Link>
       )}
 
-      <View style={styles.tip}>
-        <Teko mood="idle" size={64} />
-        <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, lineHeight: 20 }}>
-          Planning another trip? Start a pot and share the link. Friends join with passkey.
-        </Text>
-      </View>
+      {list.length > 0 && (
+        <View style={styles.tip}>
+          <Teko mood="idle" size={64} />
+          <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, lineHeight: 20 }}>
+            Planning another trip? Start a pot and share the link. Friends join with passkey.
+          </Text>
+        </View>
+      )}
     </Screen>
   );
 }

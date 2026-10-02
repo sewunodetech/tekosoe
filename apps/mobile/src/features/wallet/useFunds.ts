@@ -5,6 +5,7 @@ import { ausdBalance } from '@/lib/chain';
 import { isLive } from '@/lib/env';
 import { usd } from '@/lib/money';
 
+import { addDemoFeedItem } from '../activity/useFeed';
 import { requireAccount, useAccount } from '../use-account';
 
 /** Batas satu kali "Top up" di testnet (jatah satu permintaan faucet AUSD Agora). */
@@ -43,6 +44,14 @@ export function useTopUp() {
       }
       await new Promise((resolve) => setTimeout(resolve, 1200));
       queryClient.setQueryData<bigint>(balanceKey(address), (current) => (current ?? 0n) + amount);
+      addDemoFeedItem(queryClient, address, {
+        id: `topup-${Date.now()}`,
+        kind: 'topUp',
+        title: 'Top up',
+        sub: 'Added to your dollars',
+        amount,
+        at: Math.floor(Date.now() / 1000),
+      });
     },
     onSuccess: () => {
       if (isLive) queryClient.invalidateQueries({ queryKey: ['ausd'] });
@@ -64,6 +73,14 @@ export function useCashOut() {
       queryClient.setQueryData<bigint>(balanceKey(address), (current) => {
         const now = current ?? 0n;
         return now > amount ? now - amount : 0n;
+      });
+      addDemoFeedItem(queryClient, address, {
+        id: `cashout-${Date.now()}`,
+        kind: 'cashOut',
+        title: 'Cash out',
+        sub: 'Sent to your bank (demo)',
+        amount: -amount,
+        at: Math.floor(Date.now() / 1000),
       });
     },
     onSuccess: () => {
