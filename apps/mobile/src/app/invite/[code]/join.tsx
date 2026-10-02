@@ -136,7 +136,6 @@ const styles = StyleSheet.create({
     fontSize: 56,
     lineHeight: 58,
     letterSpacing: -1.5,
-    color: colors.text,
   },
   safety: {
     padding: 18,

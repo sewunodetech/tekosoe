@@ -54,7 +54,7 @@ function AddMoneyView({ trip }: { trip: Trip }) {
     fallbackRoute: `/trip/${trip.id}`,
   });
 
-  const balance = useBalance(320).data;
+  const balance = useBalance().data;
   const short = balance !== undefined && balance < amountBigInt;
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {

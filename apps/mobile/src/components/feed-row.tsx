@@ -42,7 +42,7 @@ export function FeedRow({ item, time }: { item: FeedItem; time: string }) {
         <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }} numberOfLines={1}>
           {item.title}
         </Text>
-        <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }} numberOfLines={1}>
+        <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }} numberOfLines={2}>
           {item.sub}
         </Text>
       </View>
@@ -54,7 +54,7 @@ export function FeedRow({ item, time }: { item: FeedItem; time: string }) {
         ) : item.neutralAmount !== undefined ? (
           <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>{money(item.neutralAmount)}</Text>
         ) : null}
-        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11 }} color={colors.textMuted}>
+        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12 }} color={colors.textMuted}>
           {time}
         </Text>
       </View>
@@ -87,7 +87,7 @@ export function NeedsYouRow({ item }: { item: FeedItem }) {
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>
             {item.title} {item.neutralAmount !== undefined ? money(item.neutralAmount) : ''}
           </Text>
-          <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }} numberOfLines={1}>
+          <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }} numberOfLines={2}>
             {item.sub}
           </Text>
         </View>

@@ -30,12 +30,12 @@ export function ActivityRow({ spend, href, fresh = false, meta }: { spend: Spend
         {spend.hasReceipt ? (
           <View style={styles.metaRow}>
             <Icon name="receipt" size={12} color={colors.primary} strokeWidth={2.4} />
-            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11 }} color={colors.primary}>
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12 }} color={colors.primary}>
               Receipt
             </Text>
           </View>
         ) : (
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11 }} color={colors.notice}>
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 12 }} color={colors.notice}>
             No receipt
           </Text>
         )}

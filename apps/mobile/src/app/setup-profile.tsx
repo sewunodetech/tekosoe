@@ -82,7 +82,6 @@ export default function SetupProfileScreen() {
           <Button
             label={save.isPending ? 'Saving…' : editing ? 'Save' : 'Continue'}
             disabled={!isValid || save.isPending}
-            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
         }>

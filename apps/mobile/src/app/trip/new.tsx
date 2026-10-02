@@ -84,7 +84,6 @@ export default function NewTripScreen() {
           <Button
             label="Create trip"
             disabled={!isValid || tx.isProcessing}
-            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
         }>

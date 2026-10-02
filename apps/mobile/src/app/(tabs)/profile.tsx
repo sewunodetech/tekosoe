@@ -96,6 +96,8 @@ function ProfileView({
             accessibilityLabel="Notifications"
             trackColor={{ true: colors.primary, false: colors.borderStrong }}
             thumbColor={colors.surface}
+            // Web: tanpa ini kenop ikut berwarna teal di atas jalur teal.
+            {...({ activeThumbColor: colors.surface } as object)}
           />
         </Row>
         <Row icon="home" tint={palette.sky} title="Past trips" sub={settled.map((s) => `${s.name} · settled`).join(', ') || 'None yet'} chevron onPress={() => router.push('/past-trips')} />
