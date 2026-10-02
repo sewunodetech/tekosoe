@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { money, parseAmountInput } from '@/lib/money';
+
 /**
  * Skema validasi form Profil dengan Zod.
  */
@@ -63,7 +65,7 @@ export const createPaySchema = (potMax: number) =>
       included: z.record(z.string(), z.boolean()),
     })
     .superRefine((data, ctx) => {
-      const amt = Number(data.amountStr) || 0;
+      const amt = parseAmountInput(data.amountStr) ?? 0n;
       const totalIncluded = Object.values(data.included).filter(Boolean).length;
       if (totalIncluded === 0) {
         ctx.addIssue({
@@ -73,16 +75,16 @@ export const createPaySchema = (potMax: number) =>
         });
       }
       if (data.split === 'custom') {
-        let customSum = 0;
+        let customSum = 0n;
         for (const [id, isInc] of Object.entries(data.included)) {
           if (isInc) {
-            customSum += parseInt(data.customShares[id] || '0', 10);
+            customSum += parseAmountInput(data.customShares[id] || '0') ?? 0n;
           }
         }
         if (customSum !== amt) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: `Custom split total ($${customSum}) must equal $${amt}`,
+            message: `Custom split total (${money(customSum)}) must equal ${money(amt)}`,
             path: ['split'],
           });
         }

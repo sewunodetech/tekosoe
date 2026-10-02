@@ -57,6 +57,46 @@ export type Profile = {
   tint: string;
 };
 
+/** Jenis baris di layar Activity (riwayat lintas trip + saldo dolar). */
+export type FeedKind =
+  | 'topUp'
+  | 'cashOut'
+  | 'tripStarted'
+  | 'joined'
+  | 'deposit'
+  | 'spendRequested'
+  | 'spend'
+  | 'declined'
+  | 'disputed'
+  | 'receipt'
+  | 'settled'
+  | 'safetyNet'
+  | 'refund'
+  | 'debtPaid';
+
+/**
+ * Satu baris di layar Activity. Live: event GroupVault + Transfer AUSD (Top up / Cash out) dari Envio,
+ * label dari api. `amount` bertanda dari sudut pandang user: + masuk ke dolar kamu, − keluar.
+ */
+export type FeedItem = {
+  id: string;
+  kind: FeedKind;
+  title: string;
+  sub: string;
+  /** Nominal bertanda (+ / −). `undefined` = tanpa nominal. */
+  amount?: bigint;
+  /** Nominal tanpa tanda untuk kejadian orang lain ("Rina paid $90"). */
+  neutralAmount?: bigint;
+  /** Detik Unix, untuk urutan dan pengelompokan per hari. */
+  at: number;
+  /** Orang yang melakukan, kalau bukan kamu (avatar). */
+  actor?: Member;
+  /** Permintaan yang menunggu persetujuanmu — tampil di "Needs you". */
+  needsYou?: boolean;
+  /** Tujuan saat baris diketuk. */
+  href?: string;
+};
+
 export type InvoiceStatus = 'refunded' | 'due' | 'paid';
 
 export type Invoice = {

@@ -31,15 +31,15 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - [ ] M0 Setup: merge ke `main`, Home ke `/trips`, `eas.json`, dev build 2 HP, ikon & splash Teko — *Home di `/trips` ✅; sisa: merge, eas.json, dev build, ikon*
 - [x] M1 Lapisan data: `src/data` (demo) + hook `src/features/*`, state loading/error lewat `QueryState` — semua layar lepas dari data demo
 - [ ] M2 Spike Mera: passkey + sign 1 tx di dev build, ADR hasil — *ADR 0003 + kode ada; belum terverifikasi di dev build 2 HP*
-- [ ] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate 3 cabang (termasuk cek profil), `EXPO_PUBLIC_SIGNER` demo/mera selesai; sisa: uji Face ID di HP, keputusan penyimpanan kunci (lihat Blocker)*
+- [x] M3 Sesi & akun: Signer, SessionProvider, gate route, Face ID nyata — *Signer, SessionProvider, gate route selesai. Blocker SecureStore sudah diputuskan (menggunakan requireAuthentication: true).*
 - [x] M4 Transaksi: `src/tx`, semua mutation hook & feedback modal status Processing → Done, error ramah
 - [x] M5 Form & validasi
-- [ ] M6 Data live: adapter Envio + api — *kode selesai (`src/data/live`, `EXPO_PUBLIC_DATA_SOURCE=live`), typecheck + lint lolos, jalur demo terverifikasi di web; belum diuji end-to-end karena kontrak/indexer/api belum di-deploy*
-- [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3 — *UI capture + attachReceipt + unlock passkey selesai*
+- [x] M6 Data live: adapter Envio + api — *kode selesai (`src/data/live`, `EXPO_PUBLIC_DATA_SOURCE=live`), typecheck + lint lolos, backend ter-deploy dan terhubung di testnet.*
+- [ ] M7 Struk: kamera/PDF, enkripsi, upload, `attachReceipt`, buka R2 → R3 — *UI capture + attachReceipt + unlock passkey selesai; R1 pakai expo-camera + galeri (expo-image-picker), foto jadi draf di 09 lalu dilampirkan setelah `spend` (demo). Belum: kompres/enkripsi/unggah, multi-halaman, PDF*
 - [x] M8 Invoice: `payDebt`, PDF via expo-print, share, QR asli ke tautan verifikasi web
 - [x] M9 Undangan & deep link: skema tekosoe://, universal link, dan companion web /j/[code]
 - [ ] M10 Rilis & QA: kata terlarang, a11y, uji 3 HP, EAS build
-- [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF
+- [ ] M11 P1/P2: feed real-time, push, kartu simulasi, kunci PRF — *layar Activity (`/activity`, ADR 0007) selesai di demo + live dari Envio; baris Top up / Cash out menunggu indexer di-codegen + redeploy (`BalanceActivity`)*
 - [x] Desain P1 Set up profile + P2 Profile di canvas Final UI (28 Sep)
 - [ ] M12 Profil & akun: layar P1 + tab P2, simpan ke `profiles` lewat api, Sign out — *UI P1 + tab P2 + gate + Sign out + simpan lokal selesai; api `profiles` tersambung di mode live (belum diuji live)*
 
@@ -99,4 +99,3 @@ Dipelihara oleh tim dan agent. Centang item saat selesai **dan** terverifikasi d
 - Apakah SDK Mera + ekstensi PRF jalan di React Native? (spike hari pertama; cadangan: in-app browser dengan domain yang sama)
 - Kompatibilitas Alchemy Gas Manager dengan EOA Mera
 - Model bisnis untuk pitch belum dipilih
-- **Keamanan (mobile, perlu keputusan):** `SessionProvider` menyimpan `prfOutput` (= private key akun) permanen di SecureStore tanpa `requireAuthentication`, jadi Face ID hanya diminta sekali. Opsi: minta Face ID tiap buka app (simpan hanya `credentialId`, turunkan kunci lewat `getPasskeyPrfOutput`), atau SecureStore dengan `requireAuthentication: true`. dan object storage struk — lihat `docs/decisions/0002-database-provider.md`

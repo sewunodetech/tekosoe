@@ -36,6 +36,23 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Tekosoe uses the camera to snap receipts for your trip.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Tekosoe lets you pick a receipt photo from your gallery.",
+          "cameraPermission": "Tekosoe uses the camera to snap receipts for your trip.",
+          "microphonePermission": false
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

@@ -1,6 +1,6 @@
 import { palette } from '@/constants/theme';
 import { usd } from '@/lib/money';
-import type { Invoice, Member, Spend, Trip } from '../types';
+import type { FeedItem, Invoice, Member, Spend, Trip } from '../types';
 
 /**
  * Adapter data DEMO: cerita Rina/Wei/Jack di Jepang dari canvas "Final UI".
@@ -91,6 +91,20 @@ export const trips: Record<string, Trip> = {
     activity: [],
     settleToday: [],
   },
+  bali: {
+    id: 'bali',
+    name: 'Bali Weekend',
+    pot: usd(0),
+    myBalance: usd(12.5),
+    members: [members.rina, members.jack],
+    countries: 'Indonesia · Australia',
+    status: 'Settled',
+    settlesOn: 'Oct 1',
+    approvalLimit: usd(50),
+    activity: [spends.ramen],
+    settleToday: [],
+    settled: true,
+  },
 };
 
 export const getTrip = (id?: string) => trips[id ?? ''] ?? trips.japan;
@@ -179,3 +193,109 @@ export const invoices: Record<string, Invoice> = {
 };
 
 export const getInvoice = (who?: string) => invoices[who ?? ''] ?? invoices.jack;
+
+/** Waktu cerita (Okt 2026, waktu lokal) → detik Unix. */
+const at = (month: number, day: number, hour: number, minute: number) =>
+  Math.floor(new Date(2026, month - 1, day, hour, minute).getTime() / 1000);
+
+/** Layar Activity dari sudut pandang Jack: saldo dolar + kejadian di semua trip, terbaru dulu. */
+export const feed: FeedItem[] = [
+  {
+    id: 'train-requested',
+    kind: 'spendRequested',
+    title: 'You asked to pay',
+    sub: 'Train tickets to Kyoto · waiting for a yes',
+    neutralAmount: usd(150),
+    at: at(10, 11, 9, 12),
+    href: '/trip/japan/spend/train/waiting',
+  },
+  {
+    id: 'ramen',
+    kind: 'spend',
+    title: 'Ramen and karaoke',
+    sub: 'Wei paid · Japan Trip',
+    neutralAmount: usd(60),
+    at: at(10, 10, 21, 15),
+    actor: members.wei,
+    href: '/trip/japan/spend/ramen',
+  },
+  {
+    id: 'dinner-receipt',
+    kind: 'receipt',
+    title: 'Receipt added',
+    sub: 'Dinner in Shibuya · by Rina',
+    at: at(10, 9, 20, 45),
+    actor: members.rina,
+    href: '/trip/japan/spend/dinner/receipt',
+  },
+  {
+    id: 'dinner',
+    kind: 'spend',
+    title: 'Dinner in Shibuya',
+    sub: 'Rina paid · your share $30.00',
+    neutralAmount: usd(90),
+    at: at(10, 9, 20, 42),
+    actor: members.rina,
+    href: '/trip/japan/spend/dinner',
+  },
+  {
+    id: 'japan-deposit-jack',
+    kind: 'deposit',
+    title: 'You filled the pot',
+    sub: 'Japan Trip',
+    amount: -usd(100),
+    at: at(10, 8, 18, 5),
+    href: '/trip/japan',
+  },
+  {
+    id: 'japan-deposit-wei',
+    kind: 'deposit',
+    title: 'Wei put in',
+    sub: 'Japan Trip',
+    neutralAmount: usd(100),
+    at: at(10, 8, 17, 50),
+    actor: members.wei,
+    href: '/trip/japan',
+  },
+  {
+    id: 'japan-joined',
+    kind: 'joined',
+    title: 'You joined Japan Trip',
+    sub: 'Safety net up to $50.00',
+    at: at(10, 8, 17, 46),
+    href: '/trip/japan',
+  },
+  {
+    id: 'topup-oct8',
+    kind: 'topUp',
+    title: 'Top up',
+    sub: 'Added to your dollars',
+    amount: usd(200),
+    at: at(10, 8, 17, 40),
+  },
+  {
+    id: 'bali-refund',
+    kind: 'refund',
+    title: 'You got money back',
+    sub: 'Bali Weekend',
+    amount: usd(12.5),
+    at: at(10, 1, 12, 0),
+    href: '/past-trips',
+  },
+  {
+    id: 'bali-settled',
+    kind: 'settled',
+    title: 'Bali Weekend settled up',
+    sub: 'See how it evened out',
+    at: at(10, 1, 12, 0),
+    href: '/past-trips',
+  },
+  {
+    id: 'cashout-sep30',
+    kind: 'cashOut',
+    title: 'Cash out',
+    sub: 'Sent to your bank (demo)',
+    amount: -usd(50),
+    at: at(9, 30, 10, 20),
+  },
+];

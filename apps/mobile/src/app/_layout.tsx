@@ -20,6 +20,7 @@ import { colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
 import { AppProviders } from '@/providers/app-providers';
 import { useSession } from '@/providers/session-provider';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -76,6 +77,8 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="trip/[id]/add-money" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="balance/top-up" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="balance/cash-out" options={{ presentation: 'modal' }} />
         <Stack.Screen name="trip/[id]/pay" options={{ presentation: 'modal' }} />
         <Stack.Screen name="trip/[id]/add-receipt" options={{ presentation: 'modal' }} />
         <Stack.Screen name="trip/[id]/spend/[spendId]/approve" options={{ presentation: 'modal' }} />
@@ -97,8 +100,10 @@ export default function RootLayout() {
   });
 
   return (
-    <AppProviders>
-      <RootLayoutNav fontsLoaded={fontsLoaded} fontError={fontError} />
-    </AppProviders>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppProviders>
+        <RootLayoutNav fontsLoaded={fontsLoaded} fontError={fontError} />
+      </AppProviders>
+    </GestureHandlerRootView>
   );
 }

@@ -1,6 +1,7 @@
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
+import { BalanceCard } from '@/components/balance-card';
 import { combine, QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
 import { Icon, type IconName } from '@/components/ui/icon';
@@ -20,7 +21,7 @@ export default function ProfileScreen() {
   return (
     <QueryState query={query} tab headerAction="none">
       {([profile, trips]) => (
-        <ProfileView profile={profile} activeTrips={trips.list.length} settled={trips.settled} />
+        <ProfileView profile={profile} activeTrips={trips.list.length} settled={trips.settled} totalGotBack={trips.totalGotBack} />
       )}
     </QueryState>
   );
@@ -30,10 +31,12 @@ function ProfileView({
   profile,
   activeTrips,
   settled,
+  totalGotBack,
 }: {
   profile: Profile | null;
   activeTrips: number;
-  settled: { name: string; returnAmount: string }[];
+  settled: { id: string; name: string; returnAmount: string }[];
+  totalGotBack: string;
 }) {
   const { signOut } = useSession();
   const { enabled: notifEnabled, toggleNotifications } = useNotifications();
@@ -65,10 +68,12 @@ function ProfileView({
         </Link>
       </View>
 
+      <BalanceCard />
+
       <View style={styles.stats}>
         <Stat label="Active trips" value={String(activeTrips)} />
         <Stat label="Settled" value={String(settled.length)} />
-        <Stat label="Got back" value={settled[0]?.returnAmount ?? '$0.00'} positive />
+        <Stat label="Got back" value={totalGotBack || '$0.00'} positive />
       </View>
 
       <View style={styles.faceRow}>
@@ -93,7 +98,7 @@ function ProfileView({
             thumbColor={colors.surface}
           />
         </Row>
-        <Row icon="home" tint={palette.sky} title="Past trips" sub={settled.map((s) => `${s.name} · settled`).join(', ') || 'None yet'} chevron />
+        <Row icon="home" tint={palette.sky} title="Past trips" sub={settled.map((s) => `${s.name} · settled`).join(', ') || 'None yet'} chevron onPress={() => router.push('/past-trips')} />
         <Row glyph="?" tint={palette.greenSoft} title="Help and feedback" sub="How the pot and settle-up work" chevron last />
       </View>
 
@@ -131,6 +136,7 @@ function Row({
   sub,
   chevron = false,
   last = false,
+  onPress,
   children,
 }: {
   icon?: IconName;
@@ -140,10 +146,12 @@ function Row({
   sub: string;
   chevron?: boolean;
   last?: boolean;
+  onPress?: () => void;
   children?: React.ReactNode;
 }) {
+  const Container = onPress ? Pressable : View;
   return (
-    <View style={[styles.row, !last && styles.rowBorder]}>
+    <Container style={[styles.row, !last && styles.rowBorder]} onPress={onPress}>
       <View style={[styles.iconTile, { backgroundColor: tint }]}>
         {icon ? <Icon name={icon} size={18} strokeWidth={2} /> : <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 15 }}>{glyph}</Text>}
       </View>
@@ -155,7 +163,7 @@ function Row({
       </View>
       {children}
       {chevron && <Icon name="chevron" size={16} color={colors.textMuted} strokeWidth={2} />}
-    </View>
+    </Container>
   );
 }
 

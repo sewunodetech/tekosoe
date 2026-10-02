@@ -8,9 +8,16 @@ import type { TxStatus } from './useTx';
 
 type Props = {
   status: TxStatus;
+  /** Teks saat memproses; default untuk aksi pot. */
+  processingTitle?: string;
+  processingSubtitle?: string;
 };
 
-export function TxOverlay({ status }: Props) {
+export function TxOverlay({
+  status,
+  processingTitle = 'Pouring into the pot...',
+  processingSubtitle = 'Updating everyone’s balance in real time',
+}: Props) {
   if (status === 'idle') return null;
 
   return (
@@ -41,12 +48,12 @@ export function TxOverlay({ status }: Props) {
           {/* Friendly Status Information */}
           <View style={styles.textStack}>
             <Text style={styles.title}>
-              {status === 'processing' && 'Pouring into the pot...'}
+              {status === 'processing' && processingTitle}
               {status === 'done' && 'All set!'}
               {status === 'error' && 'Something went wrong'}
             </Text>
             <Text style={styles.subtitle}>
-              {status === 'processing' && 'Updating everyone’s balance in real time'}
+              {status === 'processing' && processingSubtitle}
               {status === 'done' && 'Your transaction is complete'}
               {status === 'error' && 'No worries, no funds were changed'}
             </Text>

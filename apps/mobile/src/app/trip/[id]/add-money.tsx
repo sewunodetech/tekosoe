@@ -2,20 +2,21 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { AmountInput } from '@/components/amount-input';
 import { Bob, Coin } from '@/components/decor';
 import { QueryState } from '@/components/query-state';
 import { Teko } from '@/components/teko';
+import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { ChoiceChips } from '@/components/ui/choice-chips';
 import { KeyValue, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { colors, fonts } from '@/constants/theme';
+import { colors } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useDeposit } from '@/features/trips/useDeposit';
 import { useTrip } from '@/features/trips/useTrip';
 import { useBalance } from '@/features/wallet/useFunds';
-import { money, signed, usd } from '@/lib/money';
+import { money, signed, parseAmountInput } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -33,23 +34,34 @@ export default function AddMoneyScreen() {
   );
 }
 
+const PRESETS = [
+  { label: '$20', value: '20' },
+  { label: '$50', value: '50' },
+  { label: '$100', value: '100' },
+];
+
 function AddMoneyView({ trip }: { trip: Trip }) {
-  const [amount, setAmount] = useState<number>(50);
+  const [text, setText] = useState('50');
+  const amountBigInt = parseAmountInput(text) ?? 0n;
+  const valid = amountBigInt > 0n;
+  const amount = Number(amountBigInt) / 1000000;
+
   const { notify } = useNotifications();
 
-  const isDirty = amount !== 50;
+  const isDirty = text !== '50';
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: `/trip/${trip.id}`,
   });
 
   const balance = useBalance(320).data;
+  const short = balance !== undefined && balance < amountBigInt;
   const deposit = useDeposit(trip.id);
   const depositTx = useTx(deposit.mutateAsync, {
     onSuccess: () => {
       notify({
         title: 'Pot topped up',
-        body: `Added $${amount} to ${trip.name} pot.`,
+        body: `Added ${money(amountBigInt)} to ${trip.name} pot.`,
         data: { url: `/trip/${trip.id}` },
       });
       router.replace(`/trip/${trip.id}`);
@@ -65,7 +77,16 @@ function AddMoneyView({ trip }: { trip: Trip }) {
       <Screen
         gap={18}
         footer={
-          <Button label={`Add $${amount} to the pot`} onPress={handleAddMoney} disabled={depositTx.isProcessing} />
+          short ? (
+            // Dolar kurang: ajak Top up dulu (ADR 0006), bukan gagal di tengah transaksi.
+            <Button
+              label={`Top up to add ${valid ? money(amountBigInt) : '$0'}`}
+              icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />}
+              onPress={() => router.push('/balance/top-up')}
+            />
+          ) : (
+            <Button label={valid ? `Add ${money(amountBigInt)} to the pot` : 'Enter an amount'} onPress={handleAddMoney} disabled={!valid || depositTx.isProcessing} />
+          )
         }>
         <ScreenHeader title="Add money" action="close" onPress={handleBack} />
 
@@ -85,19 +106,20 @@ function AddMoneyView({ trip }: { trip: Trip }) {
           </Bob>
         </View>
 
-        <View style={{ alignItems: 'center', gap: 6 }}>
-          <Text style={styles.amount}>${amount}</Text>
-          <Text variant="label" style={{ fontFamily: fonts.body }} color={colors.textMuted}>
-            From your balance of {balance === undefined ? '…' : money(balance)}
-          </Text>
-        </View>
+        <AmountInput
+          value={text}
+          onChange={setText}
+          presets={PRESETS}
+          hint={`From your ${balance === undefined ? '…' : money(balance)}`}
+          accessibilityLabel="Amount to add, in dollars"
+        />
 
-        <ChoiceChips options={[20, 50, 100] as const} value={amount} onChange={setAmount} format={(v) => `$${v}`} center />
-
-        <Surface style={{ gap: 10 }}>
-          <KeyValue label="Pot after" value={money(trip.pot + usd(amount))} />
-          <KeyValue label="Your balance in trip" value={signed(trip.myBalance + usd(amount))} valueColor={colors.positive} />
-        </Surface>
+        {valid && (
+          <Surface style={{ gap: 10 }}>
+            <KeyValue label="Pot after" value={money(trip.pot + amountBigInt)} />
+            <KeyValue label="Your balance in trip" value={signed(trip.myBalance + amountBigInt)} valueColor={colors.positive} />
+          </Surface>
+        )}
 
         <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
           Anything you don&apos;t use comes back to you at settle-up.
@@ -130,12 +152,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     top: 20,
-  },
-  amount: {
-    fontFamily: fonts.display,
-    fontSize: 60,
-    lineHeight: 62,
-    letterSpacing: -1.5,
-    color: colors.text,
   },
 });

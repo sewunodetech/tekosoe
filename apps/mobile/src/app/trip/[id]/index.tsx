@@ -10,6 +10,7 @@ import { Icon, type IconName } from '@/components/ui/icon';
 import { AvatarStack, Screen, SectionLabel, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { EmptyState } from '@/components/ui/empty-state';
 import { colors, fonts, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
@@ -111,45 +112,56 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
         </>
       ) : (
         <>
-          <View style={styles.actions}>
-            <ActionTile label="Add money" icon="plus" href={`/trip/${trip.id}/add-money`} />
-            <ActionTile label="Pay" icon="pay" href={`/trip/${trip.id}/pay`} primary />
-            <ActionTile label="Card" icon="card" href="/card" />
-          </View>
-
-          {trip.settleToday.length > 0 && (
-            <Surface style={{ gap: 10 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
-                <Link href={`/trip/${trip.id}/settled`}>
-                  <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
-                    Preview settle-up →
-                  </Text>
-                </Link>
+          {!trip.settled && (
+            <>
+              <View style={styles.actions}>
+                <ActionTile label="Add money" icon="plus" href={`/trip/${trip.id}/add-money`} />
+                <ActionTile label="Pay" icon="pay" href={`/trip/${trip.id}/pay`} primary />
+                <ActionTile label="Card" icon="card" href="/card" />
               </View>
-              {trip.settleToday.map((row) => (
-                <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
-              ))}
-            </Surface>
+
+              {trip.settleToday.length > 0 && (
+                <Surface style={{ gap: 10 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
+                    <Link href={`/trip/${trip.id}/settled`}>
+                      <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
+                        Preview settle-up →
+                      </Text>
+                    </Link>
+                  </View>
+                  {trip.settleToday.map((row) => (
+                    <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
+                  ))}
+                </Surface>
+              )}
+            </>
           )}
 
           <View style={{ gap: 4 }}>
             <View style={{ paddingBottom: 6 }}>
               <SectionLabel>Activity</SectionLabel>
             </View>
-            {trip.activity.map((spend, i) => (
-              <ActivityRow
-                key={spend.id}
-                spend={spend}
-                fresh={i === 0}
-                meta={
-                  i === 0
-                    ? `${spend.paidBy.name} · ${spend.forWhom} · ${spend.status === 'pending' ? 'waiting for a yes' : 'settled instantly'}`
-                    : undefined
-                }
-                href={spendHref(trip, spend)}
+            {trip.activity.length === 0 ? (
+              <EmptyState
+                title="No activity yet"
+                description={!trip.settled ? "Pay from the pot to start!" : undefined}
               />
-            ))}
+            ) : (
+              trip.activity.map((spend, i) => (
+                <ActivityRow
+                  key={spend.id}
+                  spend={spend}
+                  fresh={i === 0}
+                  meta={
+                    i === 0
+                      ? `${spend.paidBy.name} · ${spend.forWhom} · ${spend.status === 'pending' ? 'waiting for a yes' : 'settled instantly'}`
+                      : undefined
+                  }
+                  href={spendHref(trip, spend)}
+                />
+              ))
+            )}
           </View>
         </>
       )}

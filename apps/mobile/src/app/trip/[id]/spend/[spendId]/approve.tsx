@@ -34,7 +34,8 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
   // Demo multi-HP: layar ini dilihat anggota pertama selain pembayar. Live: user yang login.
   const reviewer = trip.members.find((m) => m.id !== spend.paidBy.id) ?? trip.members[0];
   const share = spend.shares.find((s) => s.member.id === reviewer.id)?.share ?? 0n;
-  const others = trip.members.filter((m) => m.id !== spend.paidBy.id).map((m) => m.name);
+  const othersArray = trip.members.filter((m) => m.id !== spend.paidBy.id).map((m) => m.name);
+  const othersText = othersArray.length > 0 ? othersArray.join(' or ') : 'a friend';
 
   const approveSpend = useApproveSpend(trip.id, spend.id);
   const approveTx = useTx(approveSpend.mutateAsync, {
@@ -113,7 +114,7 @@ function ApprovalView({ trip, spend }: { trip: Trip; spend: Spend }) {
         />
       </Surface>
 
-      <InfoBox>One yes from {others.join(' or ')} is enough. Nothing moves until then.</InfoBox>
+      <InfoBox>One yes from {othersText} is enough. Nothing moves until then.</InfoBox>
     </Screen>
     <TxOverlay status={activeStatus} />
   </>

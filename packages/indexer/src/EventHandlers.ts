@@ -7,6 +7,7 @@
  *   (payDebt: DebtPaid masuk ke kas, lalu tiap Refunded keluar; yang gagal dibayar tetap di kas.)
  * - Member.debt/credit mengikuti remainingDebt/remainingCredit dari event; DebtPaid mengurangi debt.
  * Setiap event juga menulis satu baris Activity untuk feed.
+ * Transfer AUSD (faucet / "bank" Cash out) menulis BalanceActivity untuk Top up / Cash out di layar Activity.
  */
 import { indexer, type EvmOnEventContext, type Member } from "envio";
 
@@ -258,3 +259,57 @@ indexer.onEvent({ contract: "GroupVault", event: "DebtPaid" }, async ({ event, c
   await addToPool(context, p.groupId, p.amount);
   activity(context, event, p.groupId, "DebtPaid", p.member, { amount: p.amount });
 });
+
+// ------------------------------------------------------------ saldo dolar (Top up / Cash out)
+// Testnet: Top up = faucet AUSD Agora (selalu 10.000) lalu app mengembalikan kelebihannya ke faucet;
+// Cash out = transfer user → "bank" demo. Pembayaran pot ke toko demo (from = GroupVault) bukan Cash out.
+
+const FAUCET = lower(process.env.ENVIO_AUSD_FAUCET_ADDRESS || "0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C");
+const CASH_OUT = lower(process.env.ENVIO_CASH_OUT_ADDRESS || "0xe3436dDd9d00C6B426A12506c7db31d2a23cB89c");
+const VAULT = lower(process.env.ENVIO_GROUP_VAULT_ADDRESS || "0x1467c9de54C1e4570AF062E80E860F94852BB7ee");
+/** Versi app lama mengembalikan kelebihan faucet ke "bank"; transfer seperti itu dalam jeda ini dihitung pengembalian. */
+const LEGACY_RETURN_WINDOW = 300n;
+
+async function reduceLastTopUp(context: Ctx, account: string, value: bigint, timestamp: bigint): Promise<boolean> {
+  const state = await context.BalanceAccount.get(account);
+  if (!state?.lastTopUp) return false;
+  const topUp = await context.BalanceActivity.get(state.lastTopUp);
+  if (!topUp) return false;
+  context.BalanceActivity.set({ ...topUp, amount: topUp.amount > value ? topUp.amount - value : 0n });
+  // Satu pengembalian per Top up.
+  context.BalanceAccount.set({ ...state, lastTopUp: undefined, lastTopUpAt: timestamp });
+  return true;
+}
+
+indexer.onEvent(
+  {
+    contract: "Ausd",
+    event: "Transfer",
+    where: () => ({ params: [{ from: FAUCET }, { to: FAUCET }, { to: CASH_OUT }] }),
+  },
+  async ({ event, context }) => {
+    const from = lower(event.params.from);
+    const to = lower(event.params.to);
+    const value = event.params.value;
+    const timestamp = BigInt(event.block.timestamp);
+    const row = { amount: value, timestamp, txHash: event.transaction.hash };
+
+    if (from === FAUCET) {
+      const id = eventId(event);
+      context.BalanceActivity.set({ id, account: to, kind: "TopUp", ...row });
+      context.BalanceAccount.set({ id: to, lastTopUp: id, lastTopUpAt: timestamp });
+      return;
+    }
+    if (to === FAUCET) {
+      await reduceLastTopUp(context, from, value, timestamp);
+      return;
+    }
+    if (to === CASH_OUT && from !== VAULT) {
+      const state = await context.BalanceAccount.get(from);
+      const legacyReturn =
+        state?.lastTopUp && state.lastTopUpAt !== undefined && timestamp - state.lastTopUpAt <= LEGACY_RETURN_WINDOW;
+      if (legacyReturn && (await reduceLastTopUp(context, from, value, timestamp))) return;
+      context.BalanceActivity.set({ id: eventId(event), account: from, kind: "CashOut", ...row });
+    }
+  },
+);

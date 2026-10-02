@@ -1,9 +1,11 @@
+import { Image } from 'expo-image';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { AmountInput } from '@/components/amount-input';
 import { Teko } from '@/components/teko';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -14,11 +16,13 @@ import { Text } from '@/components/ui/text';
 import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
+import { clearReceiptDraft, useReceiptDraft } from '@/features/spends/receipt-draft';
+import { useAttachReceipt } from '@/features/spends/useAttachReceipt';
 import { useCreateSpend } from '@/features/spends/useCreateSpend';
 import { useTrip } from '@/features/trips/useTrip';
 import { splitEqually } from '@tekosoe/shared';
 import { isLive } from '@/lib/env';
-import { money, usd } from '@/lib/money';
+import { money, parseAmountInput, sanitizeAmountInput } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -29,6 +33,7 @@ import { createPaySchema, type PayFormData } from '@/lib/form-schemas';
 // 09 Pay from pot — canvas "Final UI" › F09Pay
 // Live: computeNoteHash({title, category}) → spend(groupId, tokoDemo, amount, participants, shares, noteHash),
 // lalu judul dikirim ke api. Di atas approvalThreshold jadi SpendRequested → S2 Waiting.
+// Struk dari R1 disimpan sebagai draf dan dilampirkan setelah `spend` berhasil (butuh `spendId`).
 export default function PayScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
@@ -38,11 +43,17 @@ export default function PayScreen() {
   );
 }
 
+const toAmount = (text: string | undefined) => parseAmountInput(text ?? '') ?? 0n;
+
 function PayView({ trip }: { trip: Trip }) {
   const router = useRouter();
-  // Draf demo: tiket kereta $150 (cerita desain).
+  // Draf demo: tiket kereta (cerita desain); nominal diisi user.
   const [title, setTitle] = useState(isLive ? '' : 'Train tickets to Kyoto');
   const potMax = Number(trip.pot) / 1e6;
+
+  const receiptUri = useReceiptDraft(trip.id);
+  // Draf struk hanya berlaku untuk pembayaran yang sedang dibuat di layar ini.
+  useEffect(() => () => clearReceiptDraft(trip.id), [trip.id]);
 
   const paySchema = useMemo(() => createPaySchema(potMax), [potMax]);
 
@@ -60,53 +71,59 @@ function PayView({ trip }: { trip: Trip }) {
     resolver: zodResolver(paySchema),
     mode: 'onChange',
     defaultValues: {
-      amountStr: '150',
+      amountStr: '',
       split: 'equal',
       included: defaultIncluded,
       customShares: {},
     },
   });
 
-  const amountStr = useWatch({ control, name: 'amountStr' }) ?? '150';
+  const amountStr = useWatch({ control, name: 'amountStr' }) ?? '';
   const split = useWatch({ control, name: 'split' }) ?? 'equal';
   const included = useWatch({ control, name: 'included' }) ?? defaultIncluded;
   const customShares = useWatch({ control, name: 'customShares' }) ?? {};
 
-  const amountNumber = parseInt(amountStr, 10) || 0;
-  const amountVal = usd(amountNumber);
+  const amountVal = toAmount(amountStr);
 
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
-    isDirty,
+    isDirty: isDirty || Boolean(receiptUri),
     fallbackRoute: `/trip/${trip.id}`,
   });
 
-  const overLimit = amountVal > trip.approvalLimit;
+  const hasOtherMembers = trip.members.length > 1;
+  const overLimit = hasOtherMembers && amountVal > trip.approvalLimit;
 
-  let customSum = 0;
-  if (split === 'custom') {
-    for (const m of trip.members) {
-      if (included[m.id]) {
-        customSum += parseInt(customShares[m.id] || '0', 10);
-      }
-    }
-  }
+  const people = trip.members.filter((m) => included[m.id]);
+  const equalShares = splitEqually(amountVal, Math.max(1, people.length));
+  const equalShareOf = (memberId: string) => equalShares[people.findIndex((m) => m.id === memberId)] ?? 0n;
+  const customSum = people.reduce((sum, m) => sum + toAmount(customShares[m.id]), 0n);
 
   const { notify } = useNotifications();
+  const attachReceipt = useAttachReceipt(trip.id);
   const createSpend = useCreateSpend(trip.id);
   const tx = useTx(createSpend.mutateAsync, {
     onSuccess: (result) => {
+      if (receiptUri) {
+        attachReceipt.mutateAsync({ receiptUri, spendId: result.spendId }).catch(() =>
+          notify({
+            title: 'Receipt not saved',
+            body: 'Receipts are not available yet on this version. Your payment is fine.',
+            data: { url: `/trip/${trip.id}` },
+          }),
+        );
+      }
       // Demo: mock tidak tahu batas trip, jadi pakai `overLimit` dari layar.
       if (result.pending || (!isLive && overLimit)) {
         notify({
           title: 'Approval requested',
-          body: `You requested approval to pay $${amountNumber} for ${title}.`,
+          body: `You requested approval to pay ${money(amountVal)} for ${title.trim()}.`,
           data: { url: `/trip/${trip.id}/spend/${result.spendId}/waiting` },
         });
         router.replace(`/trip/${trip.id}/spend/${result.spendId}/waiting`);
       } else {
         notify({
           title: 'Payment sent',
-          body: `Paid $${amountNumber} from ${trip.name} pot.`,
+          body: `Paid ${money(amountVal)} from ${trip.name} pot.`,
           data: { url: `/trip/${trip.id}` },
         });
         router.replace(`/trip/${trip.id}`);
@@ -115,17 +132,15 @@ function PayView({ trip }: { trip: Trip }) {
   });
 
   const onSubmit = (data: PayFormData) => {
-    const amount = usd(parseInt(data.amountStr, 10) || 0);
-    const people = trip.members.filter((m) => data.included[m.id]);
+    const amount = toAmount(data.amountStr);
+    const payers = trip.members.filter((m) => data.included[m.id]);
     const shares =
-      data.split === 'equal'
-        ? splitEqually(amount, people.length)
-        : people.map((m) => usd(parseInt(data.customShares[m.id] || '0', 10)));
+      data.split === 'equal' ? splitEqually(amount, payers.length) : payers.map((m) => toAmount(data.customShares[m.id]));
     tx.execute({
       amount,
       title: title.trim() || 'Payment',
       category: 'other',
-      participants: people.map((m) => m.id),
+      participants: payers.map((m) => m.id),
       shares,
     });
   };
@@ -135,43 +150,35 @@ function PayView({ trip }: { trip: Trip }) {
     (typeof errors.included?.message === 'string' ? errors.included.message : undefined) ??
     (typeof errors.split?.message === 'string' ? errors.split.message : undefined);
 
+  const label = !amountVal ? 'Enter an amount' : overLimit ? 'Request approval' : `Pay ${money(amountVal)}`;
+
   return (
     <View style={{ flex: 1 }}>
       <Screen
         gap={16}
         footer={
           <Button
-            label={overLimit ? 'Request approval' : `Pay ${money(amountVal)}`}
+            label={label}
             disabled={!isValid || tx.isProcessing || !title.trim()}
-            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
         }>
         <ScreenHeader title="Pay from the pot" action="close" onPress={handleBack} />
 
         <Surface style={styles.amountCard}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.amount}>$</Text>
-            <Controller
-              control={control}
-              name="amountStr"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.amount}
-                  value={value}
-                  onChangeText={onChange}
-                  keyboardType="numeric"
-                  placeholder="0"
-                  placeholderTextColor={colors.textMuted}
-                />
-              )}
-            />
-          </View>
-          {validationErrorMessage ? (
-            <Text variant="caption" color={colors.danger} style={{ fontFamily: fonts.bodyBold }}>
-              {validationErrorMessage}
-            </Text>
-          ) : null}
+          <Controller
+            control={control}
+            name="amountStr"
+            render={({ field: { onChange, value } }) => (
+              <AmountInput
+                value={value}
+                onChange={onChange}
+                hint={validationErrorMessage ?? `The pot has ${money(trip.pot)}`}
+                error={Boolean(validationErrorMessage)}
+                accessibilityLabel="Amount to pay"
+              />
+            )}
+          />
           <View style={styles.what}>
             <Icon name="train" size={16} strokeWidth={2} />
             <TextInput
@@ -211,15 +218,13 @@ function PayView({ trip }: { trip: Trip }) {
           </View>
 
           {split === 'custom' && (
-            <Text variant="caption" color={customSum === amountNumber ? colors.positive : colors.danger}>
-              Custom split total: ${customSum} / ${amountNumber}
+            <Text variant="caption" color={customSum === amountVal ? colors.positive : colors.danger}>
+              Custom split total: {money(customSum)} / {money(amountVal)}
             </Text>
           )}
 
           {trip.members.map((member) => {
             const on = included[member.id] ?? false;
-            const includedCount = Math.max(1, Object.values(included).filter(Boolean).length);
-            const equalShareAmount = Math.floor(amountNumber / includedCount);
 
             return (
               <View key={member.id} style={styles.shareRow}>
@@ -227,17 +232,20 @@ function PayView({ trip }: { trip: Trip }) {
                 <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14 }}>{member.label}</Text>
 
                 {split === 'equal' ? (
-                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(usd(equalShareAmount)) : '—'}</Text>
+                  <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{on ? money(equalShareOf(member.id)) : '—'}</Text>
                 ) : on ? (
                   <TextInput
                     style={styles.customInput}
                     value={customShares[member.id] || ''}
                     onChangeText={(val) => {
-                      const updated = { ...customShares, [member.id]: val };
+                      const updated = { ...customShares, [member.id]: sanitizeAmountInput(val) };
                       setValue('customShares', updated, { shouldValidate: true, shouldDirty: true });
                     }}
-                    keyboardType="numeric"
+                    keyboardType="decimal-pad"
+                    inputMode="decimal"
                     placeholder="$0"
+                    placeholderTextColor={colors.textMuted}
+                    accessibilityLabel={`Share for ${member.label}`}
                   />
                 ) : (
                   <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>—</Text>
@@ -259,9 +267,40 @@ function PayView({ trip }: { trip: Trip }) {
           })}
         </Surface>
 
-        <Link href={`/trip/${trip.id}/add-receipt`} asChild>
-          <Button label="Add receipt photo · only your group can see it" variant="dashed" icon={<Icon name="camera" size={18} strokeWidth={2} />} />
-        </Link>
+        {receiptUri ? (
+          <Surface style={styles.receiptRow}>
+            <Image source={{ uri: receiptUri }} style={styles.receiptThumb} contentFit="cover" accessibilityLabel="Receipt photo" />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text variant="label">Receipt added</Text>
+              <Text variant="caption" color={colors.textMuted}>
+                Only your group can see it
+              </Text>
+            </View>
+            <Link href={`/trip/${trip.id}/add-receipt`} asChild>
+              <Pressable accessibilityRole="button" hitSlop={8}>
+                <Text variant="label" color={colors.primary}>
+                  Retake
+                </Text>
+              </Pressable>
+            </Link>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Remove receipt"
+              hitSlop={8}
+              onPress={() => clearReceiptDraft(trip.id)}
+              style={styles.receiptRemove}>
+              <Icon name="close" size={16} color={colors.textMuted} strokeWidth={2.4} />
+            </Pressable>
+          </Surface>
+        ) : (
+          <Link href={`/trip/${trip.id}/add-receipt`} asChild>
+            <Button
+              label="Add receipt photo · only your group can see it"
+              variant="dashed"
+              icon={<Icon name="camera" size={18} strokeWidth={2} />}
+            />
+          </Link>
+        )}
 
         {overLimit && (
           <View style={styles.warn}>
@@ -287,14 +326,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 26,
     alignItems: 'center',
-    gap: 8,
-  },
-  amount: {
-    fontFamily: fonts.display,
-    fontSize: 56,
-    lineHeight: 58,
-    letterSpacing: -1.5,
-    color: colors.text,
+    gap: 12,
   },
   title: {
     fontFamily: fonts.bodyBold,
@@ -302,7 +334,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     minWidth: 120,
     paddingVertical: 0,
-  },
+    outlineStyle: 'none',
+  } as object,
   what: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -311,6 +344,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: radius.pill,
     backgroundColor: colors.warmBg,
+  },
+  receiptRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderRadius: radius.row,
+  },
+  receiptThumb: {
+    width: 44,
+    height: 56,
+    borderRadius: 10,
+    backgroundColor: palette.cameraBg,
+  },
+  receiptRemove: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   splitHeader: {
     flexDirection: 'row',
@@ -355,7 +409,7 @@ const styles = StyleSheet.create({
     color: colors.text,
     borderBottomWidth: 1,
     borderBottomColor: palette.lineStrong,
-    width: 60,
+    width: 72,
     textAlign: 'right',
     paddingVertical: 2,
     marginRight: 10,

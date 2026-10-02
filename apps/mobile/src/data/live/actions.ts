@@ -2,7 +2,16 @@ import { parseEventLogs, type Hex, type LocalAccount, type TransactionReceipt } 
 import { computeNoteHash, groupVaultAbi } from '@tekosoe/shared';
 
 import { api } from '@/lib/api';
-import { ausdAllowance, ausdBalance, publicClient, requestDemoFunds, signAusdPermit, vaultAddress, writeVault } from '@/lib/chain';
+import {
+  ausdAllowance,
+  ausdBalance,
+  publicClient,
+  requestDemoFunds,
+  signAusdPermit,
+  transferAusd,
+  vaultAddress,
+  writeVault,
+} from '@/lib/chain';
 import { env } from '@/lib/env';
 import { waitForIndexer } from '@/lib/envio';
 import { decodeInviteCode, encodeInviteCode, newInviteSecret, saveInviteSecret, signInvite } from '@/lib/invite';
@@ -17,18 +26,13 @@ import { usd } from '@/lib/money';
 /** Safety net pembuat trip (layar New trip belum punya isian; sama dengan default layar Join). */
 const CREATOR_SAFETY_NET = usd(50);
 
-/** Isi saldo otomatis di latar belakang kalau di bawah ini (faucet memberi 10.000 per permintaan). */
-const PREFUND_BELOW = usd(500);
-
 /**
- * Testnet: saldo kurang → isi otomatis dari faucet AUSD Agora, di dalam alur yang sama
- * (user hanya melihat "Processing"). Di mainnet tempat ini diganti on-ramp.
+ * Saldo dolar harus cukup. Tidak diisi otomatis (ADR 0006): user melakukan "Top up" sendiri
+ * supaya merasakan alur on-ramp. Layar sudah mengarahkan ke Top up sebelum sampai ke sini.
  */
-async function ensureBalance(account: LocalAccount, amount: bigint) {
+async function requireBalance(account: LocalAccount, amount: bigint) {
   if (amount === 0n) return;
-  if ((await ausdBalance(account.address)) >= amount) return;
-  await requestDemoFunds(account);
-  if ((await ausdBalance(account.address)) < amount) throw new Error('Not enough balance for this amount.');
+  if ((await ausdBalance(account.address)) < amount) throw new Error('Not enough dollars. Top up first.');
 }
 
 async function indexed(receipt: TransactionReceipt): Promise<TransactionReceipt> {
@@ -82,7 +86,7 @@ export async function joinTrip(account: LocalAccount, code: string, input: { put
   if (!invite) throw new Error('This invite link has expired.');
   const putIn = usd(input.putIn);
   const safetyNet = usd(input.safetyNet);
-  await ensureBalance(account, putIn);
+  await requireBalance(account, putIn);
 
   const inviteSig = await signInvite(invite.secret, vaultAddress(), invite.groupId, account.address);
   // Satu transaksi, satu Face ID: izin AUSD (setoran + safety net) lewat permit.
@@ -95,7 +99,7 @@ export async function joinTrip(account: LocalAccount, code: string, input: { put
 
 export async function deposit(account: LocalAccount, tripId: string, amountDollars: number) {
   const amount = usd(amountDollars);
-  await ensureBalance(account, amount);
+  await requireBalance(account, amount);
   const groupId = BigInt(tripId);
   // Pertahankan izin safety net setelah setoran memakai sebagian allowance.
   const [allowance, pullCap] = await Promise.all([ausdAllowance(account.address), myPullCap(account, groupId)]);
@@ -136,27 +140,39 @@ export const disputeShare = async (account: LocalAccount, tripId: string, spendI
   indexed(await writeVault(account, 'disputeShare', [BigInt(tripId), BigInt(spendId)]));
 
 export async function payDebt(account: LocalAccount, tripId: string, amount: bigint) {
-  await ensureBalance(account, amount);
+  await requireBalance(account, amount);
   const permit = await signAusdPermit(account, amount);
   return indexed(await writeVault(account, 'payDebtWithPermit', [BigInt(tripId), amount, permit]));
 }
 
+/** Batas satu kali Top up di testnet = jatah satu permintaan faucet AUSD Agora. */
+export const TOP_UP_MAX = usd(10_000);
+
 /**
- * Testnet: isi saldo di latar belakang setelah masuk, supaya setoran pertama tidak perlu menunggu faucet.
- * Butuh MON dari drip dulu (dikirim api saat masuk), jadi tunggu sebentar sampai MON tiba. Tidak pernah gagal.
+ * Testnet: "Top up" sebesar `amount` (simulasi on-ramp). Faucet AUSD Agora selalu mengirim 10.000,
+ * jadi kelebihannya langsung dikembalikan ke faucet — saldo user naik tepat `amount`.
+ * Dua transaksi (faucet + pengembalian) kecuali `amount` = 10.000. Mainnet: on-ramp mitra.
+ * Pengembalian sengaja ke faucet (bukan "bank" Cash out) supaya indexer bisa membedakan
+ * Top up (faucet → user, dikurangi user → faucet) dari Cash out (user → bank).
  */
-export async function prefundAccount(account: LocalAccount) {
-  try {
-    if ((await ausdBalance(account.address)) >= PREFUND_BELOW) return;
-    const deadline = Date.now() + 30_000;
-    while ((await publicClient.getBalance({ address: account.address })) === 0n) {
-      if (Date.now() > deadline) return;
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
-    }
-    await requestDemoFunds(account);
-  } catch {
-    // Faucet sibuk atau koneksi putus: ensureBalance mencoba lagi saat user benar-benar menyetor.
-  }
+export async function topUpBalance(account: LocalAccount, amount: bigint) {
+  if (amount <= 0n || amount > TOP_UP_MAX) throw new Error('Top up between $1 and $10,000 at a time.');
+  const before = await ausdBalance(account.address);
+  await requestDemoFunds(account);
+  const received = (await ausdBalance(account.address)) - before;
+  const extra = received - amount;
+  if (extra > 0n) await transferAusd(account, env.ausdFaucetAddress, extra);
+}
+
+/**
+ * Testnet: "Cash out" (simulasi off-ramp) — dolar sungguhan keluar dari saldo ke "bank" demo
+ * (EXPO_PUBLIC_CASH_OUT_ADDRESS), tanpa transfer bank sungguhan. Mainnet: off-ramp mitra.
+ */
+export async function cashOut(account: LocalAccount, amount: bigint) {
+  const bank = env.cashOutAddress;
+  if (!bank) throw new Error('EXPO_PUBLIC_CASH_OUT_ADDRESS is not set');
+  await requireBalance(account, amount);
+  return transferAusd(account, bank, amount);
 }
 
 export type { Hex };

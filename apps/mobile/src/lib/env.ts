@@ -14,6 +14,10 @@ export const env = {
   webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'tekosoe.xyz',
   /** Penerima pembayaran "toko demo" (layar Pay / Card). Testnet saja. */
   demoShopAddress: process.env.EXPO_PUBLIC_DEMO_SHOP_ADDRESS as `0x${string}` | undefined,
+  /** Penerima "Cash out" (simulasi off-ramp: "bank" demo). Testnet saja; default = toko demo. */
+  cashOutAddress: (process.env.EXPO_PUBLIC_CASH_OUT_ADDRESS || process.env.EXPO_PUBLIC_DEMO_SHOP_ADDRESS) as
+    | `0x${string}`
+    | undefined,
   /** Jeda keberatan + settle setelah tanggal berakhir, detik. Demo pakai singkat. */
   disputeWindowSeconds: Number(process.env.EXPO_PUBLIC_DISPUTE_WINDOW_SECONDS ?? 3600),
   /** Sumber data layar: `demo` (src/data/demo) atau `live` (Envio + api + GroupVault). */

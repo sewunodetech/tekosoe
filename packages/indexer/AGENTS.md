@@ -4,8 +4,8 @@ Envio HyperIndex **v3** — **sumber data baca untuk semua hal soal uang**: daft
 
 - `config.yaml` — event harus identik dengan `packages/contracts/src/interfaces/IGroupVault.sol` (GroupVault v1, ADR 0005). `field_selection` memilih `transaction.hash` dan `transaction.from`. Chain id, alamat kontrak, start block, dan RPC diambil dari env (`${ENVIO_…:-default}`); default-nya GroupVault v1 testnet.
 - `.env` (gitignored, salin dari `.env.example`) — `ENVIO_API_TOKEN` untuk HyperSync (sumber utama, gratis di envio.dev/app/api-tokens). RPC publik Monad hanya cadangan (`ENVIO_RPC_FOR=fallback`); tanpa token set `ENVIO_RPC_FOR=sync` (lambat: `eth_getLogs` dibatasi 100 blok). Envio hanya membaca variabel berawalan `ENVIO_`.
-- `schema.graphql` — Group, Member, Spend, SpendShare, Receipt, Activity. Relasi memakai `group: Group!` / `spend: Spend!` (kolom `group_id` / `spend_id`) + `@derivedFrom`.
-- `src/EventHandlers.ts` — handler untuk ke-12 event. Di v3, `indexer` dan tipe entitas diimpor dari `"envio"` (tidak ada lagi modul `generated`).
+- `schema.graphql` — Group, Member, Spend, SpendShare, Receipt, Activity, plus BalanceActivity / BalanceAccount (Top up / Cash out, ADR 0007). Relasi memakai `group: Group!` / `spend: Spend!` (kolom `group_id` / `spend_id`) + `@derivedFrom`.
+- `src/EventHandlers.ts` — handler untuk ke-12 event GroupVault + `Transfer` AUSD (kontrak `Ausd`, difilter `where` ke faucet / bank Cash out; alamat dari `ENVIO_AUSD_FAUCET_ADDRESS`, `ENVIO_CASH_OUT_ADDRESS`). Di v3, `indexer` dan tipe entitas diimpor dari `"envio"` (tidak ada lagi modul `generated`).
 
 ## Aturan
 

@@ -77,6 +77,30 @@ type Receipt {
   timestamp: BigInt!
 }
 
+# Saldo dolar pribadi (di luar trip), dari Transfer AUSD — ADR 0006 / layar Activity.
+# TopUp  = faucet → user, dikurangi pengembalian user → faucet (app mengembalikan kelebihan faucet).
+# CashOut = user → alamat "bank" demo (ENVIO_CASH_OUT_ADDRESS), bukan pembayaran dari GroupVault.
+enum BalanceKind {
+  TopUp
+  CashOut
+}
+
+type BalanceActivity {
+  id: ID! # `${txHash}-${logIndex}` dari Transfer yang membuatnya
+  account: String! @index # lowercase
+  kind: BalanceKind!
+  amount: BigInt! # bersih (TopUp sudah dikurangi pengembalian)
+  timestamp: BigInt!
+  txHash: String!
+}
+
+# Penanda per akun: Top up terakhir, supaya pengembalian ke faucet mengurangi baris yang benar.
+type BalanceAccount {
+  id: ID! # address lowercase
+  lastTopUp: String # id BalanceActivity
+  lastTopUpAt: BigInt
+}
+
 type Activity {
   id: ID! # `${txHash}-${logIndex}`
   group: Group!
