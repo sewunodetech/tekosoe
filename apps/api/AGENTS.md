@@ -3,7 +3,7 @@
 Express 5 (Node 22/TypeScript, ESM, dijalankan dengan `tsx`) dalam Docker, deploy ke Railway. Menyimpang dari spesifikasi awal (Hono) — lihat [ADR 0004](../../docs/decisions/0004-api-express.md). Tugasnya (spesifikasi › Pembagian tugas):
 
 1. **Penjadwal settle** — `setInterval` di dalam proses (`src/modules/settle/scheduler.ts`): cari grup Active yang jatuh tempo lewat Envio, cek `endsAt + disputeWindow` dari kontrak (waktu blok, bukan jam server), `simulate` lalu kirim `settle(groupId)`, backoff eksponensial di `settle_runs`.
-2. **Gas** — drip MON sekali per alamat baru (`POST /api/drip`), dibatasi rate limit per IP, cap harian, dan cek saldo minimum.
+2. **Gas** — drip MON untuk alamat baru, dan isi ulang kalau saldonya di bawah minimum setelah cooldown (`POST /api/drip`), dibatasi rate limit per IP, cap harian, dan cek saldo minimum.
 3. **Satu-satunya pintu ke database** (Postgres via `DATABASE_URL`, Drizzle) dan object storage struk (S3-compatible, presigned URL) — app tidak pernah terhubung langsung.
 4. **Push notification** — webhook Alchemy → decode event GroupVault → kirim push lewat Expo (P3, `FEATURE_PUSH`).
 5. **Metadata & invoice** — profil, label trip/pemakaian (dikunci ke hash on-chain), invoice per anggota setelah settle.
