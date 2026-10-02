@@ -159,7 +159,7 @@ Each sponsor has one clear job in the product, and every integration runs for re
 - [x] API deployed: settle scheduler, MON drip, SIWE login, trip/spend labels bound to on-chain hashes, invoices, push tokens.
 - [x] Mobile app: every screen of the final design, live mode against testnet, invoices with PDF + verifiable QR, invite deep links, activity feed, top up / cash out.
 - [x] Web companion: invoice verification, invite links, passkey domain files.
-- [ ] In progress: Mera passkey sign-in verified in a release build on physical iOS and Android phones (the code path is in [`src/wallet`](apps/mobile/src/wallet); web and Expo Go fall back to an on-device demo key), encrypted receipt upload, EAS release build.
+- [ ] In progress: Mera passkey sign-in verified in a release build on physical iOS and Android phones (the code path is in [`src/wallet`](apps/mobile/src/wallet); web and Expo Go fall back to an on-device demo key), receipts verified live on testnet (encryption, upload and `attachReceipt` are built, see [ADR 0008](docs/decisions/0008-encrypted-receipts.md)), EAS release build.
 
 Full progress: [`docs/STATUS.md`](docs/STATUS.md).
 

@@ -133,4 +133,25 @@ export const api = {
 
   subscribePush: (account: LocalAccount, expoPushToken: string, platform: 'ios' | 'android') =>
     request('/api/push/subscribe', { method: 'POST', body: { expoPushToken, platform }, auth: account }),
+
+  // Struk (M7): kunci publik anggota, kunci trip terbungkus, unggah ciphertext lewat URL presigned.
+  publishEncKey: (account: LocalAccount, encPublicKey: string) =>
+    request('/api/keys/me', { method: 'PUT', body: { encPublicKey }, auth: account }),
+  groupEncKeys: async (account: LocalAccount, groupId: string) =>
+    (await request<{ keys: { address: Address; encPublicKey: string | null }[] }>(`/api/groups/${groupId}/keys`, { auth: account })).keys,
+  shareTripKey: (account: LocalAccount, groupId: string, wraps: { member: Address; wrappedKey: string }[]) =>
+    request<{ created: number }>(`/api/groups/${groupId}/key-wraps`, { method: 'PUT', body: { wraps }, auth: account }),
+  myTripKeyWrap: (account: LocalAccount, groupId: string) =>
+    request<{ wrappedKey: string; wrappedBy: Address }>(`/api/groups/${groupId}/key-wraps/me`, { auth: account }),
+
+  receiptUploadUrl: (account: LocalAccount, body: { groupId: string; spendId: string; sizeBytes: number; mime: string }) =>
+    request<{ receiptId: string; uploadUrl: string; headers?: Record<string, string> }>('/api/receipts/upload-url', {
+      method: 'POST',
+      body,
+      auth: account,
+    }),
+  confirmReceipt: (account: LocalAccount, receiptId: string, receiptHash: string) =>
+    request<{ status: 'ready' }>(`/api/receipts/${receiptId}/confirm`, { method: 'POST', body: { receiptHash }, auth: account }),
+  receiptByHash: (account: LocalAccount, receiptHash: string) =>
+    request<{ mime: string; downloadUrl: string; sizeBytes: number }>(`/api/receipts/by-hash/${receiptHash}`, { auth: account }),
 };

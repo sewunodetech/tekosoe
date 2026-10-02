@@ -43,10 +43,10 @@ export default function TripScreen() {
   );
 }
 
-function spendHref(trip: Trip, spend: Spend): Href | undefined {
+function spendHref(trip: Trip, spend: Spend): Href {
   if (spend.status === 'pending') return `/trip/${trip.id}/spend/${spend.id}/waiting`;
-  if (isLive || spend.hasReceipt) return `/trip/${trip.id}/spend/${spend.id}`;
-  return undefined;
+  // Selalu bisa dibuka: tanpa struk pun, rincian menampilkan tombol "Add" untuk yang membayar.
+  return `/trip/${trip.id}/spend/${spend.id}`;
 }
 
 function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; empty: boolean }) {

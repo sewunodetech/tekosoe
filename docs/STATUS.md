@@ -37,7 +37,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [x] M4 Transactions: `src/tx`, every mutation hook and the Processing → Done feedback modal, friendly errors
 - [x] M5 Forms & validation
 - [x] M6 Live data: Envio + api adapters. *Code done (`src/data/live`, `EXPO_PUBLIC_DATA_SOURCE=live`), typecheck + lint pass, backend deployed and connected on testnet.*
-- [ ] M7 Receipts: camera/PDF, encryption, upload, `attachReceipt`, open R2 → R3. *Capture UI + `attachReceipt` + passkey unlock done; R1 uses expo-camera + gallery (expo-image-picker), the photo becomes a draft on 09 and is attached after `spend` (demo). Not yet: compress/encrypt/upload, multi-page, PDF*
+- [ ] M7 Receipts: camera/PDF, encryption, upload, `attachReceipt`, open R2 → R3. *Code complete (ADR 0008): compress → AES-GCM with the trip key on the phone → presigned upload → `attachReceipt` → R2 checks the on-chain fingerprint and decrypts. Typecheck, lint and crypto round-trip checks pass; demo flow verified. Remaining: verify live on testnet (needs `FEATURE_RECEIPTS` + S3 on the api), multi-page, PDF*
 - [x] M8 Invoices: `payDebt`, PDF through expo-print, share, a real QR code linking to web verification
 - [x] M9 Invites & deep links: `tekosoe://` scheme, universal links, and the `/j/[code]` web companion
 - [ ] M10 Release & QA: banned-word check, accessibility, test on 3 phones, EAS build

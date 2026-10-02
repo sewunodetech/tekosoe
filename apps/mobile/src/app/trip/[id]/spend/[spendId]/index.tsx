@@ -10,9 +10,11 @@ import { Text } from '@/components/ui/text';
 import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
+import { demoReceipt } from '@/features/spends/demo-receipts';
 import { useDisputeSpend } from '@/features/spends/useDisputeSpend';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
+import { isLive } from '@/lib/env';
 import { money } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -30,6 +32,8 @@ export default function PaymentDetailsScreen() {
 
 function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
   const myShare = spend.shares.find((s) => s.member.label === 'You')?.share ?? 0n;
+  const iPaid = spend.paidBy.label === 'You';
+  const hasReceipt = spend.hasReceipt || (!isLive && Boolean(demoReceipt(trip.id, spend.id)));
 
   const disputeSpend = useDisputeSpend(trip.id, spend.id);
   const disputeTx = useTx(disputeSpend.mutateAsync, {
@@ -46,17 +50,20 @@ function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
     <>
       <Screen
         footer={
-          <>
-            <Button
-              label="I wasn't part of this"
-              variant="outline"
-              onPress={handleDispute}
-              disabled={disputeTx.isProcessing}
-            />
-            <Text variant="small" color={colors.textMuted} style={{ textAlign: 'center', fontFamily: fonts.body }}>
-              Moves your {money(myShare)} share back to {spend.paidBy.name}. Open for 24 hours.
-            </Text>
-          </>
+          // Keberatan hanya untuk peserta yang benar-benar punya bagian (kontrak juga menolak yang lain).
+          myShare > 0n && !iPaid ? (
+            <>
+              <Button
+                label="I wasn't part of this"
+                variant="outline"
+                onPress={handleDispute}
+                disabled={disputeTx.isProcessing}
+              />
+              <Text variant="small" color={colors.textMuted} style={{ textAlign: 'center', fontFamily: fonts.body }}>
+                Moves your {money(myShare)} share back to {spend.paidBy.name}. Open for 24 hours.
+              </Text>
+            </>
+          ) : undefined
         }>
         <ScreenHeader title="Payment details" />
 
@@ -85,16 +92,24 @@ function PaymentDetailsView({ trip, spend }: { trip: Trip; spend: Spend }) {
         <View style={{ flex: 1 }}>
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>Receipt</Text>
           <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-            Encrypted · only the group can open it
+            {hasReceipt
+              ? 'Encrypted · only the group can open it'
+              : iPaid
+                ? 'Add a photo so everyone can check it'
+                : 'No receipt added yet'}
           </Text>
         </View>
-        <Link href={`/trip/${trip.id}/spend/${spend.id}/receipt`} asChild>
-          <Pressable accessibilityRole="link" hitSlop={12}>
-            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }} color={colors.primary}>
-              Open
-            </Text>
-          </Pressable>
-        </Link>
+        {(hasReceipt || iPaid) && (
+          <Link
+            href={hasReceipt ? `/trip/${trip.id}/spend/${spend.id}/receipt` : `/trip/${trip.id}/add-receipt?spendId=${spend.id}`}
+            asChild>
+            <Pressable accessibilityRole="link" hitSlop={12}>
+              <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }} color={colors.primary}>
+                {hasReceipt ? 'Open' : 'Add'}
+              </Text>
+            </Pressable>
+          </Link>
+        )}
       </Surface>
 
       <View style={styles.proof}>
