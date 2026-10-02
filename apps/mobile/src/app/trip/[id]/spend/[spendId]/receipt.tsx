@@ -147,11 +147,6 @@ function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
               <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
                 {unlocked ? `Same file ${attachedBy} attached, not changed since` : 'Proves this receipt has not been swapped'}
               </Text>
-              {latest && (
-                <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.bodyMedium }}>
-                  {latest.hash.slice(0, 10)}…{latest.hash.slice(-6)}
-                </Text>
-              )}
             </View>
           </View>
         )}
