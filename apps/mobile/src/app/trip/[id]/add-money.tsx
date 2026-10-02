@@ -41,14 +41,14 @@ const PRESETS = [
 ];
 
 function AddMoneyView({ trip }: { trip: Trip }) {
-  const [text, setText] = useState('50');
+  const [text, setText] = useState('');
   const amountBigInt = parseAmountInput(text) ?? 0n;
   const valid = amountBigInt > 0n;
   const amount = Number(amountBigInt) / 1000000;
 
   const { notify } = useNotifications();
 
-  const isDirty = text !== '50';
+  const isDirty = text !== '';
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: `/trip/${trip.id}`,

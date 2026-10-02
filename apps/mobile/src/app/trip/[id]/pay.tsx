@@ -48,7 +48,7 @@ const toAmount = (text: string | undefined) => parseAmountInput(text ?? '') ?? 0
 function PayView({ trip }: { trip: Trip }) {
   const router = useRouter();
   // Draf demo: tiket kereta (cerita desain); nominal diisi user.
-  const [title, setTitle] = useState(isLive ? '' : 'Train tickets to Kyoto');
+  const [title, setTitle] = useState('');
   const potMax = Number(trip.pot) / 1e6;
 
   const receiptUri = useReceiptDraft(trip.id);
