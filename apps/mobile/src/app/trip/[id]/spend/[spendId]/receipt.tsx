@@ -1,6 +1,6 @@
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Pop } from '@/components/decor';
 import { ReceiptPaper } from '@/components/receipt-paper';
@@ -12,13 +12,19 @@ import { Text } from '@/components/ui/text';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import { combine, QueryState } from '@/components/query-state';
 import type { Spend, Trip } from '@/data/types';
+import { useOpenReceipt } from '@/features/spends/useOpenReceipt';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
+import { isLive } from '@/lib/env';
 import { money } from '@/lib/money';
 
+/** Waktu struk dilampirkan, mis. "Oct 9, 8:45 PM". */
+const receiptTime = (seconds: number) =>
+  new Date(seconds * 1000).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
 // R2 Receipt, locked → R3 Receipt, unlocked — canvas "Final UI" › S08ReceiptLocked, S09ReceiptView
-// TODO: api → receipts, group_keys; Envio ReceiptAttached. Buka kunci grup dengan Face ID (PRF Mera),
-// unduh ciphertext, cocokkan keccak256 dengan receiptHash on-chain, lalu dekripsi di HP.
+// Live (ADR 0008): unduh ciphertext, cocokkan keccak256 dengan receiptHash on-chain, lalu dekripsi di HP dengan
+// kunci trip. Demo: foto yang dilampirkan di sesi ini, atau struk contoh.
 export default function ReceiptScreen() {
   const { id, spendId } = useLocalSearchParams<{ id: string; spendId: string }>();
   return (
@@ -29,36 +35,55 @@ export default function ReceiptScreen() {
 }
 
 function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
-  const [unlocked, setUnlocked] = useState(false);
-  const [unlocking, setUnlocking] = useState(false);
+  const open = useOpenReceipt(trip.id, spend);
+  const unlocked = open.isSuccess;
+  const photo = open.data?.uri;
   const count = trip.members.length === 3 ? 'three' : String(trip.members.length);
-
-  const handleUnlock = async () => {
-    setUnlocking(true);
-    // Simulate passkey biometric authentication + PRF group key decryption
-    setTimeout(() => {
-      setUnlocked(true);
-      setUnlocking(false);
-    }, 600);
-  };
+  const latest = spend.receipts?.[0];
+  const missing = isLive && !latest;
+  const attachedBy = latest ? latest.by.name : spend.paidBy.name;
+  const attachedAt = latest ? receiptTime(latest.at) : 'Oct 9, 8:45 PM';
 
   return (
     <Screen
       footer={
-        unlocked ? (
+        unlocked || missing ? (
           <Button label="Done" onPress={() => router.back()} />
         ) : (
-          <Button
-            label={unlocking ? 'Authenticating...' : 'Unlock with Passkey'}
-            icon={<Icon name="faceId" color={colors.textOnPrimary} strokeWidth={2} />}
-            onPress={handleUnlock}
-            disabled={unlocking}
-          />
+          <View style={{ gap: 10 }}>
+            <Button
+              label={open.isPending ? 'Unlocking…' : 'Unlock with Passkey'}
+              icon={<Icon name="faceId" color={colors.textOnPrimary} strokeWidth={2} />}
+              onPress={() => open.mutate()}
+              disabled={open.isPending}
+            />
+            {open.isError && (
+              <Text variant="caption" color={colors.danger} style={{ textAlign: 'center' }} accessibilityLiveRegion="polite">
+                {open.error.message}
+              </Text>
+            )}
+          </View>
         )
       }>
       <ScreenHeader title="Receipt" right={unlocked ? <Pill label="Unlocked here" bg={colors.positiveBg} color={colors.positiveText} /> : undefined} />
 
-      {unlocked ? (
+      {missing ? (
+        <View style={[styles.locked, styles.empty]}>
+          <View style={styles.lockCircle}>
+            <Icon name="receipt" size={30} color={colors.primary} strokeWidth={2} />
+          </View>
+          <Text variant="h3" style={{ fontSize: 22, lineHeight: 28 }}>
+            No receipt yet
+          </Text>
+          <Text variant="label" style={{ fontFamily: fonts.body, textAlign: 'center', lineHeight: 21 }} color={colors.textMuted}>
+            {spend.paidBy.label === 'You' ? 'Add a photo from the payment details.' : `${spend.paidBy.name} hasn't added one yet.`}
+          </Text>
+        </View>
+      ) : unlocked && photo ? (
+        <Pop style={styles.photoWrap}>
+          <Image source={{ uri: photo }} style={styles.photo} contentFit="contain" accessibilityLabel={`Receipt for ${spend.title}`} />
+        </Pop>
+      ) : unlocked ? (
         <Pop style={{ alignItems: 'center', paddingVertical: 8 }}>
           <ReceiptPaper
             style={{ width: 270 }}
@@ -110,20 +135,21 @@ function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
               {spend.title} · {money(spend.amount)}
             </Text>
             <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-              Attached by {spend.paidBy.name} · Oct 9, 8:45 PM
+              {missing ? 'Nothing attached yet' : `Attached by ${attachedBy} · ${attachedAt}`}
             </Text>
           </View>
         </View>
-        <Pressable accessibilityRole="link" style={styles.row}>
-          {unlocked && <View style={styles.dot} />}
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{unlocked ? 'Fingerprint matches Monad' : 'Fingerprint on Monad'}</Text>
-            <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
-              {unlocked ? `Same file ${spend.paidBy.name} attached, not changed since` : 'Proves this receipt has not been swapped'}
-            </Text>
+        {!missing && (
+          <View style={styles.row}>
+            {unlocked && <View style={styles.dot} />}
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14 }}>{unlocked ? 'Matches the original' : "Can't be swapped"}</Text>
+              <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
+                {unlocked ? `The same photo ${attachedBy} added, not changed since` : 'Locked in the moment it was added'}
+              </Text>
+            </View>
           </View>
-          <Icon name="external" size={14} color={colors.primary} />
-        </Pressable>
+        )}
       </Surface>
     </Screen>
   );
@@ -138,6 +164,20 @@ const styles = StyleSheet.create({
     paddingVertical: 34,
     paddingHorizontal: 40,
     gap: 12,
+  },
+  empty: {
+    height: 320,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoWrap: {
+    height: 420,
+    borderRadius: radius.hero,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+  },
+  photo: {
+    flex: 1,
   },
   skeleton: {
     borderRadius: 7,

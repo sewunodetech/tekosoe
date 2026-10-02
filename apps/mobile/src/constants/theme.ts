@@ -11,9 +11,9 @@ export const palette = {
   white: '#ffffff',
   ink: '#1d2426',
   inkSoft: '#2a3436',
-  slate: '#5f6b6d',
-  slateLight: '#7c8789',
-  teal: '#1f7a6e',
+  slate: '#5a6668',
+  slateLight: '#5d6567',
+  teal: '#1d7065',
   tealDeep: '#16574e',
   tealInk: '#234a44',
   tealMuted: '#3f5b56',
@@ -22,7 +22,7 @@ export const palette = {
   mintCardDeco: '#b8dfd3',
   mintDeep: '#bfe4da',
   mintBright: '#8ed8c6',
-  green: '#1c7a4f',
+  green: '#1a7149',
   greenDeep: '#145c3b',
   greenSoft: '#cdeedd',
   orange: '#ff9a62',
@@ -87,9 +87,9 @@ export const colors = {
   positive: palette.green,
   positiveBg: palette.greenSoft,
   positiveText: palette.greenDeep,
-  /** "No receipt", peringatan ringan. */
-  warning: palette.brown,
-  /** Invoice Due. */
+  /** Status yang perlu perhatian tapi bukan error ("No receipt", menunggu persetujuan, safety net). Netral hangat, bukan merah. */
+  notice: palette.cocoa,
+  /** HANYA untuk error (validasi, transaksi gagal). Status biasa seperti invoice Due tidak boleh merah. */
   danger: palette.rust,
 
   /** Pot kosong (S1) — Teko tidur. */

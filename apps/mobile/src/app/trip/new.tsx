@@ -26,6 +26,9 @@ import { inviteUrl } from '@/lib/invite';
 // 04 New trip — canvas "Final UI" › F04Create
 // Live: createGroup(name, inviteKey, endsAt, disputeWindow, approvalThreshold, safetyNet) + api → group_meta.
 // Rahasia undangan dibuat di HP; link dibagikan setelah trip ada.
+/** Titik awal kalender saja (bukan isian): besok. */
+const tomorrow = () => new Date(Date.now() + 24 * 60 * 60 * 1000);
+
 export default function NewTripScreen() {
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -39,15 +42,15 @@ export default function NewTripScreen() {
     resolver: zodResolver(newTripFormSchema),
     mode: 'onChange',
     defaultValues: {
-      name: 'Japan Trip',
-      limitStr: '100',
-      endsAt: new Date('2026-10-14T00:00:00Z'),
+      name: '',
+      limitStr: '',
+      endsAt: undefined,
     },
   });
 
   const tripName = useWatch({ control, name: 'name' });
   const limitStr = useWatch({ control, name: 'limitStr' });
-  const endsAt = useWatch({ control, name: 'endsAt' }) ?? new Date('2026-10-14T00:00:00Z');
+  const endsAt = useWatch({ control, name: 'endsAt' }) as Date | undefined;
 
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
@@ -81,7 +84,6 @@ export default function NewTripScreen() {
           <Button
             label="Create trip"
             disabled={!isValid || tx.isProcessing}
-            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
         }>
@@ -106,7 +108,8 @@ export default function NewTripScreen() {
           <View pointerEvents="none">
             <TextField
               label="Trip ends"
-              value={endsAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              value={endsAt ? endsAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+              placeholder="Pick a date"
               editable={false}
               error={errors.endsAt?.message}
               icon={<Icon name="calendar" color={colors.primary} strokeWidth={2} />}
@@ -117,7 +120,8 @@ export default function NewTripScreen() {
 
         {showDatePicker && (
           <DateTimePicker
-            value={endsAt}
+            value={endsAt ?? tomorrow()}
+            minimumDate={tomorrow()}
             mode="date"
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onValueChange={(_event, selectedDate) => {
@@ -142,13 +146,13 @@ export default function NewTripScreen() {
                 onBlur={onBlur}
                 error={errors.limitStr?.message}
                 keyboardType="numeric"
-                placeholder="100"
+                placeholder="e.g. 100"
               />
             )}
           />
           <ChoiceChips
             options={[50, 100, 200] as const}
-            value={parseInt(limitStr, 10) || 100}
+            value={parseInt(limitStr, 10) || null}
             onChange={(v) => {
               setValue('limitStr', String(v), { shouldValidate: true, shouldDirty: true });
             }}

@@ -30,7 +30,7 @@ import { useTx } from '@/tx/useTx';
 // R1 Add receipt — canvas "Final UI" › S07ReceiptCapture
 // Dari 09 (tanpa `spendId`): foto disimpan sebagai draf, lalu 09 melampirkannya setelah `spend` berhasil.
 // Dengan `?spendId=`: langsung dilampirkan ke pemakaian itu.
-// TODO (M7): kompres → AES-GCM kunci grup → keccak256(ciphertext) → unggah lewat api → attachReceipt.
+// Live: dikompres, dienkripsi dengan kunci trip, diunggah, lalu attachReceipt (data/live/receipts.ts, ADR 0008).
 export default function AddReceiptScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (

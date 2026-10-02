@@ -48,7 +48,7 @@ const toAmount = (text: string | undefined) => parseAmountInput(text ?? '') ?? 0
 function PayView({ trip }: { trip: Trip }) {
   const router = useRouter();
   // Draf demo: tiket kereta (cerita desain); nominal diisi user.
-  const [title, setTitle] = useState(isLive ? '' : 'Train tickets to Kyoto');
+  const [title, setTitle] = useState('');
   const potMax = Number(trip.pot) / 1e6;
 
   const receiptUri = useReceiptDraft(trip.id);
@@ -103,23 +103,35 @@ function PayView({ trip }: { trip: Trip }) {
   const createSpend = useCreateSpend(trip.id);
   const tx = useTx(createSpend.mutateAsync, {
     onSuccess: (result) => {
+      // Demo: permintaan di atas batas memakai pemakaian cerita `train` ($150 tiket kereta) supaya layar berikutnya cocok.
+      const spendId = !isLive && overLimit ? 'train' : result.spendId;
       if (receiptUri) {
-        attachReceipt.mutateAsync({ receiptUri, spendId: result.spendId }).catch(() =>
-          notify({
-            title: 'Receipt not saved',
-            body: 'Receipts are not available yet on this version. Your payment is fine.',
-            data: { url: `/trip/${trip.id}` },
-          }),
-        );
+        // Dilampirkan di latar belakang setelah pembayaran tercatat; hasilnya dikabarkan lewat banner.
+        attachReceipt
+          .mutateAsync({ receiptUri, spendId })
+          .then(() =>
+            notify({
+              title: 'Receipt added',
+              body: `Encrypted and saved for ${title.trim()}. Only your trip can open it.`,
+              data: { url: `/trip/${trip.id}/spend/${spendId}` },
+            }),
+          )
+          .catch((error: unknown) =>
+            notify({
+              title: 'Receipt not saved',
+              body: `${error instanceof Error ? error.message : 'Please try again.'} You can add it from the payment details.`,
+              data: { url: `/trip/${trip.id}/spend/${spendId}` },
+            }),
+          );
       }
       // Demo: mock tidak tahu batas trip, jadi pakai `overLimit` dari layar.
       if (result.pending || (!isLive && overLimit)) {
         notify({
           title: 'Approval requested',
           body: `You requested approval to pay ${money(amountVal)} for ${title.trim()}.`,
-          data: { url: `/trip/${trip.id}/spend/${result.spendId}/waiting` },
+          data: { url: `/trip/${trip.id}/spend/${spendId}/waiting` },
         });
-        router.replace(`/trip/${trip.id}/spend/${result.spendId}/waiting`);
+        router.replace(`/trip/${trip.id}/spend/${spendId}/waiting`);
       } else {
         notify({
           title: 'Payment sent',

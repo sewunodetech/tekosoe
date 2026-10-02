@@ -127,6 +127,7 @@ function toSpend(s: EnvioSpend, members: Map<string, Member>, meta: Map<string, 
     shares,
     when: when(s.executedAt ?? s.requestedAt),
     hasReceipt: s.receiptCount > 0,
+    receipts: (s.receipts ?? []).map((r) => ({ hash: r.receiptHash as `0x${string}`, by: memberOf(r.by), at: Number(r.timestamp) })),
     status: s.status === 'Pending' ? 'pending' : s.status === 'Rejected' ? 'rejected' : 'executed',
   };
 }

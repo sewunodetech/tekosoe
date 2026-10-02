@@ -30,24 +30,26 @@ export default function JoinScreen() {
 }
 
 function JoinView({ trip, code }: { trip: Trip; code: string }) {
-  const [putIn, setPutIn] = useState<number>(100);
-  const [safetyNet, setSafetyNet] = useState<number>(50);
+  // Mulai kosong: user memilih sendiri setoran dan safety net-nya.
+  const [putIn, setPutIn] = useState<number | null>(null);
+  const [safetyNet, setSafetyNet] = useState<number | null>(null);
+  const ready = putIn !== null && safetyNet !== null;
 
-  const isDirty = putIn !== 100 || safetyNet !== 50;
+  const isDirty = putIn !== null || safetyNet !== null;
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
     fallbackRoute: '/trips',
   });
 
   const balance = useBalance().data;
-  const short = balance !== undefined && balance < usd(putIn);
+  const short = putIn !== null && balance !== undefined && balance < usd(putIn);
   const joinTrip = useJoinTrip(code);
   const { notify } = useNotifications();
   const joinTx = useTx(joinTrip.mutateAsync, {
     onSuccess: () => {
       notify({
         title: 'Joined trip',
-        body: `You joined ${trip.name} and put in $${putIn}.`,
+        body: `You joined ${trip.name} and put in $${putIn ?? 0}.`,
         data: { url: `/trip/${trip.id}` },
       });
       router.replace(`/trip/${trip.id}`);
@@ -55,6 +57,7 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
   });
 
   const handleJoin = () => {
+    if (putIn === null || safetyNet === null) return;
     joinTx.execute({ putIn, safetyNet });
   };
 
@@ -71,7 +74,11 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
               onPress={() => router.push('/balance/top-up')}
             />
           ) : (
-            <Button label={`Join and put in $${putIn}`} onPress={handleJoin} disabled={joinTx.isProcessing} />
+            <Button
+              label={ready ? `Join and put in $${putIn}` : putIn === null ? 'Choose how much to put in' : 'Choose your safety net'}
+              onPress={handleJoin}
+              disabled={!ready || joinTx.isProcessing}
+            />
           )
         }>
       <ScreenHeader title={`Join ${trip.name}`} onPress={handleBack} />
@@ -80,7 +87,7 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
         <Text variant="label" color={colors.textMuted}>
           Put in to start
         </Text>
-        <Text style={styles.bigAmount}>${putIn}</Text>
+        <Text style={styles.bigAmount} color={putIn === null ? colors.textMuted : undefined}>${putIn ?? 0}</Text>
         <ChoiceChips options={[50, 100, 200] as const} value={putIn} onChange={setPutIn} format={(v) => `$${v}`} />
         <Text variant="caption" color={colors.textMuted}>
           You can add more any time.
@@ -102,8 +109,8 @@ function JoinView({ trip, code }: { trip: Trip; code: string }) {
       </View>
 
       <Surface style={{ gap: 10 }}>
-        <KeyValue label="Put in now" value={`$${putIn}.00`} />
-        <KeyValue label="Safety net up to" value={`$${safetyNet}.00`} />
+        <KeyValue label="Put in now" value={putIn === null ? "—" : `$${putIn}.00`} />
+        <KeyValue label="Safety net up to" value={safetyNet === null ? "—" : `$${safetyNet}.00`} />
         <KeyValue label="Your dollars" value={balance === undefined ? '…' : money(balance)} />
       </Surface>
     </Screen>
@@ -129,7 +136,6 @@ const styles = StyleSheet.create({
     fontSize: 56,
     lineHeight: 58,
     letterSpacing: -1.5,
-    color: colors.text,
   },
   safety: {
     padding: 18,

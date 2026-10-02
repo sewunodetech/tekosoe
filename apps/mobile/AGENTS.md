@@ -77,7 +77,7 @@ ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri
 - Join = satu transaksi `joinGroupWithPermit` (tanda tangan undangan + permit AUSD setoran + safety net). Setor = `depositWithPermit`; bayar tagihan = `payDebtWithPermit`.
 - Saldo dolar pribadi = kartu "Your dollars" di Profile (ADR 0006). **Top up** (`/balance/top-up`, simulasi on-ramp: faucet AUSD Agora) dan **Cash out** (`/balance/cash-out`, simulasi off-ramp: transfer AUSD ke `EXPO_PUBLIC_CASH_OUT_ADDRESS`). Tidak ada dolar gratis otomatis: kalau dolar kurang, Add money / Join menampilkan "Top up to …" yang membuka Top up.
 - Setiap aksi live (`data/live/actions.ts`) baru selesai setelah Envio memproses blok transaksinya (`waitForIndexer`), jadi `invalidateQueries` sesudahnya langsung mengambil data terbaru. Tidak perlu optimistic update untuk pot/saldo.
-- Belum tersambung di live: struk (enkripsi + unggah, M7) — `useAttachReceipt` gagal terus terang; halaman kartu (Card) masih demo.
+- Struk (M7, ADR 0008): `data/live/receipts.ts` + `lib/receipt-crypto.ts` — kunci trip dibagikan lewat api `keys`, struk dienkripsi di HP, diunggah, lalu `attachReceipt`. Butuh `FEATURE_RECEIPTS` + S3 di api. Halaman kartu (Card) masih demo.
 
 ## Expo has changed — do not trust your training data
 

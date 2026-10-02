@@ -5,7 +5,8 @@ import { Text } from './text';
 
 type Props<T extends string | number> = {
   options: readonly T[];
-  value: T;
+  /** `null` = belum ada yang dipilih (isian mulai kosong). */
+  value: T | null;
   onChange: (value: T) => void;
   format?: (value: T) => string;
   /** "teal" (nominal) atau "ink" (safety net di F06, di atas kartu cream). */

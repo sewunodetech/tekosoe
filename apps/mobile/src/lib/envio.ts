@@ -33,6 +33,8 @@ export type EnvioMember = {
 
 export type EnvioShare = { participant: string; share: string; disputed: boolean };
 
+export type EnvioReceipt = { receiptHash: string; by: string; timestamp: string };
+
 export type EnvioSpend = {
   id: string;
   spendId: string;
@@ -44,6 +46,7 @@ export type EnvioSpend = {
   requestedAt: string;
   executedAt: string | null;
   receiptCount: number;
+  receipts?: EnvioReceipt[];
   shares: EnvioShare[];
 };
 
@@ -112,6 +115,11 @@ const GROUP_FIELDS = gql`
       requestedAt
       executedAt
       receiptCount
+      receipts(order_by: { timestamp: desc }) {
+        receiptHash
+        by
+        timestamp
+      }
       shares {
         participant
         share

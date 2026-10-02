@@ -124,7 +124,7 @@ export function AvatarStack({
       ))}
       {extra ? (
         <View style={[styles.extra, { width: size, height: size, borderRadius: size / 2, borderColor: ring }]}>
-          <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 11 }} color={colors.textMuted}>
+          <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 12 }} color={colors.textMuted}>
             +{extra}
           </Text>
         </View>

@@ -54,7 +54,7 @@ export function TxOverlay({
             </Text>
             <Text style={styles.subtitle}>
               {status === 'processing' && processingSubtitle}
-              {status === 'done' && 'Your transaction is complete'}
+              {status === 'done' && 'All done'}
               {status === 'error' && 'No worries, no funds were changed'}
             </Text>
           </View>

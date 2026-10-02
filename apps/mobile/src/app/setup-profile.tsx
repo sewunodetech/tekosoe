@@ -28,8 +28,6 @@ export default function SetupProfileScreen() {
   const [pickingCountry, setPickingCountry] = useState(false);
   const [pickingCity, setPickingCity] = useState(false);
 
-  const defaultCountry = existing?.country ?? 'Australia';
-  const defaultCities = LOCATIONS[defaultCountry] ?? ['Sydney'];
 
   const {
     control,
@@ -41,16 +39,16 @@ export default function SetupProfileScreen() {
     mode: 'onChange',
     defaultValues: {
       name: existing?.name ?? '',
-      country: defaultCountry,
-      city: existing?.city ?? defaultCities[0],
-      tint: existing?.tint ?? avatarColors[2],
+      country: existing?.country ?? '',
+      city: existing?.city ?? '',
+      tint: existing?.tint ?? '',
     },
   });
 
   const currentName = useWatch({ control, name: 'name' }) || '';
-  const currentCountry = useWatch({ control, name: 'country' }) || defaultCountry;
+  const currentCountry = useWatch({ control, name: 'country' }) || '';
   const currentCity = useWatch({ control, name: 'city' }) || '';
-  const currentTint = useWatch({ control, name: 'tint' }) || avatarColors[2];
+  const currentTint = useWatch({ control, name: 'tint' }) || '';
 
   const { showDiscardModal, setShowDiscardModal, handleBack, confirmExit } = useUnsavedChanges({
     isDirty,
@@ -71,7 +69,8 @@ export default function SetupProfileScreen() {
   const handleSelectCountry = (c: string) => {
     setValue('country', c, { shouldValidate: true, shouldDirty: true });
     const cities = LOCATIONS[c] ?? [];
-    setValue('city', cities[0] ?? '', { shouldValidate: true, shouldDirty: true });
+    // Kota dipilih sendiri; kalau negara ganti, pilihan kota lama tidak berlaku lagi.
+    if (!cities.includes(currentCity)) setValue('city', '', { shouldValidate: true, shouldDirty: true });
     setPickingCountry(false);
   };
 
@@ -83,7 +82,6 @@ export default function SetupProfileScreen() {
           <Button
             label={save.isPending ? 'Saving…' : editing ? 'Save' : 'Continue'}
             disabled={!isValid || save.isPending}
-            style={!isValid ? { opacity: 0.5 } : undefined}
             onPress={handleSubmit(onSubmit)}
           />
         }>
@@ -94,7 +92,7 @@ export default function SetupProfileScreen() {
 
         <View style={styles.hero}>
           <View style={styles.avatarWrap}>
-            <View style={[styles.avatar, { backgroundColor: currentTint }]}>
+            <View style={[styles.avatar, { backgroundColor: currentTint || colors.surfaceMuted }]}>
               <Text style={{ fontFamily: fonts.display, fontSize: 36, lineHeight: 42 }}>{(currentName.trim()[0] ?? '?').toUpperCase()}</Text>
             </View>
             <Bob style={styles.teko}>
@@ -119,7 +117,7 @@ export default function SetupProfileScreen() {
               onChangeText={onChange}
               onBlur={onBlur}
               error={errors.name?.message}
-              placeholder="Jack"
+              placeholder="Your first name"
               autoCapitalize="words"
             />
           )}
@@ -131,14 +129,14 @@ export default function SetupProfileScreen() {
             <Text variant="label">Country</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Country, ${currentCountry}`}
+              accessibilityLabel={`Country, ${currentCountry || 'not selected'}`}
               onPress={() => {
                 setPickingCountry((p) => !p);
                 setPickingCity(false);
               }}
               style={styles.select}>
-              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
-                {currentCountry}
+              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} color={currentCountry ? colors.text : colors.textMuted} numberOfLines={1}>
+                {currentCountry || 'Select country'}
               </Text>
               <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />
             </Pressable>
@@ -148,13 +146,18 @@ export default function SetupProfileScreen() {
             <Text variant="label">City</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`City, ${currentCity}`}
+              accessibilityLabel={`City, ${currentCity || 'not selected'}`}
               onPress={() => {
+                // Tanpa negara belum ada daftar kota: buka pilihan negara dulu.
+                if (!currentCountry) {
+                  setPickingCountry(true);
+                  return;
+                }
                 setPickingCity((p) => !p);
                 setPickingCountry(false);
               }}
               style={styles.select}>
-              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} numberOfLines={1}>
+              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 15 }} color={currentCity ? colors.text : colors.textMuted} numberOfLines={1}>
                 {currentCity || 'Select city'}
               </Text>
               <Icon name="chevron" size={18} color={colors.textMuted} strokeWidth={2} />

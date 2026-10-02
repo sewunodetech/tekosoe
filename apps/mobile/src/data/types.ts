@@ -10,6 +10,14 @@ export type Member = {
 
 export type ActivityIcon = 'food' | 'music' | 'train';
 
+export type SpendReceipt = {
+  /** keccak256(ciphertext), dicatat lewat `attachReceipt`. */
+  hash: `0x${string}`;
+  by: Member;
+  /** Detik Unix. */
+  at: number;
+};
+
 export type Spend = {
   id: string;
   title: string;
@@ -20,6 +28,8 @@ export type Spend = {
   shares: { member: Member; share: bigint }[];
   when: string;
   hasReceipt: boolean;
+  /** Live: struk yang dilampirkan (sidik jari on-chain), terbaru dulu. Demo: tidak diisi. */
+  receipts?: SpendReceipt[];
   /** Live: status on-chain. Demo: tidak diisi (dianggap sudah dibayar). */
   status?: 'pending' | 'executed' | 'rejected';
 };

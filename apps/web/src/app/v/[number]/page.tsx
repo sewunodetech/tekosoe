@@ -25,7 +25,7 @@ export default function InvoiceVerifyPage({ params }: { params: Promise<{ number
             ✓
           </div>
           <span className="text-xs font-extrabold text-[#145c3b]">
-            Cryptographically verified on Monad testnet
+            Checked: this invoice matches the trip&apos;s records
           </span>
         </div>
 
@@ -89,9 +89,9 @@ export default function InvoiceVerifyPage({ params }: { params: Promise<{ number
 
         {/* Proof Info Box */}
         <div className="bg-[#fff4ec] rounded-2xl p-4 border border-[#ffdccb] text-xs text-[#6b5e55] flex flex-col gap-1">
-          <span className="font-extrabold text-[#1d2426]">GroupVault Proof</span>
+          <span className="font-extrabold text-[#1d2426]">Why you can trust this</span>
           <span>
-            Computed on-chain with AUSD digital dollars. This invoice cannot be altered or falsified.
+            Every amount comes from the trip&apos;s own records, written the moment each payment happened. Nobody, including Tekosoe, can change it afterwards.
           </span>
         </div>
 

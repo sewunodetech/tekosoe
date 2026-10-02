@@ -5,7 +5,6 @@ import { Pressable, Share, StyleSheet, View } from 'react-native';
 
 import { QrCode } from '@/components/invoice/qr-code';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
 import { KeyValue, Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
@@ -23,10 +22,10 @@ import { useTx } from '@/tx/useTx';
 // I1 Refunded · I2 Due · I3 Paid — canvas "Final UI" › S10Invoice, S11InvoiceDue, S12InvoicePaid.
 // `?who=jack|wei|rina` memilih invoice anggota (demo multi-HP).
 // TODO: angka dari Envio, nomor/status/hash dari api → invoices. "Pay" → payDebt → DebtPaid.
-// "Save as PDF" → expo-print. Tiap baris menaut ke transaksinya di explorer Monad.
+// "Save as PDF" → expo-print. Baris tidak menaut ke explorer: blockchain tidak terlihat oleh user (verifikasi lewat QR).
 const BADGE: Record<InvoiceStatus, { label: string; bg: string; color: string }> = {
   refunded: { label: 'Refunded', bg: colors.positiveBg, color: colors.positiveText },
-  due: { label: 'Due', bg: palette.peachSoft, color: colors.danger },
+  due: { label: 'Due', bg: palette.peachSoft, color: colors.notice },
   paid: { label: 'Paid', bg: palette.sky, color: palette.navy },
 };
 
@@ -147,7 +146,7 @@ function InvoiceView({
             </div>
 
             <div class="footer">
-              Verified on Monad Metropolis Testnet · tekosoe.xyz/v/${invoice.number}
+              Check this invoice at tekosoe.xyz/v/${invoice.number}
             </div>
           </body>
         </html>
@@ -224,7 +223,7 @@ function InvoiceView({
 
         <Surface style={{ paddingVertical: 0 }}>
           {invoice.lines.map((line) => (
-            <Pressable key={line.date + line.title} accessibilityRole="link" style={styles.line}>
+            <View key={line.date + line.title} style={styles.line}>
               <Text style={styles.date} color={colors.textMuted}>
                 {line.date}
               </Text>
@@ -237,8 +236,7 @@ function InvoiceView({
               <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }} color={line.positive ? colors.positive : colors.text}>
                 {line.positive ? signed(line.amount) : money(line.amount)}
               </Text>
-              <Icon name="external" size={14} color={colors.primary} />
-            </Pressable>
+            </View>
           ))}
           <View style={styles.totals}>
             {invoice.totals.map((t) => (
@@ -252,7 +250,7 @@ function InvoiceView({
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Scan to verify</Text>
             <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body, lineHeight: 17 }}>
-              Rebuilds this invoice from Monad and checks it was not changed.
+              Checks this invoice against the trip&apos;s records and shows if anything was changed.
             </Text>
             <Text variant="small" color={colors.primary}>
               {verifyUrl}

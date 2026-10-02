@@ -87,10 +87,10 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: colors.surface,
   },
+  // Tidak dipudarkan lagi: label abu tua di atas pasir tetap terbaca (AA), jadi user tahu apa yang kurang.
   disabled: {
     backgroundColor: colors.surfaceMuted,
     borderColor: colors.surfaceMuted,
-    opacity: 0.8,
   },
 });
 
