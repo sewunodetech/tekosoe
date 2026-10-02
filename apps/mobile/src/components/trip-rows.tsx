@@ -35,7 +35,7 @@ export function ActivityRow({ spend, href, fresh = false, meta }: { spend: Spend
             </Text>
           </View>
         ) : (
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11 }} color={colors.warning}>
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 11 }} color={colors.notice}>
             No receipt
           </Text>
         )}

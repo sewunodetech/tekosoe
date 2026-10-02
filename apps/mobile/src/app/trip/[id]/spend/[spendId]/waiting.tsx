@@ -91,7 +91,7 @@ function WaitingView({ trip, spend }: { trip: Trip; spend: Spend }) {
             {i === 0 ? (
               <View style={styles.seen}>
                 <PulseDot color={colors.accent} size={8} />
-                <Text variant="small" color={palette.brownDeep}>
+                <Text variant="small" color={colors.notice}>
                   Seen
                 </Text>
               </View>

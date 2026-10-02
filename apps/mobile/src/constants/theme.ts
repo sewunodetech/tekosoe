@@ -87,9 +87,9 @@ export const colors = {
   positive: palette.green,
   positiveBg: palette.greenSoft,
   positiveText: palette.greenDeep,
-  /** "No receipt", peringatan ringan. */
-  warning: palette.brown,
-  /** Invoice Due. */
+  /** Status yang perlu perhatian tapi bukan error ("No receipt", menunggu persetujuan, safety net). Netral hangat, bukan merah. */
+  notice: palette.cocoa,
+  /** HANYA untuk error (validasi, transaksi gagal). Status biasa seperti invoice Due tidak boleh merah. */
   danger: palette.rust,
 
   /** Pot kosong (S1) — Teko tidur. */

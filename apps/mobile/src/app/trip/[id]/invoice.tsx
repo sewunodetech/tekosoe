@@ -26,7 +26,7 @@ import { useTx } from '@/tx/useTx';
 // "Save as PDF" → expo-print. Tiap baris menaut ke transaksinya di explorer Monad.
 const BADGE: Record<InvoiceStatus, { label: string; bg: string; color: string }> = {
   refunded: { label: 'Refunded', bg: colors.positiveBg, color: colors.positiveText },
-  due: { label: 'Due', bg: palette.peachSoft, color: colors.danger },
+  due: { label: 'Due', bg: palette.peachSoft, color: colors.notice },
   paid: { label: 'Paid', bg: palette.sky, color: palette.navy },
 };
 
