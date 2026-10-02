@@ -7,6 +7,16 @@ export function mapTxError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   const lower = message.toLowerCase();
 
+  // Biaya jaringan habis/tidak tersedia: jangan sampai terbaca sebagai "dolar kurang" (lihat ensureNetworkFee).
+  if (
+    lower.includes('getting your account ready') ||
+    lower.includes('insufficient funds for gas') ||
+    lower.includes('gas required exceeds') ||
+    lower.includes('intrinsic gas') ||
+    lower.includes('exceeds the balance of the account')
+  ) {
+    return "We're getting your account ready. Please try again in a minute.";
+  }
   if (lower.includes('top up first')) {
     return 'Not enough dollars. Top up first from your Profile.';
   }

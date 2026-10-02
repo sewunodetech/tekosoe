@@ -16,12 +16,14 @@ function startOfUtcDay(now = new Date()): Date {
 
 /**
  * FR-03 / US-01: brand new accounts have no MON, so the very first transaction
- * (join + deposit) would fail. This sends a small fixed amount, once per address,
- * and only answers "funded" after the transaction is confirmed.
+ * (join + deposit) would fail. This sends a small fixed amount and only answers
+ * "funded" after the transaction is confirmed. An address that was funded before is
+ * refilled only when it is below DRIP_MIN_BALANCE_MON and its last drip is older than
+ * DRIP_REFILL_COOLDOWN_MINUTES, so users never run out of network fees mid-trip.
  *
  * The endpoint is unauthenticated (the account does not exist yet), so it is
- * protected by: per-IP rate limit, a global daily cap, a one-time claim per address
- * and a minimum-balance check.
+ * protected by: per-IP rate limit, a global daily cap, one claim per address at a
+ * time with a refill cooldown, and a minimum-balance check.
  */
 export async function requestDrip(
   ctx: RouteContext,
@@ -32,7 +34,20 @@ export async function requestDrip(
 
   const existing = await repos.gasDrips.get(lower);
   if (existing?.status === "confirmed") {
-    return { status: "already_funded" };
+    // Refill: an active member spends the first drip after a dozen or so payments. Top them up
+    // again only when they are nearly empty and the last drip is older than the cooldown; the
+    // per-IP rate limit and the daily cap still apply below.
+    const cooledDown =
+      Date.now() - existing.createdAt.getTime() >= env.DRIP_REFILL_COOLDOWN_MINUTES * 60_000;
+    if (!cooledDown) return { status: "already_funded" };
+    let balance: bigint;
+    try {
+      balance = await chain.getNativeBalance(lower);
+    } catch {
+      return { status: "already_funded" };
+    }
+    if (balance >= parseMonAmount(env.DRIP_MIN_BALANCE_MON)) return { status: "already_funded" };
+    await repos.gasDrips.release(lower);
   }
 
   const dripsToday = await repos.gasDrips.countSince(startOfUtcDay());

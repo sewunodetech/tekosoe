@@ -305,10 +305,15 @@ Tx settle dicari lewat Envio. Idempoten.
 
 ## 5. Onboarding
 
-### 3. `POST /api/drip` — biaya jaringan untuk akun baru
+### 3. `POST /api/drip` — biaya jaringan untuk akun baru dan isi ulang
 
 Akun baru belum punya MON, padahal transaksi pertamanya butuh biaya jaringan.
 Balasan `funded` hanya keluar setelah transaksi terkonfirmasi.
+
+**Isi ulang:** alamat yang sudah pernah di-drip diisi lagi hanya kalau saldonya di bawah
+`DRIP_MIN_BALANCE_MON` **dan** drip terakhirnya lebih lama dari `DRIP_REFILL_COOLDOWN_MINUTES`
+(default 30). Selain itu jawabannya `already_funded`. App memanggil endpoint ini sebelum transaksi
+kalau saldo MON-nya rendah (`ensureNetworkFee` di `apps/mobile/src/lib/chain.ts`).
 
 | Field | Tipe | Aturan |
 | --- | --- | --- |

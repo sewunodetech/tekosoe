@@ -74,6 +74,8 @@ export const envSchema = z.object({
   DRIP_MIN_BALANCE_MON: num(0),
   DRIP_RATE_LIMIT_PER_HOUR: int(5, 1),
   DRIP_DAILY_CAP: int(200, 1),
+  /** A funded address can be refilled (when below DRIP_MIN_BALANCE_MON) after this many minutes. */
+  DRIP_REFILL_COOLDOWN_MINUTES: int(30, 1),
 
   // settle scheduler
   SETTLE_INTERVAL_MS: int(30_000, 1),

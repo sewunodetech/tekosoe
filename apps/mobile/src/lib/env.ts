@@ -9,6 +9,8 @@ export const env = {
   groupVaultAddress: (process.env.EXPO_PUBLIC_GROUP_VAULT_ADDRESS || GROUP_VAULT_TESTNET_ADDRESS) as `0x${string}` | undefined,
   envioGraphqlUrl: process.env.EXPO_PUBLIC_ENVIO_GRAPHQL_URL,
   apiUrl: process.env.EXPO_PUBLIC_API_URL,
+  /** Di bawah saldo MON ini app meminta drip sebelum transaksi (samakan dengan DRIP_MIN_BALANCE_MON di api). */
+  minFeeBalanceMon: process.env.EXPO_PUBLIC_MIN_FEE_BALANCE_MON || '0.05',
   passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN ?? 'tekosoe.xyz',
   /** Domain tautan undangan & verifikasi invoice (apps/web). */
   webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'tekosoe.xyz',
