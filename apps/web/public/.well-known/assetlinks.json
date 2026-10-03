@@ -8,7 +8,8 @@
       "namespace": "android_app",
       "package_name": "com.tekosoe.xyz",
       "sha256_cert_fingerprints": [
-        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+        "DE:B1:E6:59:83:57:D6:A5:C0:07:04:DC:18:BC:8E:05:91:A4:E7:CB:D1:B0:79:44:0B:D5:91:3A:39:48:C7:3E"
       ]
     }
   }
