@@ -158,7 +158,7 @@ Each sponsor has one clear job in the product, and every integration runs for re
 
 | | Address / URL |
 | --- | --- |
-| **GroupVault v1** | [`0x1467c9de54C1e4570AF062E80E860F94852BB7ee`](https://testnet.monadvision.com/address/0x1467c9de54C1e4570AF062E80E860F94852BB7ee) (block 66921819) |
+| **GroupVault v1** | [`0x1467c9de54C1e4570AF062E80E860F94852BB7ee`](https://testnet.monadvision.com/address/0x1467c9de54C1e4570AF062E80E860F94852BB7ee) (block 66921819) · ✅ source verified, exact match on [Sourcify](https://sourcify-api-monad.blockvision.org/v2/contract/10143/0x1467c9de54C1e4570AF062E80E860F94852BB7ee) |
 | **AUSD (Agora)** | [`0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`](https://testnet.monadvision.com/address/0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC) |
 | **Envio GraphQL** | https://graphql.mulalabs.biz.id/v1/graphql |
 | **API** | https://api.mulalabs.biz.id/health |
