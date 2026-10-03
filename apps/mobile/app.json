@@ -31,7 +31,11 @@
         {
           "backgroundColor": "#faf8f3",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 120
+          "imageWidth": 160,
+          "dark": {
+            "backgroundColor": "#faf8f3",
+            "image": "./assets/images/splash-icon.png"
+          }
         }
       ],
       "expo-secure-store",
@@ -52,7 +56,17 @@
           "microphonePermission": false
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/sounds/tekosoe.wav"
+          ],
+          "color": "#1f7a6e",
+          "defaultChannel": "tekosoe-chime"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false,

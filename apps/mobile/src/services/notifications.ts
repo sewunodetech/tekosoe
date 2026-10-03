@@ -9,6 +9,16 @@ export const isAndroidExpoGo = Platform.OS === 'android' && isExpoGo;
 
 let notificationsModule: typeof NotificationsType | null = null;
 let handlerConfigured = false;
+let pushTokenFailureLogged = false;
+
+/**
+ * Channel Android dengan suara khas Tekosoe (assets/sounds/tekosoe.wav, didaftarkan lewat plugin
+ * expo-notifications di app.json). Suara channel tidak bisa diubah setelah dibuat, jadi channel
+ * baru = id baru. apps/api mengirim push ke channel yang sama.
+ */
+export const NOTIFICATION_CHANNEL_ID = 'tekosoe-chime';
+export const NOTIFICATION_SOUND = 'tekosoe.wav';
+const LEGACY_CHANNEL_IDS = ['tekosoe-default', 'tekosoe'];
 
 /**
  * Lazy loader aman untuk expo-notifications.
@@ -53,13 +63,16 @@ export async function setupNotificationChannels() {
   if (!Notifications || Platform.OS !== 'android') return;
 
   try {
-    await Notifications.setNotificationChannelAsync('tekosoe-default', {
-      name: 'Tekosoe Notifications',
+    await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNEL_ID, {
+      name: 'Tekosoe',
       importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
+      vibrationPattern: [0, 120, 80, 180],
       lightColor: colors.primary,
-      sound: 'default',
+      sound: NOTIFICATION_SOUND,
     });
+    for (const id of LEGACY_CHANNEL_IDS) {
+      await Notifications.deleteNotificationChannelAsync(id);
+    }
   } catch (e) {
     console.warn('[notifications] Channel setup skipped:', e);
   }
@@ -121,7 +134,12 @@ export async function getExpoPushToken(): Promise<string | null> {
     const tokenData = await Notifications.getExpoPushTokenAsync();
     return tokenData.data;
   } catch (err) {
-    console.warn('[notifications] Could not get push token:', err);
+    // Push dari server butuh Firebase (google-services.json) di build Android. Tanpa itu notifikasi
+    // lokal tetap jalan — cukup dicatat sekali, bukan peringatan setiap kali masuk.
+    if (!pushTokenFailureLogged) {
+      pushTokenFailureLogged = true;
+      console.info('[notifications] Push token unavailable, local notifications only:', (err as Error)?.message);
+    }
     return null;
   }
 }
@@ -145,9 +163,9 @@ export async function sendNotification({ title, body, data }: NotificationPayloa
         title,
         body,
         data,
-        sound: 'default',
+        sound: NOTIFICATION_SOUND,
       },
-      trigger: null,
+      trigger: Platform.OS === 'android' ? { channelId: NOTIFICATION_CHANNEL_ID } : null,
     });
   } catch (err) {
     console.warn('[notifications] Failed to schedule local notification:', err);

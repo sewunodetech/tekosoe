@@ -9,12 +9,12 @@ import { colors, fonts, palette, radius } from '@/constants/theme';
 import {
   addNotificationResponseListener,
   getExpoPushToken,
-  getNotificationPermissionStatus,
   requestNotificationPermission,
   sendNotification,
   setupNotificationChannels,
   type NotificationPayload,
 } from '@/services/notifications';
+import { requestStartupPermissions } from '@/services/permissions';
 import { api } from '@/lib/api';
 import { isLive } from '@/lib/env';
 import { useSession } from './session-provider';
@@ -46,10 +46,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     setupNotificationChannels();
 
+    // Izin notifikasi + kamera diminta sekali saat app dibuka.
     if (Platform.OS !== 'web') {
-      getNotificationPermissionStatus().then((status) => {
-        setEnabled(status);
-      });
+      requestStartupPermissions().then(setEnabled);
     }
 
     const cleanupSubscription = addNotificationResponseListener((url) => {
@@ -112,6 +111,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const { signer } = useSession();
 
+  // Live: daftarkan token push ke api setiap kali masuk dengan izin notifikasi aktif.
+  useEffect(() => {
+    if (!enabled || !signer || !isLive || Platform.OS === 'web') return;
+    getExpoPushToken().then((token) => {
+      if (token) void api.subscribePush(signer.account, token, Platform.OS as 'ios' | 'android').catch(() => undefined);
+    });
+  }, [enabled, signer]);
+
   const toggleNotifications = useCallback(
     async (targetVal: boolean): Promise<void> => {
       if (!targetVal) {
@@ -123,14 +130,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       setEnabled(granted);
 
       if (granted) {
-        // Ambil token push
-        getExpoPushToken().then((token) => {
-          // Live: simpan token di api `push_subs` (Expo Push). Gagal = notifikasi lokal tetap jalan.
-          if (token && isLive && signer && (Platform.OS === 'ios' || Platform.OS === 'android')) {
-            void api.subscribePush(signer.account, token, Platform.OS).catch(() => undefined);
-          }
-        });
-
+        // Token push didaftarkan oleh effect di atas begitu `enabled` aktif.
         // Berikan notifikasi konfirmasi bahwa notifikasi telah aktif
         notify({
           title: 'Notifications enabled',
@@ -138,7 +138,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
       }
     },
-    [notify, signer],
+    [notify],
   );
 
   const handleBannerPress = () => {
