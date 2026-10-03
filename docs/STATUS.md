@@ -32,7 +32,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [x] UI for every Final UI screen + the Teko mascot + design system (demo data), branch `mobile-dev`
 - [ ] M0 Setup: merge to `main`, Home at `/trips`, `eas.json`, dev build on 2 phones, icons & splash. *Home at `/trips` ✅; app icon, adaptive icon, splash, favicon + web/OG icons from `tekosoe-mark.svg` ✅ (`scripts/brand-assets.mjs`); remaining: merge, `eas.json`, dev build*
 - [x] M1 Data layer: `src/data` (demo) + `src/features/*` hooks, loading/error states through `QueryState`. Every screen is decoupled from demo data
-- [ ] M2 Mera spike: passkey + sign one transaction in a dev build, ADR with the result. *ADR 0003 + code exist; not yet verified in a dev build on 2 phones*
+- [ ] M2 Mera spike: passkey + sign one transaction in a dev build, ADR with the result. *ADR 0003 + code exist. 4 Oct: passkey + PRF verified in a dev build on Android (Xiaomi, MIUI) with rpId `tekosoe.mulalabs.biz.id` — `.well-known` served from the VPS, signing back in with the same passkey opens the same account (profile + balance). Remaining: sign a transaction, iOS (needs Apple Team ID in AASA), second phone*
 - [x] M3 Session & account: Signer, SessionProvider, route gate, real passkey prompt. *Signer, SessionProvider and route gate done. SecureStore blocker resolved (using `requireAuthentication: true`).*
 - [x] M4 Transactions: `src/tx`, every mutation hook and the Processing → Done feedback modal, friendly errors
 - [x] M5 Forms & validation
@@ -40,7 +40,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] M7 Receipts: camera/PDF, encryption, upload, `attachReceipt`, open R2 → R3. *Code complete (ADR 0008): compress → AES-GCM with the trip key on the phone → presigned upload → `attachReceipt` → R2 checks the on-chain fingerprint and decrypts. Typecheck, lint and crypto round-trip checks pass; demo flow verified. Remaining: verify live on testnet (needs `FEATURE_RECEIPTS` + S3 on the api), multi-page, PDF*
 - [x] M8 Invoices: `payDebt`, PDF through expo-print, share, a real QR code linking to web verification
 - [x] M9 Invites & deep links: `tekosoe://` scheme, universal links, and the `/j/[code]` web companion
-- [ ] M10 Release & QA: banned-word check, accessibility, test on 3 phones, EAS build
+- [ ] M10 Release & QA: banned-word check, accessibility, test on 3 phones, EAS build. *4 Oct: first EAS preview APK on project `@kyy27/tekosoe` ([build](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/6e99c9fa-c6b3-409b-9d08-5984783046ec)); EAS keystore SHA-256 `DE:B1:E6:…:C7:3E` added to `assetlinks.json`; `EXPO_PUBLIC_*` set in the EAS `preview` environment*
 - [ ] M11 P1/P2: real-time feed, push, simulated card, PRF key. *Activity screen (`/activity`, ADR 0007) done in demo + live from Envio; Top up / Cash out rows wait for an indexer codegen + redeploy (`BalanceActivity`)*
 - [x] P1 Set up profile + P2 Profile designed on the Final UI canvas (28 Sep)
 - [ ] M12 Profile & account: P1 screen + P2 tab, saved to `profiles` through the api, Sign out. *P1 UI + P2 tab + gate + Sign out + local save done; api `profiles` wired up in live mode (not yet tested live)*
