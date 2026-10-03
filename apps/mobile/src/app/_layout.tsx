@@ -13,13 +13,14 @@ import {
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
 
 import { colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
 import { AppProviders } from '@/providers/app-providers';
 import { useSession } from '@/providers/session-provider';
+import { TxOverlay } from '@/tx/tx-overlay';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
@@ -37,9 +38,11 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
   const profileLoading = !!signer && profile.isLoading;
   const ready = (fontsLoaded || fontError != null) && !isLoading && !profileLoading;
 
+  // Saat app dibuka splash native menutupi loading; sesudahnya (mis. selesai passkey) pakai layar Teko transaksi.
+  const [booted, setBooted] = useState(false);
   useEffect(() => {
     if (ready) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().finally(() => setBooted(true));
     }
   }, [ready]);
 
@@ -67,7 +70,8 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
     }
   }, [ready, signer, profile.data, segments, pathname, router]);
 
-  if (!ready) return null;
+  // Font belum siap: splash native masih menutupi layar.
+  if (!fontsLoaded && fontError == null) return null;
 
   return (
     <>
@@ -84,6 +88,11 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
         <Stack.Screen name="trip/[id]/spend/[spendId]/approve" options={{ presentation: 'modal' }} />
         <Stack.Screen name="trip/[id]/spend/[spendId]/declined" options={{ presentation: 'modal' }} />
       </Stack>
+      <TxOverlay
+        status={booted && !ready ? 'processing' : 'idle'}
+        processingTitle="Opening your trips..."
+        processingSubtitle="Teko is getting everything ready"
+      />
     </>
   );
 }
