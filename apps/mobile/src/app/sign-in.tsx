@@ -16,7 +16,7 @@ import { Screen } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
-import { useSession } from '@/providers/session-provider';
+import { passkeyErrorCode, useSession } from '@/providers/session-provider';
 
 // 02 Sign in — canvas "Final UI" › F02SignIn
 export default function SignInScreen() {
@@ -27,6 +27,8 @@ export default function SignInScreen() {
       // Setelah sesi ada, gate di app/_layout.tsx mengarahkan: akun baru → P1 Set up profile, lainnya → Home.
       await signIn();
     } catch (err: any) {
+      // Sheet passkey ditutup user: bukan error, cukup tetap di layar ini.
+      if (passkeyErrorCode(err) === 'UserCancelled') return;
       console.error('Mera Auth Error:', err);
       Alert.alert('Sign in failed', err?.message || 'Failed to authenticate');
     }

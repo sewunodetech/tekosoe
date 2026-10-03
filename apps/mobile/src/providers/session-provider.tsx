@@ -37,6 +37,26 @@ function prepareAccount(signer: Signer) {
   void api.drip(signer.address).catch(() => undefined);
 }
 
+/** Kode error react-native-passkey (`NoCredentials`, `UserCancelled`, …) di balik MeraError. */
+export function passkeyErrorCode(err: unknown): string | undefined {
+  const cause = (err as { cause?: { error?: unknown } } | null)?.cause;
+  return typeof cause?.error === 'string' ? cause.error : undefined;
+}
+
+/**
+ * Simpan PRF supaya buka app berikutnya cukup biometrik, tanpa sheet passkey. Hanya kalau perangkat
+ * punya biometrik kelas strong (syarat `requireAuthentication`); kalau tidak, PRF tidak disimpan sama
+ * sekali dan sesi dipulihkan lewat passkey lagi — kunci tidak pernah disimpan tanpa perlindungan.
+ */
+async function cachePrfOutput(prfOutput: Uint8Array) {
+  if (!SecureStore.canUseBiometricAuthentication()) return;
+  try {
+    await SecureStore.setItemAsync(PRF_STORAGE_KEY, bytesToHex(prfOutput), { requireAuthentication: true });
+  } catch (err) {
+    console.warn('PRF not cached, next sign in uses the passkey again:', err);
+  }
+}
+
 export function SessionProvider({ children }: PropsWithChildren) {
   const [signer, setSigner] = useState<Signer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,6 +69,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return;
       }
       try {
+        if (!SecureStore.canUseBiometricAuthentication()) return;
         const prfHex = await SecureStore.getItemAsync(PRF_STORAGE_KEY, {
           requireAuthentication: true,
           authenticationPrompt: 'Unlock Tekosoe',
@@ -81,31 +102,30 @@ export function SessionProvider({ children }: PropsWithChildren) {
     let prfOutput: Uint8Array;
     let newCredentialId: string;
 
-    if (savedCredentialId) {
-      // Login with existing credential
-      const result = await getPasskeyPrfOutput({
+    // Akun = fungsi deterministik dari (passkey, rpId, salt PRF Mera). Passkey yang sama → alamat yang sama.
+    // Tanpa ID tersimpan (sign out / install ulang / HP baru) tawarkan dulu passkey yang sudah ada;
+    // passkey baru (= akun baru) hanya dibuat kalau perangkat memang belum punya passkey Tekosoe.
+    let result: { credentialId: string; prfOutput: Uint8Array | ArrayBuffer };
+    try {
+      result = await getPasskeyPrfOutput({
         rpId: env.passkeyDomain,
-        credential: { credentialId: savedCredentialId },
+        ...(savedCredentialId ? { credential: { credentialId: savedCredentialId } } : {}),
         webAuthnClient: reactNativeWebAuthnClient,
       });
-      prfOutput = new Uint8Array(result.prfOutput);
-      newCredentialId = result.credentialId;
-    } else {
-      // Register new passkey
-      const result = await createPasskeyWithPrfOutput({
+    } catch (err) {
+      if (passkeyErrorCode(err) !== 'NoCredentials') throw err;
+      result = await createPasskeyWithPrfOutput({
         rp: { id: env.passkeyDomain, name: 'Tekosoe' },
         user: { name: 'user', displayName: 'Tekosoe User' },
         webAuthnClient: reactNativeWebAuthnClient,
       });
-      prfOutput = new Uint8Array(result.prfOutput);
-      newCredentialId = result.credentialId;
     }
+    prfOutput = new Uint8Array(result.prfOutput);
+    newCredentialId = result.credentialId;
 
-    // Save to SecureStore with biometric requirement
-    await SecureStore.setItemAsync(PRF_STORAGE_KEY, bytesToHex(prfOutput), {
-      requireAuthentication: true,
-    });
+    // ID passkey dulu: kalau langkah berikutnya gagal, masuk lagi tetap memakai passkey (akun) yang sama.
     await SecureStore.setItemAsync(CREDENTIAL_ID_KEY, newCredentialId);
+    await cachePrfOutput(prfOutput);
 
     const mera = new MeraSigner(prfOutput);
     setSigner(mera);
