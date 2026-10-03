@@ -1,0 +1,52 @@
+# apps/web di VPS: nginx (HTTPS) → `next start` di 127.0.0.1:3000.
+# Salin ke /etc/nginx/sites-available/tekosoe, ganti domain/path, lalu:
+#   sudo ln -s /etc/nginx/sites-available/tekosoe /etc/nginx/sites-enabled/
+#   sudo certbot --nginx -d tekosoe.mulalabs.biz.id        # sertifikat HTTPS wajib untuk passkey
+#   sudo nginx -t && sudo systemctl reload nginx
+# Cek dari laptop: npm run check:wellknown -- tekosoe.mulalabs.biz.id --sha256 <fingerprint EAS>
+#
+# Domain di sini HARUS sama dengan EXPO_PUBLIC_PASSKEY_DOMAIN (rpId) dan
+# ios.associatedDomains di apps/mobile/app.json. Jangan redirect domain ini ke www.
+
+server {
+    listen 80;
+    server_name tekosoe.mulalabs.biz.id;
+
+    # Jangan redirect file asosiasi — Android & Apple tidak mengikuti redirect.
+    location /.well-known/ {
+        root /srv/tekosoe/apps/web/public;
+        default_type application/json;
+        add_header Cache-Control "public, max-age=300";
+        try_files $uri =404;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name tekosoe.mulalabs.biz.id;
+
+    # Diisi certbot
+    # ssl_certificate     /etc/letsencrypt/live/tekosoe.mulalabs.biz.id/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/tekosoe.mulalabs.biz.id/privkey.pem;
+
+    # Dilayani langsung dari disk: tetap jalan walau proses Next mati.
+    location /.well-known/ {
+        root /srv/tekosoe/apps/web/public;
+        default_type application/json;
+        add_header Cache-Control "public, max-age=300";
+        try_files $uri =404;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

@@ -19,7 +19,8 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f --tail=100",
-    "docker:ps": "docker compose ps"
+    "docker:ps": "docker compose ps",
+    "check:wellknown": "node scripts/check-wellknown.mjs"
   },
   "devDependencies": {
     "turbo": "^2.11.5",

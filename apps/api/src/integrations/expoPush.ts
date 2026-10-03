@@ -46,7 +46,8 @@ export function createPushService(
       const response = await fetchImpl(EXPO_PUSH_URL, {
         method: "POST",
         headers,
-        body: JSON.stringify(batch.map((message) => ({ ...message, sound: "default" }))),
+        // Suara khas + channel Android yang dibuat app (apps/mobile/src/services/notifications.ts).
+        body: JSON.stringify(batch.map((message) => ({ ...message, sound: "tekosoe.wav", channelId: "tekosoe-chime" }))),
         signal: AbortSignal.timeout(10_000),
       });
       if (!response.ok) return batch.map(() => "failed");
