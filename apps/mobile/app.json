@@ -74,8 +74,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "4a57a214-69cf-47de-bf80-6d3eea7dcd80"
-      }
-    }
+        "projectId": "00ebfaf4-670e-4b1a-af47-d1c5798bea85"
+      },
+      "router": {}
+    },
+    "owner": "kyy27"
   }
 }
