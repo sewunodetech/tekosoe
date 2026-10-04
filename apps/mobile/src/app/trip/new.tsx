@@ -13,7 +13,7 @@ import { Screen } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
-import { colors, fonts, radius } from '@/constants/theme';
+import { colors, fonts, palette, radius } from '@/constants/theme';
 import { useCreateTrip } from '@/features/trips/useCreateTrip';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -25,6 +25,7 @@ import { inviteUrl } from '@/lib/invite';
 
 // 04 New trip — canvas "Final UI" › F04Create
 // Live: createGroup(name, inviteKey, endsAt, disputeWindow, approvalThreshold, safetyNet) + api → group_meta.
+// Safety net pilihan pembuat = safety net semua anggota: dibaca dari kontrak saat orang gabung (ADR 0009).
 // Rahasia undangan dibuat di HP; link dibagikan setelah trip ada.
 /** Titik awal kalender saja (bukan isian): besok. */
 const tomorrow = () => new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -32,6 +33,7 @@ const tomorrow = () => new Date(Date.now() + 24 * 60 * 60 * 1000);
 export default function NewTripScreen() {
   const router = useRouter();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [safetyNet, setSafetyNet] = useState<number>(50);
 
   const {
     control,
@@ -73,6 +75,7 @@ export default function NewTripScreen() {
       name: data.name.trim(),
       endsAt: data.endsAt,
       limit: parseInt(data.limitStr, 10),
+      safetyNet,
     });
   };
 
@@ -164,6 +167,20 @@ export default function NewTripScreen() {
           </Text>
         </View>
 
+        <View style={styles.safety}>
+          <View style={styles.safetyTitle}>
+            <View style={styles.shield}>
+              <Icon name="shield" size={18} strokeWidth={2} />
+            </View>
+            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 15 }}>Safety net for everyone</Text>
+          </View>
+          <Text style={{ fontFamily: fonts.body, fontSize: 14, lineHeight: 21 }} color={palette.bark}>
+            If someone spends more than they put in, up to this much is collected from them automatically at
+            settle-up. Friends agree to it when they join.
+          </Text>
+          <ChoiceChips options={[25, 50, 100] as const} value={safetyNet} onChange={setSafetyNet} format={(v) => `$${v}`} tone="ink" borderless />
+        </View>
+
         <View style={styles.invite}>
           <View style={styles.inviteTeko}>
             <Teko mood="wink" size={92} bob={false} />
@@ -195,6 +212,25 @@ export default function NewTripScreen() {
 }
 
 const styles = StyleSheet.create({
+  safety: {
+    padding: 18,
+    borderRadius: radius.card,
+    backgroundColor: colors.warmBg,
+    gap: 12,
+  },
+  safetyTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  shield: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: palette.peachSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   invite: {
     overflow: 'hidden',
     padding: 18,

@@ -1,4 +1,4 @@
-import { parseEventLogs, type Hex, type LocalAccount, type TransactionReceipt } from 'viem';
+import { parseEventLogs, type Address, type Hex, type LocalAccount, type TransactionReceipt } from 'viem';
 import { computeNoteHash, groupVaultAbi } from '@tekosoe/shared';
 
 import { api } from '@/lib/api';
@@ -23,9 +23,6 @@ import { usd } from '@/lib/money';
  * Setiap aksi baru selesai setelah Envio memproses bloknya, jadi data yang diambil ulang sudah terbaru.
  */
 
-/** Safety net pembuat trip (layar New trip belum punya isian; sama dengan default layar Join). */
-const CREATOR_SAFETY_NET = usd(50);
-
 /**
  * Saldo dolar harus cukup. Tidak diisi otomatis (ADR 0006): user melakukan "Top up" sendiri
  * supaya merasakan alur on-ramp. Layar sudah mengarahkan ke Top up sebelum sampai ke sini.
@@ -46,17 +43,34 @@ function eventArgs<N extends 'GroupCreated' | 'SpendExecuted' | 'SpendRequested'
   return parseEventLogs({ abi: groupVaultAbi, logs, eventName })[0]?.args;
 }
 
-async function myPullCap(account: LocalAccount, groupId: bigint): Promise<bigint> {
+async function pullCapOf(groupId: bigint, member: Address): Promise<bigint> {
   const position = await publicClient.readContract({
     address: vaultAddress(),
     abi: groupVaultAbi,
     functionName: 'positionOf',
-    args: [groupId, account.address],
+    args: [groupId, member],
   });
   return position[3];
 }
 
-export async function createTrip(account: LocalAccount, input: { name: string; endsAt: Date; limit: number }) {
+const myPullCap = (account: LocalAccount, groupId: bigint) => pullCapOf(groupId, account.address);
+
+/** Safety net trip = safety net pembuat (dipilih di 04 New trip); anggota baru memakai angka yang sama. */
+export async function tripSafetyNet(tripId: string): Promise<bigint> {
+  const groupId = BigInt(tripId);
+  const group = await publicClient.readContract({
+    address: vaultAddress(),
+    abi: groupVaultAbi,
+    functionName: 'getGroup',
+    args: [groupId],
+  });
+  return pullCapOf(groupId, group.creator);
+}
+
+export async function createTrip(
+  account: LocalAccount,
+  input: { name: string; endsAt: Date; limit: number; safetyNet: number },
+) {
   const endsAt = BigInt(Math.floor(input.endsAt.getTime() / 1000));
   if (endsAt * 1000n <= BigInt(Date.now())) throw new Error('The end date must be in the future.');
 
@@ -68,7 +82,7 @@ export async function createTrip(account: LocalAccount, input: { name: string; e
       endsAt,
       BigInt(env.disputeWindowSeconds),
       usd(input.limit),
-      CREATOR_SAFETY_NET,
+      usd(input.safetyNet),
     ]),
   );
   const created = eventArgs(receipt, 'GroupCreated') as { groupId: bigint } | undefined;
@@ -81,19 +95,24 @@ export async function createTrip(account: LocalAccount, input: { name: string; e
   return { id: groupId, inviteCode: encodeInviteCode(groupId, secret) };
 }
 
-export async function joinTrip(account: LocalAccount, code: string, input: { putIn: number; safetyNet: number }) {
+/**
+ * Gabung cukup dengan undangan (ADR 0009): tanpa setoran, jadi tidak butuh dolar. Safety net = pilihan
+ * pembuat trip, disetujui dengan menekan Join; izinnya lewat permit (tanda tangan di HP, tanpa Face ID
+ * tambahan). Permit menimpa izin lama, jadi izin yang sudah ada (trip lain) ditambahkan, bukan diganti.
+ */
+export async function joinTrip(account: LocalAccount, code: string) {
   const invite = decodeInviteCode(code);
   if (!invite) throw new Error('This invite link has expired.');
-  const putIn = usd(input.putIn);
-  const safetyNet = usd(input.safetyNet);
-  await requireBalance(account, putIn);
-
+  const groupId = BigInt(invite.groupId);
   const inviteSig = await signInvite(invite.secret, vaultAddress(), invite.groupId, account.address);
-  // Satu transaksi, satu Face ID: izin AUSD (setoran + safety net) lewat permit.
-  const permit = await signAusdPermit(account, putIn + safetyNet);
-  await indexed(
-    await writeVault(account, 'joinGroupWithPermit', [BigInt(invite.groupId), inviteSig, safetyNet, putIn, permit]),
-  );
+  const safetyNet = await tripSafetyNet(invite.groupId);
+
+  if (safetyNet === 0n) {
+    await indexed(await writeVault(account, 'joinGroup', [groupId, inviteSig, 0n, 0n]));
+  } else {
+    const permit = await signAusdPermit(account, (await ausdAllowance(account.address)) + safetyNet);
+    await indexed(await writeVault(account, 'joinGroupWithPermit', [groupId, inviteSig, safetyNet, 0n, permit]));
+  }
   return { tripId: invite.groupId };
 }
 

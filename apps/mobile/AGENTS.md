@@ -38,7 +38,7 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 | 12 Card | `(tabs)/card.tsx` | F12Card; Tokyo Taxi → S4 |
 | 04 New trip | `trip/new.tsx` | F04Create |
 | 05 Invite | `invite/[code]/index.tsx` | F05Invite; deep link `tekosoe://invite/<code>` |
-| 06 Join + put in | `invite/[code]/join.tsx` | F06Join |
+| ~~06 Join + put in~~ | `invite/[code]/join.tsx` | Dihapus (ADR 0009): redirect ke 05; gabung langsung dari 05 |
 | 07 Trip · S1 | `trip/[id]/index.tsx` | F07Group; `?state=empty` = S01PotEmpty |
 | 08 Add money | `trip/[id]/add-money.tsx` | F08AddMoney (modal) |
 | 09 Pay from pot | `trip/[id]/pay.tsx` | F09Pay (modal) |
@@ -75,7 +75,7 @@ ID demo: trip `japan`, `euro`; spend `dinner`, `ramen`, `train`. Jalur demo juri
 
 - Butuh `EXPO_PUBLIC_GROUP_VAULT_ADDRESS`, `EXPO_PUBLIC_ENVIO_GRAPHQL_URL`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_DEMO_SHOP_ADDRESS`.
 - Masuk → api `/api/drip` (MON untuk transaksi pertama) di latar belakang. Profil, label trip/pemakaian, invoice, dan token push lewat api (login SIWE otomatis).
-- Join = satu transaksi `joinGroupWithPermit` (tanda tangan undangan + permit AUSD setoran + safety net). Setor = `depositWithPermit`; bayar tagihan = `payDebtWithPermit`.
+- Join = satu transaksi dari 05 Invite tanpa setoran (ADR 0009): `joinGroupWithPermit` dengan safety net pembuat trip (dibaca dari `positionOf(groupId, creator)`), atau `joinGroup` kalau safety net 0. Setor = `depositWithPermit`; bayar tagihan = `payDebtWithPermit`.
 - Saldo dolar pribadi = kartu "Your dollars" di Profile (ADR 0006). **Top up** (`/balance/top-up`, simulasi on-ramp: faucet AUSD Agora) dan **Cash out** (`/balance/cash-out`, simulasi off-ramp: transfer AUSD ke `EXPO_PUBLIC_CASH_OUT_ADDRESS`). Tidak ada dolar gratis otomatis: kalau dolar kurang, Add money / Join menampilkan "Top up to …" yang membuka Top up.
 - Setiap aksi live (`data/live/actions.ts`) baru selesai setelah Envio memproses blok transaksinya (`waitForIndexer`), jadi `invalidateQueries` sesudahnya langsung mengambil data terbaru. Tidak perlu optimistic update untuk pot/saldo.
 - Struk (M7, ADR 0008): `data/live/receipts.ts` + `lib/receipt-crypto.ts` — kunci trip dibagikan lewat api `keys`, struk dienkripsi di HP, diunggah, lalu `attachReceipt`. Butuh `FEATURE_RECEIPTS` + S3 di api. Halaman kartu (Card) masih demo.
