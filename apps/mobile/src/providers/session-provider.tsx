@@ -12,11 +12,15 @@ import { MeraSigner, DemoSigner } from '@/wallet';
 interface SessionContextValue {
   signer: Signer | null;
   isLoading: boolean;
+  /** HP ini sudah pernah masuk (ID passkey tersimpan): buka app → langsung minta passkey (/unlock). */
+  hasAccount: boolean;
   /** Masuk dengan passkey Tekosoe yang sudah ada. Gagal dengan `NoCredentials` kalau belum ada. */
   signIn: () => Promise<void>;
   /** Buat passkey baru = akun baru. */
   signUp: () => Promise<void>;
   signOut: () => Promise<void>;
+  /** "Use a different account": lupakan akun di HP ini tanpa harus masuk dulu. */
+  forgetAccount: () => Promise<void>;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -63,6 +67,7 @@ async function cachePrfOutput(prfOutput: Uint8Array) {
 export function SessionProvider({ children }: PropsWithChildren) {
   const [signer, setSigner] = useState<Signer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAccount, setHasAccount] = useState(false);
 
   useEffect(() => {
     async function loadSession() {
@@ -72,6 +77,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
         return;
       }
       try {
+        setHasAccount(!!(await SecureStore.getItemAsync(CREDENTIAL_ID_KEY)));
+        // Kunci tersimpan hanya dengan biometrik kelas strong. Tanpa itu (PIN, face unlock "weak"),
+        // atau kalau prompt dibatalkan, app membuka /unlock yang meminta passkey.
         if (!SecureStore.canUseBiometricAuthentication()) return;
         const prfHex = await SecureStore.getItemAsync(PRF_STORAGE_KEY, {
           requireAuthentication: true,
@@ -102,6 +110,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
     const prfOutput = new Uint8Array(result.prfOutput);
     // ID passkey dulu: kalau langkah berikutnya gagal, masuk lagi tetap memakai passkey (akun) yang sama.
     await SecureStore.setItemAsync(CREDENTIAL_ID_KEY, result.credentialId);
+    setHasAccount(true);
     await cachePrfOutput(prfOutput);
 
     const mera = new MeraSigner(prfOutput);
@@ -144,13 +153,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
       setSigner(null);
       return;
     }
-    await SecureStore.deleteItemAsync(PRF_STORAGE_KEY);
-    await SecureStore.deleteItemAsync(CREDENTIAL_ID_KEY);
+    await forgetAccount();
     setSigner(null);
   };
 
+  const forgetAccount = async () => {
+    await SecureStore.deleteItemAsync(PRF_STORAGE_KEY);
+    await SecureStore.deleteItemAsync(CREDENTIAL_ID_KEY);
+    setHasAccount(false);
+  };
+
   return (
-    <SessionContext.Provider value={{ signer, isLoading, signIn, signUp, signOut }}>
+    <SessionContext.Provider value={{ signer, isLoading, hasAccount, signIn, signUp, signOut, forgetAccount }}>
       {children}
     </SessionContext.Provider>
   );

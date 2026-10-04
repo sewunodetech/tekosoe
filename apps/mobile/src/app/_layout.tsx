@@ -26,10 +26,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 SplashScreen.preventAutoHideAsync();
 
 /** Halaman yang boleh dibuka tanpa login. Undangan tetap bisa dilihat sebelum Face ID. */
-const PUBLIC = new Set(['', 'index', 'sign-in', 'invite', 'j']);
+const PUBLIC = new Set(['', 'index', 'sign-in', 'unlock', 'invite', 'j']);
 
 function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontError: Error | null }) {
-  const { isLoading, signer } = useSession();
+  const { isLoading, signer, hasAccount } = useSession();
   const profile = useProfile(!!signer);
   const segments = useSegments() as string[];
   const pathname = usePathname();
@@ -57,7 +57,9 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
     const onSetup = first === 'setup-profile';
 
     if (!signer) {
-      if (!isPublic && !onSetup) router.replace('/');
+      // HP ini sudah punya akun: buka app → langsung minta passkey, bukan onboarding/sign in.
+      if (hasAccount && (first === '' || first === 'index' || (!isPublic && !onSetup))) router.replace('/unlock');
+      else if (!isPublic && !onSetup) router.replace('/');
       return;
     }
     if (!profile.data) {
@@ -68,10 +70,10 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
       }
       return;
     }
-    if (first === '' || first === 'index' || first === 'sign-in') {
+    if (first === '' || first === 'index' || first === 'sign-in' || first === 'unlock') {
       router.replace((first === 'sign-in' && signInNext ? signInNext : '/trips') as Href);
     }
-  }, [ready, signer, profile.data, segments, pathname, router, signInNext]);
+  }, [ready, signer, hasAccount, profile.data, segments, pathname, router, signInNext]);
 
   // Font belum siap: splash native masih menutupi layar.
   if (!fontsLoaded && fontError == null) return null;
@@ -82,6 +84,7 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="sign-in" />
+        <Stack.Screen name="unlock" options={{ gestureEnabled: false }} />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="trip/[id]/add-money" options={{ presentation: 'modal' }} />
         <Stack.Screen name="balance/top-up" options={{ presentation: 'modal' }} />
