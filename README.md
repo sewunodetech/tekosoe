@@ -56,7 +56,7 @@
 | Needs crypto knowledge | No | No | No | **No, just a passkey** |
 | Someone holds your money | n/a | Yes | Yes | **No.** The contract holds it, your key stays on your phone |
 
-> **Demo video:** _link coming 11 Oct_ · **Android APK:** [download (preview build)](https://expo.dev/artifacts/eas/Nr6qbAov-WEqG5bztIjegu2pbxdt3SfqDGNYmpfHpvc.apk)
+> **Demo video:** _link coming 11 Oct_ · **Android APK:** [download (preview build)](https://expo.dev/artifacts/eas/qw2PmlQ3C_PuGI3Dg0P4pUvpT2aaYSVgUUblbKcJzt8.apk)
 
 ---
 
@@ -99,7 +99,7 @@ Welcome → Sign in (passkey) → Home → Japan Trip → Pay from pot → Reque
 | **Trip** | Live pot balance, activity feed, "who owes whom" preview, all read from the Envio indexer. |
 | **Settled** | Each member's invoice with Paid / Refunded / Due, a **Pay** button for debts, PDF export, and a QR code anyone can verify on the web. |
 
-**Install on Android:** [download the APK](https://expo.dev/artifacts/eas/Nr6qbAov-WEqG5bztIjegu2pbxdt3SfqDGNYmpfHpvc.apk), or open the [build page](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/44226207-0436-4f8f-95b7-794d00121710) on your phone and scan the QR code. It runs live on Monad testnet; sign in with a passkey (Android needs a screen lock, and Google Password Manager stores the passkey).
+**Install on Android:** [download the APK](https://expo.dev/artifacts/eas/qw2PmlQ3C_PuGI3Dg0P4pUvpT2aaYSVgUUblbKcJzt8.apk), or open the [build page](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/6d4b80d7-94ad-4a01-9d34-a92b4a871e77) on your phone and scan the QR code. It runs live on Monad testnet; sign in with a passkey (Android needs a screen lock, and Google Password Manager stores the passkey).
 
 Run it yourself: see [Getting started](#-getting-started).
 

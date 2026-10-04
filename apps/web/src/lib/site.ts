@@ -7,4 +7,4 @@ export const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.mulalabs.b
 /** APK Android terbaru (EAS preview). Diganti tiap build baru. */
 export const androidApkUrl =
   process.env.NEXT_PUBLIC_ANDROID_APK_URL ||
-  "https://expo.dev/artifacts/eas/Nr6qbAov-WEqG5bztIjegu2pbxdt3SfqDGNYmpfHpvc.apk";
+  "https://expo.dev/artifacts/eas/qw2PmlQ3C_PuGI3Dg0P4pUvpT2aaYSVgUUblbKcJzt8.apk";
