@@ -14,7 +14,7 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
+import { Stack, useGlobalSearchParams, usePathname, useRouter, useSegments, type Href } from 'expo-router';
 
 import { colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
@@ -26,7 +26,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 SplashScreen.preventAutoHideAsync();
 
 /** Halaman yang boleh dibuka tanpa login. Undangan tetap bisa dilihat sebelum Face ID. */
-const PUBLIC = new Set(['', 'index', 'sign-in', 'invite']);
+const PUBLIC = new Set(['', 'index', 'sign-in', 'invite', 'j']);
 
 function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontError: Error | null }) {
   const { isLoading, signer } = useSession();
@@ -34,6 +34,9 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
   const segments = useSegments() as string[];
   const pathname = usePathname();
   const router = useRouter();
+  // Sign in dari layar undangan membawa `next` (Join) supaya user kembali ke sana setelah masuk.
+  const { next: nextParam } = useGlobalSearchParams<{ next?: string }>();
+  const signInNext = typeof nextParam === 'string' && nextParam.startsWith('/invite/') ? nextParam : undefined;
 
   const profileLoading = !!signer && profile.isLoading;
   const ready = (fontsLoaded || fontError != null) && !isLoading && !profileLoading;
@@ -60,15 +63,15 @@ function RootLayoutNav({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontE
     if (!profile.data) {
       // Akun baru: isi profil dulu, lalu kembali ke tujuan semula (mis. layar Join dari link undangan).
       if (!onSetup) {
-        const next = first === 'invite' ? pathname : undefined;
+        const next = first === 'invite' ? pathname : first === 'sign-in' ? signInNext : undefined;
         router.replace(next ? { pathname: '/setup-profile', params: { next } } : '/setup-profile');
       }
       return;
     }
     if (first === '' || first === 'index' || first === 'sign-in') {
-      router.replace('/trips');
+      router.replace((first === 'sign-in' && signInNext ? signInNext : '/trips') as Href);
     }
-  }, [ready, signer, profile.data, segments, pathname, router]);
+  }, [ready, signer, profile.data, segments, pathname, router, signInNext]);
 
   // Font belum siap: splash native masih menutupi layar.
   if (!fontsLoaded && fontError == null) return null;

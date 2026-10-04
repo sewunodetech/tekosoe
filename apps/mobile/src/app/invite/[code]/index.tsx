@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { Bob, Sparkle } from '@/components/decor';
@@ -13,6 +13,7 @@ import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
 import { tripIdFromInvite } from '@/lib/invite';
+import { useSession } from '@/providers/session-provider';
 import { money, moneyShort } from '@/lib/money';
 
 // 05 Invite — canvas "Final UI" › F05Invite. Dibuka dari tekosoe://invite/<code> atau tautan web.
@@ -23,6 +24,13 @@ export default function InviteScreen() {
 }
 
 function InviteView({ trip, code }: { trip: Trip; code: string }) {
+  const { signer } = useSession();
+  // Belum masuk (biasanya dari link undangan): passkey dulu, lalu gate di _layout kembali ke Join.
+  const join = () => {
+    const joinPath = `/invite/${code}/join`;
+    if (signer) router.push(joinPath);
+    else router.push({ pathname: '/sign-in', params: { next: joinPath } });
+  };
   // Anggota pertama = pembuat trip; yang ditampilkan hanya anggota lain (bukan "You").
   const organizer = trip.members[0];
   const others = trip.members.filter((m) => m.label !== 'You');
@@ -32,9 +40,7 @@ function InviteView({ trip, code }: { trip: Trip; code: string }) {
       gap={20}
       footer={
         <>
-          <Link href={`/invite/${code}/join`} asChild>
-            <Button label="Join with Passkey" />
-          </Link>
+          <Button label="Join with Passkey" onPress={join} />
           <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
             New here? Your account is created as you join.
           </Text>

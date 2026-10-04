@@ -4,24 +4,54 @@
     {
       "name": "mobile-web",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["expo", "start", "--web", "--port", "8082"],
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8082"
+      ],
       "cwd": "apps/mobile",
       "port": 8082
     },
     {
       "name": "mobile-web-demo",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["expo", "start", "--web", "--port", "8083"],
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8083"
+      ],
       "cwd": "apps/mobile",
-      "env": { "EXPO_PUBLIC_DATA_SOURCE": "demo", "EXPO_PUBLIC_SIGNER": "demo" },
+      "env": {
+        "EXPO_PUBLIC_DATA_SOURCE": "demo",
+        "EXPO_PUBLIC_SIGNER": "demo"
+      },
       "port": 8083
     },
     {
       "name": "api",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "cwd": "apps/api",
       "port": 3001
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "dev",
+        "--port",
+        "3005"
+      ],
+      "cwd": "apps/web",
+      "port": 3005
     }
   ]
 }

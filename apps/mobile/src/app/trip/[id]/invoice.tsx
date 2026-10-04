@@ -146,7 +146,7 @@ function InvoiceView({
             </div>
 
             <div class="footer">
-              Check this invoice at tekosoe.xyz/v/${invoice.number}
+              Check this invoice at ${env.webDomain}/v/${invoice.number}
             </div>
           </body>
         </html>

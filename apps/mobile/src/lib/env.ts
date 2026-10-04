@@ -12,8 +12,11 @@ export const env = {
   /** Di bawah saldo MON ini app meminta drip sebelum transaksi (samakan dengan DRIP_MIN_BALANCE_MON di api). */
   minFeeBalanceMon: process.env.EXPO_PUBLIC_MIN_FEE_BALANCE_MON || '0.05',
   passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosoe.mulalabs.biz.id',
-  /** Domain tautan undangan & verifikasi invoice (apps/web). */
-  webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN ?? 'tekosoe.xyz',
+  /**
+   * Domain tautan undangan & verifikasi invoice (apps/web). Default = domain passkey: domain itu yang
+   * melayani /.well-known, jadi hanya di sana link https://…/j/<kode> bisa langsung membuka app.
+   */
+  webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN || process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosoe.mulalabs.biz.id',
   /** Penerima pembayaran "toko demo" (layar Pay / Card). Testnet saja. */
   demoShopAddress: process.env.EXPO_PUBLIC_DEMO_SHOP_ADDRESS as `0x${string}` | undefined,
   /** Penerima "Cash out" (simulasi off-ramp: "bank" demo). Testnet saja; default = toko demo. */

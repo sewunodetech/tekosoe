@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Manrope } from "next/font/google";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-display",
@@ -13,7 +14,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://tekosoe.xyz"),
+  metadataBase: new URL(siteUrl),
   title: "Tekosoe — One pot for the whole trip",
   description: "Friends in different countries share one pot in dollars, pay with a passkey (Face ID, fingerprint or PIN), and the trip settles up by itself.",
 };
