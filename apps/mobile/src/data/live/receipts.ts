@@ -80,7 +80,10 @@ async function tripKeyFor(account: LocalAccount, tripId: string, { create }: { c
     const group = await fetchGroup(tripId);
     const hasReceipts = (group?.spends ?? []).some((s) => s.receiptCount > 0);
     if (!create || hasReceipts) {
-      throw new Error('A friend in this trip needs to open the app once so this phone can unlock receipts.');
+      // Kunci trip dipegang teman; HP mereka membagikannya otomatis saat membuka Tekosoe (syncReceiptKeys).
+      throw new Error(
+        "This phone can't open this trip's receipts yet. It unlocks as soon as a friend in this trip opens Tekosoe. Try again after that.",
+      );
     }
     tripKey = newTripKey();
     await shareTripKey(account, tripId, tripKey);
@@ -92,6 +95,32 @@ async function tripKeyFor(account: LocalAccount, tripId: string, { create }: { c
   // Anggota baru yang sudah punya kunci publik ikut mendapat salinan.
   await shareTripKey(account, tripId, tripKey).catch(() => undefined);
   return tripKey;
+}
+
+const lastSync = new Map<string, number>();
+const SYNC_EVERY_MS = 60_000;
+
+/**
+ * Sinkron kunci struk di latar belakang (Home dan 07 Trip): daftarkan kunci publik HP ini, lalu kalau HP ini
+ * memegang kunci trip, bagikan salinannya ke anggota yang belum punya (api insert-only). Tanpa ini kunci
+ * hanya menyebar saat ada yang menambah/membuka struk, dan anggota baru tertahan "can't open receipts".
+ * Diam saja kalau gagal (fitur struk mati, offline): tidak boleh mengganggu layar.
+ */
+export async function syncReceiptKeys(account: LocalAccount, tripId: string): Promise<void> {
+  const syncId = `${account.address.toLowerCase()}:${tripId}`;
+  const now = Date.now();
+  if (now - (lastSync.get(syncId) ?? 0) < SYNC_EVERY_MS) return;
+  lastSync.set(syncId, now);
+  try {
+    await publishMyKey(account);
+    const cached = tripKeys.get(syncId);
+    const tripKey =
+      cached ?? unwrapTripKey((await api.myTripKeyWrap(account, tripId)).wrappedKey, (await encKeyPair(account)).privateKey);
+    tripKeys.set(syncId, tripKey);
+    await shareTripKey(account, tripId, tripKey);
+  } catch {
+    // Belum memegang kunci (KEY_WRAP_NOT_FOUND) atau api tidak bisa: coba lagi di sinkron berikutnya.
+  }
 }
 
 /** Foto → JPEG terkompres (base64) supaya hemat kuota dan di bawah batas unggah api. */
