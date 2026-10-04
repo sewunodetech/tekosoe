@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
 import { StyleSheet, View, Alert } from 'react-native';
 import Animated, {
   Easing,
@@ -18,7 +19,7 @@ import { Text } from '@/components/ui/text';
 import { colors } from '@/constants/theme';
 import { passkeyErrorCode, useSession } from '@/providers/session-provider';
 
-// 02 Sign in — canvas "Final UI" › F02SignIn
+// 02 Sign in — canvas "Final UI" › F02SignIn. Juga slide terakhir onboarding (O4).
 export default function SignInScreen() {
   const { signIn, signUp } = useSession();
   const [busy, setBusy] = useState(false);
@@ -74,7 +75,8 @@ export default function SignInScreen() {
           </Text>
         </View>
       }>
-      <ScreenHeader />
+      {/* Onboarding sudah dilihat → / langsung ke sini; tanpa riwayat, back memutar ulang onboarding. */}
+      <ScreenHeader onPress={() => (router.canGoBack() ? router.back() : router.replace('/?intro=1'))} />
 
       <View style={styles.center}>
         <View style={styles.badgeWrap}>
@@ -88,10 +90,10 @@ export default function SignInScreen() {
           </View>
         </View>
         <Text variant="h1" style={[styles.textCenter, { fontSize: 30, lineHeight: 34 }]}>
-          Continue with Passkey
+          Just your face. No passwords.
         </Text>
         <Text variant="body" color={colors.textMuted} style={[styles.textCenter, { maxWidth: 300 }]}>
-          Your account lives safely on this phone. No passwords, no secret words to remember.
+          Your account lives on this phone with a passkey. No secret words to remember.
         </Text>
       </View>
     </Screen>
