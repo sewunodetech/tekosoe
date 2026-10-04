@@ -101,7 +101,15 @@ function ProfileView({
           />
         </Row>
         <Row icon="home" tint={palette.sky} title="Past trips" sub={settled.map((s) => `${s.name} · settled`).join(', ') || 'None yet'} chevron onPress={() => router.push('/past-trips')} />
-        <Row glyph="?" tint={palette.greenSoft} title="Help and feedback" sub="How the pot and settle-up work" chevron last />
+        <Row
+          glyph="?"
+          tint={palette.greenSoft}
+          title="Help and feedback"
+          sub="Replay the tour of how the pot and settle-up work"
+          chevron
+          last
+          onPress={() => router.navigate({ pathname: '/trips', params: { tour: String(Date.now()) } })}
+        />
       </View>
 
       <View style={styles.footer}>
