@@ -170,13 +170,13 @@ export default function NewTripScreen() {
           </View>
           <Text variant="label">Invite link</Text>
           <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14 }} color={colors.heroText}>
-            {isLive ? `${env.webDomain}/j/… · ready after you create the trip` : 'tekosoe.xyz/j/[invite-code]'}
+            {isLive ? `${env.webDomain}/j/… · ready after you create the trip` : `${env.webDomain}/j/[invite-code]`}
           </Text>
           {!isLive && <View style={styles.inviteActions}>
             <Button
               label="Share link"
               variant="pill"
-              onPress={() => Share.share({ message: `Join our trip "${tripName}" on Tekosoe: https://tekosoe.xyz/j/japan` })}
+              onPress={() => Share.share({ message: `Join our trip "${tripName}" on Tekosoe: https://${env.webDomain}/j/japan` })}
             />
             <Link href="/invite/japan" asChild>
               <Button label="Preview" variant="pill" />
