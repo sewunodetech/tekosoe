@@ -9,7 +9,7 @@ People create an account with a passkey, then start a trip or join one through a
 | Screen | Purpose | Comes from | Leads to | Contract & data |
 | --- | --- | --- | --- | --- |
 | 01 Welcome | Introduces the product: "One pot for the whole trip". Teko pours into three glasses for members from three countries | First launch | Get started → 02; I already have an account → 02 | — |
-| 02 Sign in | Create an account or sign in with a passkey (Mera). Teko winks | 01 | Continue with Passkey → P1 (new account) or 03 (returning); back → 01 | Mera: passkey → address; gas drip to new accounts |
+| 02 Sign in | Create an account or sign in with a passkey (Mera). Teko winks | 01 | Create account with Passkey → P1; I already have an account → 03 (no passkey yet → offers to create one); back → 01 | Mera: passkey → address; gas drip to new accounts |
 | 03 Home | Trip list: active trip card (pot, your balance, members' countries), settled trips, tips from Teko | P1 (new account); 02 (returning); Trips tab; back from 04 and 07 | Japan Trip card → 07; New trip → 04; Card tab → 12 | Envio: pot and balance per trip; database: trip names |
 | 04 New trip | Create a trip: name, end date, approval limit, invite link | 03; Plan another trip on 13 | Create trip → 07; Copy link / Share → 05; back → 03 | `createGroup`; database `group_meta` |
 | 05 Invite | What a friend sees when they open the link: who invited them, members, pot, approval limit. Teko "love" | 04; Invite more friends on S6 | Join with Passkey → 06 | Database `group_meta`, `profiles` |

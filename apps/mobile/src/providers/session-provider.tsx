@@ -12,7 +12,10 @@ import { MeraSigner, DemoSigner } from '@/wallet';
 interface SessionContextValue {
   signer: Signer | null;
   isLoading: boolean;
+  /** Masuk dengan passkey Tekosoe yang sudah ada. Gagal dengan `NoCredentials` kalau belum ada. */
   signIn: () => Promise<void>;
+  /** Buat passkey baru = akun baru. */
+  signUp: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -88,48 +91,49 @@ export function SessionProvider({ children }: PropsWithChildren) {
     loadSession();
   }, []);
 
-  const signIn = async () => {
-    if (env.signer === 'demo') {
-      const demo = await DemoSigner.load();
-      setSigner(demo);
-      prepareAccount(demo);
-      return;
-    }
+  const signInDemo = async () => {
+    const demo = await DemoSigner.load();
+    setSigner(demo);
+    prepareAccount(demo);
+  };
 
-    // Check if we have a saved credential
-    const savedCredentialId = await SecureStore.getItemAsync(CREDENTIAL_ID_KEY);
-
-    let prfOutput: Uint8Array;
-    let newCredentialId: string;
-
-    // Akun = fungsi deterministik dari (passkey, rpId, salt PRF Mera). Passkey yang sama → alamat yang sama.
-    // Tanpa ID tersimpan (sign out / install ulang / HP baru) tawarkan dulu passkey yang sudah ada;
-    // passkey baru (= akun baru) hanya dibuat kalau perangkat memang belum punya passkey Tekosoe.
-    let result: { credentialId: string; prfOutput: Uint8Array | ArrayBuffer };
-    try {
-      result = await getPasskeyPrfOutput({
-        rpId: env.passkeyDomain,
-        ...(savedCredentialId ? { credential: { credentialId: savedCredentialId } } : {}),
-        webAuthnClient: reactNativeWebAuthnClient,
-      });
-    } catch (err) {
-      if (passkeyErrorCode(err) !== 'NoCredentials') throw err;
-      result = await createPasskeyWithPrfOutput({
-        rp: { id: env.passkeyDomain, name: 'Tekosoe' },
-        user: { name: 'user', displayName: 'Tekosoe User' },
-        webAuthnClient: reactNativeWebAuthnClient,
-      });
-    }
-    prfOutput = new Uint8Array(result.prfOutput);
-    newCredentialId = result.credentialId;
-
+  /** Akun = fungsi deterministik dari (passkey, rpId, salt PRF Mera). Passkey yang sama → alamat yang sama. */
+  const startSession = async (result: { credentialId: string; prfOutput: Uint8Array | ArrayBuffer }) => {
+    const prfOutput = new Uint8Array(result.prfOutput);
     // ID passkey dulu: kalau langkah berikutnya gagal, masuk lagi tetap memakai passkey (akun) yang sama.
-    await SecureStore.setItemAsync(CREDENTIAL_ID_KEY, newCredentialId);
+    await SecureStore.setItemAsync(CREDENTIAL_ID_KEY, result.credentialId);
     await cachePrfOutput(prfOutput);
 
     const mera = new MeraSigner(prfOutput);
     setSigner(mera);
     prepareAccount(mera);
+  };
+
+  const signIn = async () => {
+    if (env.signer === 'demo') return signInDemo();
+
+    // Tanpa ID tersimpan (sign out / install ulang / HP baru) sheet menawarkan semua passkey Tekosoe.
+    const savedCredentialId = await SecureStore.getItemAsync(CREDENTIAL_ID_KEY);
+    const result = await getPasskeyPrfOutput({
+      rpId: env.passkeyDomain,
+      ...(savedCredentialId ? { credential: { credentialId: savedCredentialId } } : {}),
+      webAuthnClient: reactNativeWebAuthnClient,
+    });
+    await startSession(result);
+  };
+
+  // Sign up eksplisit: iOS (dan Android dengan opsi "perangkat lain") tidak mengembalikan `NoCredentials`
+  // saat belum ada passkey — sheet tetap muncul lalu ditutup user — jadi user baru tidak bisa
+  // mengandalkan fallback dari sign in.
+  const signUp = async () => {
+    if (env.signer === 'demo') return signInDemo();
+
+    const result = await createPasskeyWithPrfOutput({
+      rp: { id: env.passkeyDomain, name: 'Tekosoe' },
+      user: { name: 'user', displayName: 'Tekosoe User' },
+      webAuthnClient: reactNativeWebAuthnClient,
+    });
+    await startSession(result);
   };
 
   const signOut = async () => {
@@ -146,7 +150,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   };
 
   return (
-    <SessionContext.Provider value={{ signer, isLoading, signIn, signOut }}>
+    <SessionContext.Provider value={{ signer, isLoading, signIn, signUp, signOut }}>
       {children}
     </SessionContext.Provider>
   );
