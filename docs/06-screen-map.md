@@ -12,9 +12,9 @@ People create an account with a passkey, then start a trip or join one through a
 | 02 Sign in (O4) | "Just your face. No passwords." Create an account or sign in with a passkey (Mera). Teko winks | 01 | Create account with Passkey → P1; I already have an account → 03 (no passkey yet → offers to create one); back → 01 | Mera: passkey → address; gas drip to new accounts |
 | 03 Home | Trip list: active trip card (pot, your balance, members' countries), settled trips, tips from Teko | P1 (new account); 02 (returning); Trips tab; back from 04 and 07 | Japan Trip card → 07; New trip → 04; Card tab → 12 | Envio: pot and balance per trip; database: trip names |
 | T1–T6 Tour | Once per account on a device, over 03 after the first sign in: welcome → New trip → inside a trip (Add money, Pay, If we settled today) → bell → Card tab → Profile tab → "You're all set". Dimmed screen with the part being explained highlighted; Skip anytime | 03 (first time); Help and feedback on P2 (replay) | Let's go / Skip → 03 | Device flag only |
-| 04 New trip | Create a trip: name, end date, approval limit, invite link | 03; Plan another trip on 13 | Create trip → 07; Copy link / Share → 05; back → 03 | `createGroup`; database `group_meta` |
-| 05 Invite | What a friend sees when they open the link: who invited them, members, pot, approval limit. Teko "love" | 04; Invite more friends on S6 | Join with Passkey → 06 | Database `group_meta`, `profiles` |
-| 06 Join + put in | Join, choose a first deposit and a safety net | 05 | Join and put in $100 → 07; back → 05 | `joinGroupWithPermit` (deposit + safety net in one transaction) |
+| 04 New trip | Create a trip: name, end date, approval limit, safety net for everyone ($25 / $50 / $100), invite link | 03; Plan another trip on 13 | Create trip → 07; Copy link / Share → 05; back → 03 | `createGroup`; database `group_meta` |
+| 05 Invite | What a friend sees when they open the link: who invited them, members, pot, approval limit. Teko "love" | 04; Invite more friends on S6 | Join with Passkey → joins right away, no deposit, with the trip's safety net ([ADR 0009](decisions/0009-join-without-deposit.md)) → 03; signed out → 02 → back here and joins; members see Open trip → 07 | `joinGroupWithPermit` (deposit 0, creator's safety net) or `joinGroup`; database `group_meta`, `profiles` |
+| ~~06 Join + put in~~ | Retired ([ADR 0009](decisions/0009-join-without-deposit.md)): joining happens on 05; `/invite/<code>/join` redirects there | — | — | — |
 
 ## Trip and payments (07–12)
 
