@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Profile, Trip } from '@/data/types';
 import { useFeed } from '@/features/activity/useFeed';
+import { useReceiptKeySync } from '@/features/spends/useReceiptKeySync';
 import { useProfile } from '@/features/profile/useProfile';
 import { TourOverlay } from '@/features/tour/tour-overlay';
 import { useTour } from '@/features/tour/use-tour';
@@ -49,6 +50,8 @@ function HomeView({
   const me = { name: profile?.name ?? 'there', tint: profile?.tint ?? palette.sky };
   // Titik di lonceng = ada permintaan bayar yang menunggu persetujuanmu.
   const needsYou = useFeed().data?.some((item) => item.needsYou) ?? false;
+  // Kunci struk menyebar ke teman setiap kali app dibuka (bukan hanya saat ada yang membuka struk).
+  useReceiptKeySync(list.map((trip) => trip.id));
 
   // Tour pertama setelah sign in: bagian yang disorot diukur lewat ref ini.
   const tour = useTour();

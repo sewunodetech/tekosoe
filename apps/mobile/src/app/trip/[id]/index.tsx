@@ -15,6 +15,7 @@ import { colors, fonts, radius } from '@/constants/theme';
 import type { Spend, Trip } from '@/data/types';
 import { useSpend } from '@/features/spends/useSpend';
 import { useTrip } from '@/features/trips/useTrip';
+import { useReceiptKeySync } from '@/features/spends/useReceiptKeySync';
 import { isLive } from '@/lib/env';
 import { money, signed, usd } from '@/lib/money';
 
@@ -26,6 +27,7 @@ export default function TripScreen() {
   // Demo: pengeluaran terakhir yang disetujui (tiket kereta), untuk keadaan S1.
   const demoSpend = useSpend(isLive ? '' : 'train');
   const trip = useTrip(id);
+  useReceiptKeySync([id]);
   if (isLive) {
     return (
       <QueryState query={trip}>
