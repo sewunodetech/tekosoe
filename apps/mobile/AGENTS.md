@@ -31,8 +31,9 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 
 | Layar | File | Catatan |
 | --- | --- | --- |
-| 01 Welcome | `index.tsx` | F01Welcome |
-| 02 Sign in | `sign-in.tsx` | F02SignIn; Face ID masih langsung ke Home (TODO Mera) |
+| 01 Welcome · O1–O3 | `index.tsx` | F01Welcome = O1; onboarding sekali per perangkat (`lib/device-flags.ts`), sesudahnya `/` → 02; `?intro=1` memutar ulang |
+| 02 Sign in · O4 | `sign-in.tsx` | F02SignIn; "Create account with Passkey" (passkey baru) + "I already have an account" |
+| T1–T6 Tour | `features/tour/` | Overlay di atas 03, sekali per akun per perangkat; `/trips?tour=<id>` memutar ulang (Help di P2) |
 | 03 Home · S5 | `(tabs)/trips.tsx` (URL `/trips`) | F03Home + kartu grup besar S05BigGroup |
 | 12 Card | `(tabs)/card.tsx` | F12Card; Tokyo Taxi → S4 |
 | 04 New trip | `trip/new.tsx` | F04Create |

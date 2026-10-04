@@ -1,5 +1,5 @@
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
@@ -16,6 +16,8 @@ import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Profile, Trip } from '@/data/types';
 import { useFeed } from '@/features/activity/useFeed';
 import { useProfile } from '@/features/profile/useProfile';
+import { TourOverlay } from '@/features/tour/tour-overlay';
+import { useTour } from '@/features/tour/use-tour';
 import { useTrips } from '@/features/trips/useTrips';
 import { money, signed } from '@/lib/money';
 
@@ -48,15 +50,26 @@ function HomeView({
   // Titik di lonceng = ada permintaan bayar yang menunggu persetujuanmu.
   const needsYou = useFeed().data?.some((item) => item.needsYou) ?? false;
 
+  // Tour pertama setelah sign in: bagian yang disorot diukur lewat ref ini.
+  const tour = useTour();
+  const sceneRef = useRef<View>(null);
+  const newTripRef = useRef<View>(null);
+  const bellRef = useRef<View>(null);
+  const tourTargets = useMemo(() => ({ scene: sceneRef, newTrip: newTripRef, bell: bellRef }), []);
+
   return (
     <Screen
       tab
       gap={18}
+      background={<View ref={sceneRef} collapsable={false} pointerEvents="none" style={StyleSheet.absoluteFill} />}
       footer={
-        <Link href="/trip/new" asChild>
-          <Button label="New trip" icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />} />
-        </Link>
+        <View ref={newTripRef} collapsable={false}>
+          <Link href="/trip/new" asChild>
+            <Button label="New trip" icon={<Icon name="plus" color={colors.textOnPrimary} strokeWidth={2.4} />} />
+          </Link>
+        </View>
       }>
+      {tour.show && <TourOverlay name={me.name} targets={tourTargets} onDone={tour.done} />}
       <View style={styles.greeting}>
         <Avatar name={me.name} tint={me.tint} size={42} />
         <View style={{ flex: 1 }}>
@@ -66,6 +79,7 @@ function HomeView({
           <Text variant="h3">Hi, {me.name}</Text>
         </View>
         <Pressable
+          ref={bellRef}
           accessibilityRole="button"
           accessibilityLabel="Activity"
           style={styles.circle}
