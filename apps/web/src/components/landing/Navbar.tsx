@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, Star, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { TekoMark } from "@/components/Logo";
 import { GET_APP_HREF } from "@/lib/links";
 
 /** Tautan ke bagian-bagian landing. Urutannya sama dengan urutan di halaman. */
@@ -79,7 +80,7 @@ export function Navbar() {
         }`}
       >
         <Link href="/" className="flex items-center gap-2" aria-label="Tekosoe home">
-          <Star className="h-5 w-5 fill-black" aria-hidden="true" />
+          <TekoMark className="h-7 w-7" />
           <span className="text-lg font-semibold whitespace-nowrap">Tekosoe</span>
         </Link>
 

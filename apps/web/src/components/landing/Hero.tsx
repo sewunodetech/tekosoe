@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { Check, MapPin, PartyPopper, PiggyBank, Receipt, Star, type LucideIcon } from "lucide-react";
+import { Check, MapPin, PartyPopper, PiggyBank, Receipt, type LucideIcon } from "lucide-react";
+import { TekoMark } from "@/components/Logo";
 import { money, usd } from "@/lib/money";
 import { IntegrationMarquee } from "./Integrations";
 import { HeroScene } from "./three/lazy";
@@ -39,7 +40,7 @@ export function Hero() {
         <div className="lg-dots" aria-hidden="true" />
         <div className="animate-fade-in-up lg-glass mb-8 inline-flex items-center gap-2 rounded-full py-1.5 pr-4 pl-1.5" style={fade(0.2)}>
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/80">
-            <Star className="h-3.5 w-3.5 fill-black" aria-hidden="true" />
+            <TekoMark className="h-5 w-5" />
           </span>
           <span className="text-sm font-medium text-black">Shared pot for group trips</span>
         </div>
