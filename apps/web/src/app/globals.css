@@ -247,7 +247,15 @@ body {
  * Landing memakai dua warna saja: netral (hitam/putih/abu) dan satu aksen teal (--color-teal).
  * Permukaan kaca duduk di atas latar abu sangat muda; jangan tambah warna lain di sini.
  * Semua kelas diawali `lg-` dan hanya dipakai di components/landing.
+ * Pengecualian (ADR 0010): scene 3D (components/landing/three) dan latar `.lg-scene` boleh
+ * memakai warna kartun Teko. Teks, tombol, dan kartu tetap dua warna.
  */
+.lg-scene {
+  background:
+    radial-gradient(60% 55% at 70% 45%, #fff4ec 0%, rgba(255, 244, 236, 0) 70%),
+    radial-gradient(70% 70% at 20% 90%, #dcf0ea 0%, rgba(220, 240, 234, 0) 70%),
+    linear-gradient(180deg, #eef7f4 0%, #fdf9f3 100%);
+}
 .landing {
   --lg-blur: 22px;
   --lg-tint: rgba(255, 255, 255, 0.52);

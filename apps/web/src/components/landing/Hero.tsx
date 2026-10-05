@@ -5,6 +5,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Check, MapPin, PartyPopper, PiggyBank, Receipt, Star, type LucideIcon } from "lucide-react";
 import { money, usd } from "@/lib/money";
 import { IntegrationMarquee } from "./Integrations";
+import { HeroScene } from "./three/lazy";
 
 type TabId = "plan" | "chipin" | "spend" | "settle";
 
@@ -15,8 +16,6 @@ const TABS: { id: TabId; label: string; icon: LucideIcon }[] = [
   { id: "settle", label: "Settle", icon: PartyPopper },
 ];
 
-const VIDEO_SRC =
-  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4";
 
 /** Setiap bagian besar masuk dengan fade-in-up bertahap; opacity awal 0 diisi animasi. */
 const fade = (delay: number): CSSProperties => ({ animationDelay: `${delay}s`, opacity: 0 });
@@ -82,18 +81,16 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Video + overlay */}
+        {/* Scene 3D + kartu langkah */}
         <div className="animate-fade-in-up relative" style={fade(0.7)}>
           <div className="lg-glass rounded-[2rem] p-2">
-          <div className="relative h-[400px] overflow-hidden rounded-3xl md:h-[500px]">
-          <video className="h-full w-full object-cover" autoPlay loop muted playsInline aria-hidden="true">
-            <source src={VIDEO_SRC} type="video/mp4" />
-          </video>
-          {active === "plan" && <PlanCard />}
-          {active === "chipin" && <ChipInCard />}
-          {active === "spend" && <SpendCard />}
-          {active === "settle" && <SettleCard />}
-          </div>
+            <div className="lg-scene relative h-[560px] overflow-hidden rounded-3xl md:h-[500px]">
+              <HeroScene stage={active} />
+              {active === "plan" && <PlanCard />}
+              {active === "chipin" && <ChipInCard />}
+              {active === "spend" && <SpendCard />}
+              {active === "settle" && <SettleCard />}
+            </div>
           </div>
         </div>
 
@@ -124,16 +121,14 @@ function TabButton({ tab, active, onSelect }: { tab: (typeof TABS)[number]; acti
   );
 }
 
-/** Bingkai overlay: lapisan fade + kartu putih di tengah video. */
+/** Kartu kaca di atas scene: di bawah pada ponsel, di kiri pada layar lebar (scene di kanan). */
 function Overlay({ children }: { children: ReactNode }) {
   return (
-    <div className="animate-fade-in-overlay absolute inset-0 bg-black/10" style={{ opacity: 0 }}>
-      <div
-        className="animate-slide-up-overlay lg-glass absolute top-1/2 left-1/2 w-[calc(100%-2rem)] max-w-md rounded-3xl p-6 text-left [--lg-tint:rgba(255,255,255,0.7)] [--lg-blur:28px]"
-        style={{ opacity: 0 }}
-      >
-        {children}
-      </div>
+    <div
+      className="animate-fade-in-overlay lg-glass absolute inset-x-3 bottom-3 rounded-3xl p-5 text-left [--lg-tint:rgba(255,255,255,0.75)] [--lg-blur:28px] md:inset-x-auto md:top-1/2 md:bottom-auto md:left-8 md:w-[min(28rem,46%)] md:-translate-y-1/2 md:p-6"
+      style={{ opacity: 0 }}
+    >
+      {children}
     </div>
   );
 }
