@@ -13,12 +13,12 @@ import {
   PiggyBank,
   ScanFace,
   ShieldCheck,
-  Star,
   Undo2,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import { MAX_GROUP_MEMBERS } from "@tekosoe/shared";
+import { TekoMark } from "@/components/Logo";
 import { GET_APP_HREF } from "@/lib/links";
 import { HowSteps } from "./HowSteps";
 import { TekoScene } from "./three/lazy";
@@ -248,7 +248,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
         <div>
           <div className="mb-3 flex items-center gap-2">
-            <Star className="h-5 w-5 fill-black" aria-hidden="true" />
+            <TekoMark className="h-7 w-7" />
             <span className="text-lg font-semibold">Tekosoe</span>
           </div>
           <p className="max-w-xs text-sm text-gray-600">One shared pot for group trips that settles everyone up on the last day.</p>

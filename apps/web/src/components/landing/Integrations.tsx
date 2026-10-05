@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Star } from "lucide-react";
+import { TekoMark } from "@/components/Logo";
 import { OrbitScene } from "./three/lazy";
 
 /*
@@ -79,7 +79,7 @@ export function BuiltWith() {
             <OrbitScene logos={INTEGRATIONS.map((it) => ({ name: it.name, src: it.logo.src, w: it.logo.w, h: it.logo.h }))} />
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
               <div className="lg-btn flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white">
-                <Star className="h-4 w-4 fill-white" aria-hidden="true" />
+                <TekoMark className="h-6 w-6" />
                 Tekosoe
               </div>
             </div>
