@@ -74,6 +74,15 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] Receipts: encrypted on the phone, `attachReceipt`, opened with a passkey (FR-19, FR-20)
 - [ ] Per-member invoice: Paid/Refunded/Due, Pay, PDF (FR-22)
 
+## Web (`apps/web`) — lihat ADR 0004
+
+- [x] W-4 Landing page + dashboard demo hanya-baca (`/`, `/trips`, `/trips/[id]`, members, payment details, settle preview, invoice, `/card`, `/profile`), mobile-only, desain dari app, data demo lewat `TripRepository`
+- [x] `/j/[code]` (undangan) dan `/v/[number]` (verifikasi) memakai sistem desain yang sama; `/v` masih data demo
+- [ ] W-1 `.well-known`: Team ID Apple, bundle ID `com.tekosoe.xyz`, `Content-Type: application/json` untuk `apple-app-site-association`
+- [ ] W-3 Verifikasi invoice nyata (hitung ulang dari Envio + cocokkan sidik jari dari api) — menunggu D-1, D-2, dan skema invoice di `packages/shared`
+- [ ] Sambungkan dashboard ke Envio/api (implementasi live `TripRepository`) — menunggu C-6, D-1
+- [ ] Halaman toko untuk "Get the app" (`NEXT_PUBLIC_APP_DOWNLOAD_URL`)
+
 ### P1 — Envio
 
 - [ ] HyperIndex indexer for every event

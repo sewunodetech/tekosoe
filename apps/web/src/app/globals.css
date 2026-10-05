@@ -1,32 +1,488 @@
 @import "tailwindcss";
 
-@theme {
-  --font-display: var(--font-display), "Bricolage Grotesque", -apple-system, sans-serif;
-  --font-body: var(--font-body), "Manrope", -apple-system, sans-serif;
+/*
+ * Token desain — salinan dari apps/mobile/src/constants/theme.ts (palette, colors, radius, type).
+ * Kalau token di app berubah, ubah di sini juga. Jangan tulis hex langsung di komponen.
+ */
+@theme inline {
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", ui-sans-serif, system-ui, sans-serif;
+
+  /* palette mentah */
+  --color-ivory: #faf8f3;
+  --color-white: #ffffff;
+  --color-ink: #1d2426;
+  --color-ink-soft: #2a3436;
+  --color-slate: #5f6b6d;
+  --color-slate-light: #7c8789;
+  --color-teal: #1f7a6e;
+  --color-teal-deep: #16574e;
+  --color-teal-ink: #234a44;
+  --color-teal-muted: #3f5b56;
+  --color-mint: #dcf0ea;
+  --color-mint-card: #cfe9e1;
+  --color-mint-card-deco: #b8dfd3;
+  --color-mint-deep: #bfe4da;
+  --color-mint-bright: #8ed8c6;
+  --color-green: #1c7a4f;
+  --color-green-deep: #145c3b;
+  --color-green-soft: #cdeedd;
+  --color-orange: #ff9a62;
+  --color-peach: #ffe8da;
+  --color-peach-soft: #ffe0cc;
+  --color-cream: #fff4ec;
+  --color-apricot: #ffdccb;
+  --color-coin: #ffd66b;
+  --color-butter: #fff0c2;
+  --color-sky: #d6e4ff;
+  --color-sky-soft: #e6eefc;
+  --color-mist: #eef1f6;
+  --color-mist-ink: #56627a;
+  --color-lavender: #b9aef5;
+  --color-lilac: #cfc6ff;
+  --color-line: #e6e2d8;
+  --color-line-strong: #cfcabd;
+  --color-sand: #f1eee6;
+  --color-skeleton: #eceae4;
+  --color-camera-bg: #e9efec;
+  --color-violet: #ece8ff;
+  --color-violet-deep: #ddd6ff;
+  --color-violet-ink: #4d4870;
+  --color-violet-soft: #e3ddff;
+  --color-navy: #1f3f7a;
+  --color-cocoa: #6b5e55;
+  --color-honey: #ffc56b;
+  --color-brown: #a4561f;
+  --color-rust: #8a3b12;
+  --color-error-bg: #fffcfb;
+
+  /* radius dari theme.ts */
+  --radius-input: 16px;
+  --radius-button: 18px;
+  --radius-row: 18px;
+  --radius-card: 22px;
+  --radius-tile: 14px;
+  --radius-trip: 26px;
+  --radius-hero: 28px;
+  --radius-invite: 30px;
 }
 
 :root {
-  --background: #faf8f3;
-  --foreground: #1d2426;
-  --primary: #1f7a6e;
-  --primary-deep: #16574e;
-  --accent: #ff9a62;
-  --mint: #dcf0ea;
-  --cream: #fff4ec;
-  --sand: #f1eee6;
-  --line: #e6e2d8;
-  --slate: #5f6b6d;
+  color-scheme: light;
+  --shell-bg: #e9e5da;
+}
+
+html {
+  background: var(--shell-bg);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: #faf8f3;
-  color: #1d2426;
-  font-family: var(--font-body), -apple-system, sans-serif;
   margin: 0;
-  padding: 0;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
-h1, h2, h3, .font-display {
-  font-family: var(--font-display), -apple-system, sans-serif;
+@media (min-width: 768px) {
+  body {
+    background: var(--shell-bg);
+  }
+}
+
+/* skala tipe dari theme.ts `type` */
+@utility type-amount-xl {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 46px;
+  letter-spacing: -1px;
+}
+@utility type-hero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 38px;
+  letter-spacing: -1px;
+}
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 32px;
+  letter-spacing: -0.5px;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+}
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 24px;
+}
+@utility type-body {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+@utility type-body-strong {
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 700;
+}
+@utility type-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+}
+@utility type-caption {
+  font-size: 13px;
+  line-height: 19px;
+  font-weight: 400;
+}
+@utility type-small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+/* --- animasi (port dari decor.tsx / Teko.dc.html) --- */
+@keyframes tk-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(var(--bob, 6px) * -1)); }
+}
+@keyframes tk-sway {
+  0%, 100% { transform: rotate(calc(var(--sway, 2.5deg) * -1)); }
+  50% { transform: rotate(var(--sway, 2.5deg)); }
+}
+@keyframes tk-sparkle {
+  0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.55; transform: scale(0.72) rotate(90deg); }
+}
+@keyframes tk-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes tk-pulse {
+  0% { opacity: 0.45; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+@keyframes tk-fall {
+  0% { transform: translateY(-60px) rotate(0deg); }
+  100% { transform: translateY(960px) rotate(540deg); }
+}
+@keyframes tk-sheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes tk-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.tk-bob { animation: tk-bob var(--bob-ms, 3200ms) ease-in-out infinite; animation-delay: var(--delay, 0ms); }
+.tk-sway { transform-origin: 50% 88%; animation: tk-sway var(--sway-ms, 3600ms) ease-in-out infinite; }
+.tk-sparkle { animation: tk-sparkle 1300ms ease-in-out infinite alternate; animation-delay: var(--delay, 0ms); }
+.tk-pop { animation: tk-pop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tk-pulse-ring { animation: tk-pulse 1600ms ease-out infinite; }
+.tk-fall { animation: tk-fall var(--fall-ms, 5200ms) linear infinite; animation-delay: var(--delay, 0ms); }
+.tk-sheet { animation: tk-sheet 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tk-fade { animation: tk-fade 200ms ease-out both; }
+
+.tk-still { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tk-motion { display: none; }
+  .tk-still { display: block; }
+  .tk-bob, .tk-sway, .tk-sparkle, .tk-pop, .tk-pulse-ring, .tk-fall, .tk-sheet, .tk-fade {
+    animation: none !important;
+  }
+  .tk-fall { display: none; }
+}
+
+/* --- animasi landing (fade-in-up bertahap + overlay kartu di atas video) --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fadeInDialog {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-fade-in-overlay { animation: fadeInOverlay 0.4s ease-out forwards; }
+.animate-slide-up-overlay {
+  animation: fadeInDialog 0.5s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up, .animate-fade-in-overlay, .animate-slide-up-overlay {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Gulir halus ke bagian landing (hanya bila gerakan tidak dikurangi). */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.landing) { scroll-behavior: smooth; }
+}
+
+/* ===================== Landing: liquid glass ===================== */
+@layer components {
+/*
+ * Landing memakai dua warna saja: netral (hitam/putih/abu) dan satu aksen teal (--color-teal).
+ * Permukaan kaca duduk di atas latar abu sangat muda; jangan tambah warna lain di sini.
+ * Semua kelas diawali `lg-` dan hanya dipakai di components/landing.
+ */
+.landing {
+  --lg-blur: 22px;
+  --lg-tint: rgba(255, 255, 255, 0.52);
+  --lg-rim: rgba(255, 255, 255, 0.85);
+  --lg-shadow: 0 10px 40px -12px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.lg-glass {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, var(--lg-tint) 45%, rgba(255, 255, 255, 0.38) 100%);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(180%);
+  backdrop-filter: blur(var(--lg-blur)) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    inset 0 1px 0 var(--lg-rim),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 22px rgba(255, 255, 255, 0.28),
+    var(--lg-shadow);
+}
+/* Kilau spekular di sudut kiri atas, seperti cahaya di tepi kaca tebal. */
+.lg-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 45%),
+    radial-gradient(90% 70% at 100% 100%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%);
+}
+/* Pelek tipis berwarna (pembiasan di tepi). */
+.lg-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3) 45%, rgba(255, 255, 255, 0.8));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+/* Varian gelap untuk CTA penutup dan tombol utama. */
+.lg-glass-dark {
+  --lg-tint: rgba(17, 20, 24, 0.55);
+  background: linear-gradient(135deg, rgba(40, 46, 54, 0.72), var(--lg-tint) 50%, rgba(10, 12, 14, 0.7));
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 0 24px rgba(255, 255, 255, 0.05), 0 18px 50px -14px rgba(15, 23, 42, 0.5);
+}
+.lg-glass-dark::before {
+  background: radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 45%);
+}
+.lg-glass-dark::after {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.2));
+}
+
+/* Kartu yang bisa diklik: terangkat, dan kilau menyapu saat hover. */
+.lg-lift {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+  overflow: hidden;
+}
+.lg-lift:hover {
+  transform: translateY(-4px);
+  --lg-shadow: 0 22px 50px -16px rgba(15, 23, 42, 0.28), 0 4px 10px rgba(15, 23, 42, 0.05);
+}
+.lg-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lg-lift:hover .lg-sheen {
+  transform: translateX(120%);
+}
+
+/* Tombol hitam mengilap. */
+.lg-btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a2d33 0%, #0b0c0e 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 10px 24px -8px rgba(15, 23, 42, 0.5);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+.lg-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 16px 30px -10px rgba(15, 23, 42, 0.55);
+}
+.lg-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Pola titik halus di hero, memudar ke tepi. */
+.lg-dots {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(15, 23, 42, 0.13) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(60% 55% at 50% 30%, #000 0%, transparent 100%);
+  mask-image: radial-gradient(60% 55% at 50% 30%, #000 0%, transparent 100%);
+}
+
+/* Teks bergradasi yang berkilau pelan. */
+.lg-shimmer {
+  background: linear-gradient(100deg, #0a0a0a 0%, #6b7280 30%, #1f7a6e 50%, #6b7280 70%, #9ca3af 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lgShimmer 9s ease-in-out infinite alternate;
+}
+@keyframes lgShimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+/* Kabel diagram "Built with": garis tipis dengan titik teal yang mengalir turun. */
+.lg-wire {
+  position: relative;
+  width: 1px;
+  height: 40px;
+  margin: 0 auto;
+  background: rgba(15, 23, 42, 0.16);
+}
+.lg-wire::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -2.5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-teal);
+  animation: lgFlowDown 2.4s linear infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+@keyframes lgFlowDown {
+  0% { transform: translateY(-3px); opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { transform: translateY(37px); opacity: 0; }
+}
+/* Rel mendatar: membentang dari tengah kolom pertama ke tengah kolom kelima. */
+.lg-bus {
+  position: relative;
+  height: 1px;
+  margin: 0 10%;
+  background: rgba(15, 23, 42, 0.16);
+}
+.lg-bus::before,
+.lg-bus::after {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 9999px;
+  background: var(--color-teal);
+  animation: lgFlowOut 2.4s ease-in-out infinite;
+}
+.lg-bus::after { animation-name: lgFlowOutRight; }
+@keyframes lgFlowOut {
+  0% { left: 50%; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { left: 0%; opacity: 0; }
+}
+@keyframes lgFlowOutRight {
+  0% { left: 50%; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Baris nama yang berjalan pelan; memudar di kedua tepi. */
+.lg-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.lg-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: lgMarquee 32s linear infinite;
+}
+.lg-marquee:hover .lg-marquee-track { animation-play-state: paused; }
+.lg-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 3.5rem;
+  padding-right: 3.5rem;
+}
+@keyframes lgMarquee {
+  to { transform: translateX(-50%); }
+}
+
+/* Muncul saat digulir (hanya di browser yang mendukung scroll-driven animation). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lg-reveal {
+      animation: lgReveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 38%;
+    }
+  }
+}
+@keyframes lgReveal {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Tanpa backdrop-filter: pakai permukaan hampir solid supaya teks tetap terbaca. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lg-glass { background: rgba(255, 255, 255, 0.92); }
+  .lg-glass-dark { background: rgba(17, 20, 24, 0.94); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-shimmer, .lg-wire::after, .lg-bus::before, .lg-bus::after { animation: none !important; }
+  .lg-wire::after, .lg-bus::before, .lg-bus::after { display: none; }
+  /* Tanpa gerakan: nama ditampilkan diam dan boleh turun baris. */
+  .lg-marquee { -webkit-mask-image: none; mask-image: none; }
+  .lg-marquee-track { animation: none !important; width: auto; justify-content: center; }
+  .lg-marquee-group { flex-wrap: wrap; justify-content: center; row-gap: 1rem; padding-right: 0; }
+  .lg-marquee-group + .lg-marquee-group { display: none; }
+  .lg-lift, .lg-btn, .lg-sheen { transition: none !important; }
+  .lg-lift:hover, .lg-btn:hover { transform: none; }
+}
 }

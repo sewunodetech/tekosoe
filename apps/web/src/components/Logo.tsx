@@ -1,16 +1,20 @@
+/** Wordmark "tekosoe" teal + titik oranye — port dari apps/mobile/src/components/logo.tsx. */
 export function Logo({ size = 24, dot = true }: { size?: number; dot?: boolean }) {
+  const dotSize = Math.max(6, Math.round(size / 3));
   return (
-    <div className="flex items-center gap-1.5 select-none">
+    <div className="flex select-none items-center gap-1.5" role="img" aria-label="Tekosoe">
       <span
-        className="font-display font-extrabold tracking-tight text-[#1f7a6e]"
-        style={{ fontSize: size }}
+        className="font-display font-bold text-teal"
+        style={{ fontSize: size, lineHeight: `${size * 1.2}px`, letterSpacing: -size / 48 }}
+        aria-hidden="true"
       >
         tekosoe
       </span>
       {dot && (
         <span
-          className="rounded-full bg-[#ff9a62] inline-block"
-          style={{ width: size / 3.5, height: size / 3.5 }}
+          className="inline-block rounded-full bg-orange"
+          style={{ width: dotSize, height: dotSize }}
+          aria-hidden="true"
         />
       )}
     </div>
