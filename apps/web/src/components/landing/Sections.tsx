@@ -6,13 +6,11 @@ import {
   ChevronDown,
   CircleDollarSign,
   FileCheck,
-  Flag,
   Info,
   LayoutDashboard,
   MailOpen,
   PartyPopper,
   PiggyBank,
-  Receipt,
   ScanFace,
   ShieldCheck,
   Star,
@@ -22,6 +20,8 @@ import {
 } from "lucide-react";
 import { MAX_GROUP_MEMBERS } from "@tekosoe/shared";
 import { GET_APP_HREF } from "@/lib/links";
+import { HowSteps } from "./HowSteps";
+import { TekoScene } from "./three/lazy";
 
 /*
  * Bagian informasi landing. Isinya harus sesuai perilaku produk di docs/02-prd.md;
@@ -42,41 +42,11 @@ function SectionHead({ eyebrow, title, intro }: { eyebrow: string; title: string
 
 /* ---------- How it works ---------- */
 
-const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
-  { icon: Flag, title: "Start a trip", body: "Name it, pick the last day, and set an approval limit. Share the invite link with your friends." },
-  { icon: PiggyBank, title: "Chip in", body: "Everyone puts dollars into one shared pot. Friends in different countries all see the same amounts." },
-  { icon: Receipt, title: "Spend together", body: "Anyone pays from the pot. Bigger payments wait for one friend to say yes." },
-  { icon: PartyPopper, title: "Settle up itself", body: "On the last day Teko works out who owes whom, sends back what's left, and makes an invoice for each person." },
-];
-
 export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-24 py-24">
       <div className="mx-auto max-w-7xl px-6">
-        {/* Panel bergambar: judul di sisi kiri yang lengang, kartu langkah menumpang di tepi bawahnya. */}
-        <div className="lg-reveal relative isolate overflow-hidden rounded-[2.5rem]">
-          <Image src="/landing/path.webp" alt="" fill sizes="(min-width: 1280px) 1232px, 100vw" className="-z-10 object-cover object-right" />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/95 via-white/85 to-white/35 md:via-white/45 md:to-transparent" aria-hidden="true" />
-          <div className="max-w-xl px-7 pt-12 pb-28 md:px-12 md:pt-20 md:pb-40">
-            <p className="lg-glass mb-4 inline-block rounded-full px-3.5 py-1 text-xs font-medium text-gray-700">How it works</p>
-            <h2 className="text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">From first dollar to last day</h2>
-            <p className="mt-4 text-lg text-gray-700">Four steps, and nobody has to keep a spreadsheet.</p>
-          </div>
-        </div>
-        <ol className="relative -mt-20 grid gap-4 px-3 sm:grid-cols-2 md:-mt-28 md:px-8 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="lg-glass lg-reveal rounded-3xl p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 shadow-[inset_0_1px_0_#fff,0_4px_12px_-4px_rgba(15,23,42,0.18)]">
-                  <s.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span className="text-sm font-medium text-gray-500">0{i + 1}</span>
-              </div>
-              <h3 className="mb-2 text-lg font-semibold">{s.title}</h3>
-              <p className="text-sm leading-relaxed text-gray-600">{s.body}</p>
-            </li>
-          ))}
-        </ol>
+        <HowSteps />
       </div>
     </section>
   );
@@ -224,19 +194,22 @@ export function Faq() {
 export function ClosingCta() {
   return (
     <section className="px-6 pb-24">
-      <div className="lg-reveal relative isolate mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-[#0b0c0e] px-6 py-20 text-center text-white md:py-32">
-        <Image src="/landing/lake.webp" alt="" fill sizes="(min-width: 1280px) 1232px, 100vw" className="-z-10 object-cover" />
-        {/* Lapisan gelap supaya teks putih tetap terbaca di atas gambar. */}
-        <div className="absolute inset-0 -z-10 bg-black/45" aria-hidden="true" />
-        <h2 className="mx-auto mb-4 max-w-2xl text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">Planning a trip with friends?</h2>
-        <p className="mx-auto mb-8 max-w-xl text-lg text-gray-100">See how one shared pot works before you go.</p>
-        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/trips" className="rounded-full bg-white px-8 py-3 text-base font-medium text-black shadow-[0_10px_30px_-10px_rgba(255,255,255,0.5)] transition-transform hover:-translate-y-0.5">
-            Open dashboard
-          </Link>
-          <Link href={GET_APP_HREF} className="lg-glass lg-glass-dark rounded-full px-8 py-3 text-base font-medium text-white transition-transform hover:-translate-y-0.5">
-            Get the app
-          </Link>
+      <div className="lg-reveal lg-scene relative isolate mx-auto grid max-w-7xl items-center overflow-hidden rounded-[2.5rem] md:grid-cols-2">
+        {/* Teko 3D: di atas pada ponsel, di kanan pada layar lebar. Klik untuk membuatnya melompat. */}
+        <div className="h-72 md:order-2 md:h-[460px]">
+          <TekoScene />
+        </div>
+        <div className="px-6 pb-16 text-center md:px-14 md:py-24 md:text-left">
+          <h2 className="mb-4 text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">Planning a trip with friends?</h2>
+          <p className="mb-8 text-lg text-gray-700">See how one shared pot works before you go. Teko is ready when you are.</p>
+          <div className="flex flex-col items-center gap-3 sm:flex-row md:justify-start">
+            <Link href="/trips" className="lg-btn rounded-full px-8 py-3 text-base font-medium text-white transition-transform hover:-translate-y-0.5">
+              Open dashboard
+            </Link>
+            <Link href={GET_APP_HREF} className="lg-glass rounded-full px-8 py-3 text-base font-medium text-black transition-transform hover:-translate-y-0.5">
+              Get the app
+            </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Star } from "lucide-react";
+import { OrbitScene } from "./three/lazy";
 
 /*
  * Teknologi sponsor Monad Metropolis yang dipakai Tekosoe (docs/01-brd.md › pihak berkepentingan,
@@ -73,11 +74,14 @@ export function BuiltWith() {
         </div>
 
         <div className="lg-reveal">
-          {/* Simpul pusat */}
-          <div className="flex justify-center">
-            <div className="lg-btn flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white">
-              <Star className="h-4 w-4 fill-white" aria-hidden="true" />
-              Tekosoe
+          {/* Simpul pusat: planet 3D Tekosoe dengan logo yang mengorbit (dekoratif; daftar lengkapnya di kartu bawah). */}
+          <div className="lg-scene relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[2.5rem] md:h-96">
+            <OrbitScene logos={INTEGRATIONS.map((it) => ({ name: it.name, src: it.logo.src, w: it.logo.w, h: it.logo.h }))} />
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+              <div className="lg-btn flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white">
+                <Star className="h-4 w-4 fill-white" aria-hidden="true" />
+                Tekosoe
+              </div>
             </div>
           </div>
           <div className="lg-wire" aria-hidden="true" />
