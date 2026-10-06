@@ -61,9 +61,6 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
             <Link href={`/trip/${trip.id}/add-money`} asChild>
               <Button label="Add money to the pot" />
             </Link>
-            <Link href={`/trip/${trip.id}/settled`} asChild>
-              <Button label="Preview settle-up" variant="outline" />
-            </Link>
           </>
         ) : trip.settled ? (
           <Link href={`/trip/${trip.id}/settled`} asChild>
@@ -124,14 +121,8 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
 
               {trip.settleToday.length > 0 && (
                 <Surface style={{ gap: 10 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
-                    <Link href={`/trip/${trip.id}/settled`}>
-                      <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.primary}>
-                        Preview settle-up →
-                      </Text>
-                    </Link>
-                  </View>
+                  {/* Layar settle-up (dan invoice) hanya untuk trip yang sudah settle; di sini cukup perkiraannya. */}
+                  <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>If we settled today</Text>
                   {trip.settleToday.map((row) => (
                     <MemberAmountRow key={row.member.id} member={row.member} amount={row.amount} />
                   ))}

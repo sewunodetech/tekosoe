@@ -1,4 +1,4 @@
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, Redirect, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { Confetti, Pop } from '@/components/decor';
@@ -29,6 +29,8 @@ export default function SettledScreen() {
 }
 
 function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement }) {
+  // Belum settle: belum ada hasil maupun invoice, jadi kembali ke layar trip (mis. dari link lama).
+  if (!trip.settled) return <Redirect href={`/trip/${trip.id}`} />;
   const mine = settlement.rows.find((r) => r.member.label === 'You');
   const short = settlement.rows.filter((r) => r.net < 0n).map((r) => r.member.name);
 
