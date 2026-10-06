@@ -26,7 +26,7 @@ function buildMessage(
     nonce: params.nonce,
     issuedAt: params.issuedAt,
     expirationTime: params.expiresAt,
-    statement: "Sign in to Tekosoe.",
+    statement: "Sign in to Tekosue.",
   });
 }
 

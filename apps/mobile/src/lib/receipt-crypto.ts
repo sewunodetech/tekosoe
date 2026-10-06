@@ -14,7 +14,7 @@ import { hexToBytes, keccak256, type Hex, type LocalAccount } from 'viem';
  * - Struk: AES-256-GCM dengan kunci trip; `receiptHash = keccak256(ciphertext)` dicatat on-chain.
  */
 
-const ENC_KEY_MESSAGE = 'Tekosoe receipts\n\nUnlock the key that opens receipts in your trips.\n\nv1';
+const ENC_KEY_MESSAGE = 'Tekosue receipts\n\nUnlock the key that opens receipts in your trips.\n\nv1';
 const WRAP_INFO = 'tekosoe/trip-key-wrap/v1';
 const NONCE_BYTES = 12;
 

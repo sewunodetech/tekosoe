@@ -17,7 +17,7 @@ Lihat juga `AGENTS.md` di root. App ini memegang **semua interaksi user**; trans
 
 ## Desain
 
-Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, S01–S12, Teko). Halaman Wireframe, UI, UI v2 hanya eksplorasi — jangan dipakai.
+Sumber: canvas Claude "Tekosue — Wireframe", halaman **Final UI** (F01–F13, S01–S12, Teko). Halaman Wireframe, UI, UI v2 hanya eksplorasi — jangan dipakai.
 
 - **Token di `src/constants/theme.ts`**: `colors` (semantik — pakai ini), `palette` (warna mentah), `fonts`, `type` (skala tipografi), `radius`, `screenPadding`. **Jangan tulis hex atau `fontWeight` langsung di layar** — `fontWeight` tidak jalan dengan font kustom di Android; pakai `fonts.*`.
 - Ringkas: latar ivory `#faf8f3`, teks ink `#1d2426`, primary teal `#1f7a6e`, kartu hero mint `#dcf0ea`, aksen oranye `#ff9a62`, positif hijau `#1c7a4f`. Judul/angka **Bricolage Grotesque**, teks **Manrope** (dimuat di `app/_layout.tsx`). Hanya mode terang.
@@ -38,7 +38,7 @@ Sumber: canvas Claude "Tekosoe — Wireframe", halaman **Final UI** (F01–F13, 
 | 03 Home · S5 | `(tabs)/trips.tsx` (URL `/trips`) | F03Home + kartu grup besar S05BigGroup |
 | 12 Card | `(tabs)/card.tsx` | F12Card; Tokyo Taxi → S4 |
 | 04 New trip | `trip/new.tsx` | F04Create |
-| 05 Invite | `invite/[code]/index.tsx` | F05Invite; deep link `tekosoe://invite/<code>` |
+| 05 Invite | `invite/[code]/index.tsx` | F05Invite; deep link `tekosue://invite/<code>` |
 | ~~06 Join + put in~~ | `invite/[code]/join.tsx` | Dihapus (ADR 0009): redirect ke 05; gabung langsung dari 05 |
 | 07 Trip · S1 | `trip/[id]/index.tsx` | F07Group; `?state=empty` = S01PotEmpty |
 | 08 Add money | `trip/[id]/add-money.tsx` | F08AddMoney (modal) |

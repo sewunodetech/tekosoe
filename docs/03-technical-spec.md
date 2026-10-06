@@ -40,7 +40,7 @@ AUSD on Monad testnet: `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`, verified ag
 **Repo layout**
 
 ```
-tekosoe/
+tekosue/
   apps/
     mobile/     # Expo (React Native) app: Expo Router, EAS Build
     web/        # small site: invoice verification, invite links, passkey domain files

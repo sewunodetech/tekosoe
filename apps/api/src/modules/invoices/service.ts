@@ -12,7 +12,7 @@ import type { InvoiceRow, NewInvoice } from "../../db/repos";
 import { checksumAddress } from "../../lib/address";
 
 /** Share links for the web verification page (docs/03: "link berbagi memakai token yang kedaluwarsa"). */
-const SHARE_AUDIENCE = "tekosoe:invoice-share";
+const SHARE_AUDIENCE = "tekosue:invoice-share";
 const SHARE_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 export type EnsureInvoicesResult =

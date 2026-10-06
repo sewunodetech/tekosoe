@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 /*
- * Pemuat scene 3D landing. three.js hanya diunduh di browser dan hanya di halaman `/`;
+ * Pemuat scene 3D landing. three.js hanya diunduh di browser dan hanya di `/` (dan 404);
  * selama memuat (atau tanpa WebGL) yang tampil hanya latar `.lg-scene`.
  * Section server (Sections.tsx, Integrations.tsx) meng-import dari sini, bukan langsung.
  */

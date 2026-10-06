@@ -19,4 +19,4 @@ Everything we planned, decided and built, in one place. Start with the PRD if yo
 | [../apps/api/docs/API.md](../apps/api/docs/API.md) | The api reference: endpoints, flows, credentials and deployment |
 | [assets/](assets/) | Images used by the root README |
 
-The UI design lives on the "Tekosoe — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.
+The UI design lives on the "Tekosue — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.
