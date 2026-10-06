@@ -270,7 +270,7 @@ indexer.onEvent({ contract: "GroupVault", event: "DebtPaid" }, async ({ event, c
 
 const FAUCET = lower(process.env.ENVIO_AUSD_FAUCET_ADDRESS || "0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C");
 const CASH_OUT = lower(process.env.ENVIO_CASH_OUT_ADDRESS || "0xe3436dDd9d00C6B426A12506c7db31d2a23cB89c");
-const VAULT = lower(process.env.ENVIO_GROUP_VAULT_ADDRESS || "0x1467c9de54C1e4570AF062E80E860F94852BB7ee");
+const VAULT = lower(process.env.ENVIO_GROUP_VAULT_ADDRESS || "0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0");
 /** Versi app lama mengembalikan kelebihan faucet ke "bank"; transfer seperti itu dalam jeda ini dihitung pengembalian. */
 const LEGACY_RETURN_WINDOW = 300n;
 

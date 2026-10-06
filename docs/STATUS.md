@@ -104,7 +104,8 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 
 | Item | Value |
 | --- | --- |
-| GroupVault v1 (Monad testnet) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee`, block 66921819 (source verified, exact match, Sourcify via BlockVision, 3 Oct; built from commit `39827cd`), tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
+| GroupVault v1 + ADR 0013 (Monad testnet, **current**) | `0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0`, block 68690383, tx `0x5bdf122866c38f61110388919cca9194cd66a1be887e51b43fd3bf462fd7d6a6` (6 Oct; unpaid debt blocks new trips). Source verification pending |
+| GroupVault v1 (old, test data only) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee`, block 66921819 (source verified, exact match, Sourcify via BlockVision, 3 Oct; built from commit `39827cd`), tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
 | AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (verified: Agora docs + on-chain) |
 | AUSD testnet faucet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)` |
 | Envio GraphQL | `https://graphql.mulalabs.biz.id/v1/graphql` (`docker-compose.yml`) |
