@@ -95,10 +95,10 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] Simulated card (FR-16)
 - [ ] Passkey-derived encryption key, trip key (FR-17)
 
-### P3 — Alchemy (dropped from scope, see `docs/ROADMAP.md`)
+### P3 — Alchemy (dropped, ADR 0014)
 
-- [ ] Gas Manager with Mera accounts (half a day max)
-- [ ] Webhooks → push notifications (FR-18)
+- [x] Alchemy removed from the landing page "Built with" (6 Oct). Network fees stay covered by our MON drip.
+- [ ] 🟡 Push notifications from **Envio** instead of Alchemy webhooks (6 Oct, ADR 0014): approval requests, payments with your share, declined/disputed payments, settle-up results, and a daily "You still owe $X" reminder (ADR 0013). *Needs `FEATURE_PUSH=true` on the api and a native build (Expo Go on Android has no push). Not yet verified on a phone.*
 
 ## Deployments
 
