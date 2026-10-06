@@ -1,27 +1,27 @@
-import Svg, { Rect } from 'react-native-svg';
+import { useMemo } from 'react';
+import Svg, { Path, Rect } from 'react-native-svg';
+// Inti encoder saja (JS murni): entry utama `qrcode` menarik renderer canvas/fs.
+import { create } from 'qrcode/lib/core/qrcode';
 
 import { colors } from '@/constants/theme';
-import { demoQrCells } from './qr-pattern';
 
-/** QR dekoratif dari desain (84px, modul 4px). TODO: ganti dengan QR asli tautan verifikasi. */
-export function QrCode({ size = 84 }: { size?: number }) {
-  const ink = colors.text;
-  const finder = (x: number, y: number) => (
-    <>
-      <Rect x={x} y={y} width={28} height={28} fill={ink} />
-      <Rect x={x + 4} y={y + 4} width={20} height={20} fill={colors.surface} />
-      <Rect x={x + 8} y={y + 8} width={12} height={12} fill={ink} />
-    </>
-  );
+/** QR asli yang membuka `value` (URL verifikasi invoice). */
+export function QrCode({ value, size = 84 }: { value: string; size?: number }) {
+  const { count, d } = useMemo(() => {
+    const { modules } = create(value, { errorCorrectionLevel: 'M' });
+    let path = '';
+    for (let y = 0; y < modules.size; y++) {
+      for (let x = 0; x < modules.size; x++) {
+        if (modules.get(x, y)) path += `M${x} ${y}h1v1h-1z`;
+      }
+    }
+    return { count: modules.size, d: path };
+  }, [value]);
+
   return (
-    <Svg width={size} height={size} viewBox="0 0 84 84" accessibilityLabel="QR code to verify this invoice">
-      <Rect width={84} height={84} fill={colors.surface} />
-      {finder(0, 0)}
-      {finder(56, 0)}
-      {finder(0, 56)}
-      {demoQrCells.map(([cx, cy]) => (
-        <Rect key={`${cx}-${cy}`} x={cx * 4} y={cy * 4} width={4} height={4} fill={ink} />
-      ))}
+    <Svg width={size} height={size} viewBox={`0 0 ${count} ${count}`} accessibilityLabel="QR code to verify this invoice">
+      <Rect width={count} height={count} fill={colors.surface} />
+      <Path d={d} fill={colors.text} />
     </Svg>
   );
 }

@@ -262,6 +262,7 @@ function buildInvoice(trip: Trip, group: EnvioGroup, invoice: ApiInvoice, me: st
   if (status === 'refunded') {
     return {
       number: invoice.number,
+      shareToken: invoice.shareToken,
       status,
       owner,
       headline: `+${money(refunded)}`,
@@ -278,6 +279,7 @@ function buildInvoice(trip: Trip, group: EnvioGroup, invoice: ApiInvoice, me: st
   }
   return {
     number: invoice.number,
+    shareToken: invoice.shareToken,
     status,
     owner,
     headline: `${money(stillToPay)} to pay`,

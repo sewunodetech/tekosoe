@@ -120,4 +120,6 @@ export type Invoice = {
   subline: string;
   lines: { date: string; title: string; sub: string; amount: bigint; positive?: boolean }[];
   totals: { label: string; value: bigint; strong?: boolean }[];
+  /** Kode akses berbagi dari api (berlaku 7 hari); ikut di QR/link supaya invoice bisa diperiksa tanpa login. */
+  shareToken?: string;
 };

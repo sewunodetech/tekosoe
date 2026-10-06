@@ -14,7 +14,8 @@ import type { Invoice, InvoiceStatus, Trip } from '@/data/types';
 import { useInvoice } from '@/features/invoices/useInvoice';
 import { usePayDebt } from '@/features/trips/usePayDebt';
 import { useTrip } from '@/features/trips/useTrip';
-import { env, isLive } from '@/lib/env';
+import { isLive } from '@/lib/env';
+import { invoiceVerifyLabel, invoiceVerifyUrl } from '@/lib/invoice-link';
 import { money, signed } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
@@ -68,7 +69,9 @@ function InvoiceView({
   const headline = locallyPaid ? 'Paid in full' : invoice.headline;
   const subline = locallyPaid ? 'All debts settled with the group vault' : invoice.subline;
 
-  const verifyUrl = `${env.webDomain}/v/${invoice.number}`;
+  // QR, pesan share, dan link PDF membawa kode akses; teks yang terlihat hanya domain/v/<nomor>.
+  const verifyUrl = invoiceVerifyUrl(invoice.number, invoice.shareToken);
+  const verifyLabel = invoiceVerifyLabel(invoice.number);
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
 
   const payDebt = usePayDebt(trip.id);
@@ -82,7 +85,7 @@ function InvoiceView({
     payTx.execute({ amount: due });
   };
 
-  const share = () => Share.share({ message: `${trip.name} invoice ${invoice.number}: https://${verifyUrl}` });
+  const share = () => Share.share({ message: `${trip.name} invoice ${invoice.number}: ${verifyUrl}` });
 
   const handleSavePdf = async () => {
     try {
@@ -146,7 +149,7 @@ function InvoiceView({
             </div>
 
             <div class="footer">
-              Check this invoice at ${env.webDomain}/v/${invoice.number}
+              Check this invoice at <a href="${verifyUrl}">${verifyLabel}</a>
             </div>
           </body>
         </html>
@@ -246,14 +249,14 @@ function InvoiceView({
         </Surface>
 
         <Surface style={styles.verify}>
-          <QrCode />
+          <QrCode value={verifyUrl} />
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Scan to verify</Text>
             <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body, lineHeight: 17 }}>
               Checks this invoice against the trip&apos;s records and shows if anything was changed.
             </Text>
             <Text variant="small" color={colors.primary}>
-              {verifyUrl}
+              {verifyLabel}
             </Text>
           </View>
         </Surface>
