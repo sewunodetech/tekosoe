@@ -45,7 +45,7 @@ function activity(
   groupId: bigint,
   type: string,
   actor: string,
-  extra: { counterparty?: string; amount?: bigint; spendId?: bigint } = {},
+  extra: { counterparty?: string; amount?: bigint; spendId?: bigint; remaining?: bigint } = {},
 ): void {
   context.Activity.set({
     id: eventId(event),
@@ -57,6 +57,7 @@ function activity(
     spendId: extra.spendId,
     timestamp: BigInt(event.block.timestamp),
     txHash: event.transaction.hash,
+    remaining: extra.remaining,
   });
 }
 
@@ -124,7 +125,9 @@ indexer.onEvent({ contract: "GroupVault", event: "GroupCreated" }, async ({ even
 indexer.onEvent({ contract: "GroupVault", event: "MemberJoined" }, async ({ event, context }) => {
   const p = event.params;
   const group = await context.Group.getOrThrow(p.groupId.toString());
-  context.Group.set({ ...group, memberCount: group.memberCount + 1 });
+  // members[] di kontrak hanya bertambah, jadi posisi = jumlah anggota setelah join (urutan membersOf).
+  const position = group.memberCount + 1;
+  context.Group.set({ ...group, memberCount: position });
   context.Member.set({
     id: memberId(p.groupId, p.member),
     group_id: p.groupId.toString(),
@@ -138,6 +141,7 @@ indexer.onEvent({ contract: "GroupVault", event: "MemberJoined" }, async ({ even
     debt: 0n,
     credit: 0n,
     joinedAt: BigInt(event.block.timestamp),
+    position,
   });
   activity(context, event, p.groupId, "MemberJoined", p.member, { amount: p.pullCap });
 });
@@ -241,7 +245,7 @@ indexer.onEvent({ contract: "GroupVault", event: "Pulled" }, async ({ event, con
   const m = await member(context, p.groupId, p.member);
   context.Member.set({ ...m, pulled: m.pulled + p.amount, debt: p.remainingDebt });
   await addToPool(context, p.groupId, p.amount);
-  activity(context, event, p.groupId, "Pulled", p.member, { amount: p.amount });
+  activity(context, event, p.groupId, "Pulled", p.member, { amount: p.amount, remaining: p.remainingDebt });
 });
 
 indexer.onEvent({ contract: "GroupVault", event: "Refunded" }, async ({ event, context }) => {
@@ -249,7 +253,7 @@ indexer.onEvent({ contract: "GroupVault", event: "Refunded" }, async ({ event, c
   const m = await member(context, p.groupId, p.member);
   context.Member.set({ ...m, refunded: m.refunded + p.amount, credit: p.remainingCredit });
   await addToPool(context, p.groupId, -p.amount);
-  activity(context, event, p.groupId, "Refunded", p.member, { amount: p.amount });
+  activity(context, event, p.groupId, "Refunded", p.member, { amount: p.amount, remaining: p.remainingCredit });
 });
 
 indexer.onEvent({ contract: "GroupVault", event: "DebtPaid" }, async ({ event, context }) => {
