@@ -1,10 +1,10 @@
-# Tekosoe — Product Requirements Document (PRD)
+# Tekosue — Product Requirements Document (PRD)
 
 ## Summary and product goals
 
-The hackathon version of Tekosoe (v0.1) is a shared pot that settles up by itself. Three people in three countries put AUSD into one pot and spend from it until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back. It all runs on Monad testnet, and all anyone needs is a passkey.
+The hackathon version of Tekosue (v0.1) is a shared pot that settles up by itself. Three people in three countries put AUSD into one pot and spend from it until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back. It all runs on Monad testnet, and all anyone needs is a passkey.
 
-**Product statement.** For friends and families spread across countries, Tekosoe is a group pot that records *and* settles shared spending in digital dollars, in seconds, with no bank and no crypto knowledge.
+**Product statement.** For friends and families spread across countries, Tekosue is a group pot that records *and* settles shared spending in digital dollars, in seconds, with no bank and no crypto knowledge.
 
 **v0.1 product goals**
 
@@ -31,7 +31,7 @@ The demo uses three personas from our main story: three friends from Indonesia, 
 | 2. Joining | A member opens the link, confirms with their passkey, picks a safety net and puts in a first deposit | `joinGroup` + AUSD `approve` for the safety net; AUSD `deposit`; gas sponsored |
 | 3. Spending | A member pays from the pot (paying back a friend who covered something, or paying someone else) and picks who it was for | `spend`; recorded automatically; feed updated through Envio |
 | 4. Big payments | A payment above the trip's limit waits for one other member to approve it | `spend` with status Pending, then `approveSpend` |
-| 5. Paying at a shop (P2) | A member taps the Tekosoe card (simulated) at a demo shop | `spend` from the pot to the demo shop's address |
+| 5. Paying at a shop (P2) | A member taps the Tekosue card (simulated) at a demo shop | `spend` from the pot to the demo shop's address |
 | 6. Disputes | A member who wasn't part of a payment rejects their share | `disputeShare` within the dispute window |
 | 7. Pot running low | The app nudges members to top up | Additional `deposit` |
 | 8. End date | Nobody has to do anything. Every member gets a summary and any refund automatically | The scheduler calls `settle`; shortfalls are pulled up to each safety net; overpayments are refunded |
@@ -58,7 +58,7 @@ Priorities follow the scope layers: P0 is required for the track and main bounti
 | FR-13 | Every amount is shown in dollars, with no crypto terms | BR-01 | P0 |
 | FR-14 | The trip's activity feed updates without a manual refresh | BR-04 | P1 |
 | FR-15 | Each member's position (put in, spent, net) and a preview of the settle-up | BR-04, BR-05 | P1 |
-| FR-16 | A Tekosoe card (simulated) to pay a demo shop straight from the pot | BR-11 | P2 |
+| FR-16 | A Tekosue card (simulated) to pay a demo shop straight from the pot | BR-11 | P2 |
 | FR-17 | Notes and receipt photos are encrypted with a passkey-derived key; only members can open them | BR-08 | P2 |
 | FR-18 | Push notifications for new payments, approval requests and settle-up results | BR-04 | P3 |
 | FR-19 | The payer can attach the seller's receipt (photo or multi-page PDF) when paying or later; the receipt is encrypted on the phone and its fingerprint is recorded on-chain with `attachReceipt` | BR-04, BR-08 | P0 |

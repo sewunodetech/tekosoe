@@ -7,7 +7,7 @@ import { Icon } from '@/components/ui/icon';
 import { Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { MAX_GROUP_MEMBERS } from '@tekosoe/shared';
+import { MAX_GROUP_MEMBERS } from '@tekosue/shared';
 
 import { QueryState } from '@/components/query-state';
 import { colors, fonts } from '@/constants/theme';
@@ -23,7 +23,7 @@ async function shareInvite(trip: Trip) {
     Alert.alert('Invite link', 'Ask the person who created this trip to share the invite link.');
     return;
   }
-  const message = `Join our trip "${trip.name}" on Tekosoe: ${inviteUrl(code)}`;
+  const message = `Join our trip "${trip.name}" on Tekosue: ${inviteUrl(code)}`;
   // Browsers without navigator.share: show the link instead.
   await Share.share({ message }).catch(() => {
     // react-native-web has no Alert; prompt() lets the user copy the link.

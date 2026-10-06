@@ -2,7 +2,7 @@
  * End-to-end smoke test di Monad testnet dengan AUSD asli (Agora) dan GroupVault yang ter-deploy.
  * Memakai dua akun uji sekali pakai (A = pembuat, B = anggota) — tidak pernah kunci siapa pun.
  *
- *   npm run e2e:testnet -w @tekosoe/api      (api harus jalan; baca API_URL/ADMIN_API_KEY dari .env)
+ *   npm run e2e:testnet -w @tekosue/api      (api harus jalan; baca API_URL/ADMIN_API_KEY dari .env)
  *
  * Alur: drip MON (api) → dana demo AUSD (faucet Agora) → createGroup → joinGroupWithPermit →
  * depositWithPermit → spend kecil (langsung) + label ke api → spend besar (Pending) → approveSpend →
@@ -32,7 +32,7 @@ import {
   inviteDigest,
   MONAD_TESTNET_CHAIN_ID,
   monadTestnet,
-} from "@tekosoe/shared";
+} from "@tekosue/shared";
 
 const API = process.env["E2E_API_URL"] ?? `http://localhost:${process.env["PORT"] ?? 3001}`;
 const ADMIN_KEY = process.env["ADMIN_API_KEY"] ?? "";

@@ -1,4 +1,4 @@
-# Tekosoe — Technical Specification
+# Tekosue — Technical Specification
 
 > This is the original design. A few details changed during the build, and the decision records are the source of truth for those: [ADR 0002](decisions/0002-database-provider.md) (the metadata database is Neon Postgres, not Supabase), [ADR 0004](decisions/0004-api-express.md) (the backend is Express, not Hono) and [ADR 0005](decisions/0005-groupvault-v1.md) (GroupVault v1: signed invites, permit flows, a settle-up that can't get stuck). Where this document says "Supabase", read "the metadata database".
 
@@ -55,7 +55,7 @@ tekosoe/
 
 ## Data model and contract state
 
-Tekosoe is a shared pot. Every deposit goes into one pot, and every member can spend from it until it runs out, without looking at how much they put in. The contract tracks two numbers per member: total deposits (`deposited`) and their total share of payments (`used`). Net balance = `deposited − used`, and the sum of every member's net balance always equals the pot.
+Tekosue is a shared pot. Every deposit goes into one pot, and every member can spend from it until it runs out, without looking at how much they put in. The contract tracks two numbers per member: total deposits (`deposited`) and their total share of payments (`used`). Net balance = `deposited − used`, and the sum of every member's net balance always equals the pot.
 
 **Example.** A, B and C each put in 100 (pot: 300). A spends 90 for everyone, B spends 60 for A and B, C spends 150 for everyone. The pot is now 0.
 
@@ -269,7 +269,7 @@ After `settle`, every member gets an invoice with their deposits, their share of
 ### Card (simulated), P2
 
 - Only the card network is simulated. The payment is real: a `spend` from the pot to the demo shop's address, with participants chosen as usual.
-- The app has a virtual Tekosoe card screen (no Visa design or logo) and a list of demo shops with their addresses.
+- The app has a virtual Tekosue card screen (no Visa design or logo) and a list of demo shops with their addresses.
 - The label "Card (simulated)" appears in the app, the README and the video. Issuing a real card (for example through a Visa issuing partner) is on the roadmap.
 
 ## Security and configuration

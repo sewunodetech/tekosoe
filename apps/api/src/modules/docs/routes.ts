@@ -33,7 +33,7 @@ export function createDocsRoutes(): Router {
     "/docs",
     swaggerUi.setup(null, {
       explorer: false,
-      customSiteTitle: "Tekosoe API",
+      customSiteTitle: "Tekosue API",
       swaggerUrl: SPEC_URL,
     }),
   );

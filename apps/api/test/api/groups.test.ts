@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
-import { computeNoteHash } from "@tekosoe/shared";
+import { computeNoteHash } from "@tekosue/shared";
 import type { Address } from "viem";
 import {
   authHeader,

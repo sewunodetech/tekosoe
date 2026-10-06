@@ -11,7 +11,7 @@ import { GET_APP_HREF } from "@/lib/links";
 export const metadata: Metadata = { title: "Verify invoice", robots: { index: false } };
 export const generateStaticParams = () => DEMO_INVOICE_NUMBERS.map((number) => ({ number }));
 
-// Halaman tujuan QR invoice (tekosoe.xyz/v/<nomor>).
+// Halaman tujuan QR invoice (tekosue.xyz/v/<nomor>).
 // TODO (W-3): hitung ulang invoice dari data trip (Envio) dan cocokkan dengan sidik jari invoice dari api.
 // Sekarang hanya menampilkan invoice demo — jangan dipakai sebagai bukti apa pun.
 export default async function VerifyPage({ params }: { params: Promise<{ number: string }> }) {

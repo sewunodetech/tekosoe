@@ -1,6 +1,6 @@
-# Tekosoe — panduan agent
+# Tekosue — panduan agent
 
-Tekosoe adalah **shared wallet untuk trip lintas negara yang settle-up sendiri**: anggota grup (maks. 10) menyetor AUSD ke satu kas, siapa pun boleh memakai kas sampai habis, dan di tanggal berakhir kontrak `GroupVault` di Monad testnet menghitung serta melunasi siapa bayar ke siapa. User masuk hanya dengan Face ID (passkey Mera) — tanpa seed phrase, tanpa token gas.
+Tekosue adalah **shared wallet untuk trip lintas negara yang settle-up sendiri**: anggota grup (maks. 10) menyetor AUSD ke satu kas, siapa pun boleh memakai kas sampai habis, dan di tanggal berakhir kontrak `GroupVault` di Monad testnet menghitung serta melunasi siapa bayar ke siapa. User masuk hanya dengan Face ID (passkey Mera) — tanpa seed phrase, tanpa token gas.
 
 Proyek hackathon **Monad Metropolis**, track Consumer Products & Payments. Target submit **12 Okt 2026** (deadline 13 Okt 23.59 ET).
 
@@ -63,10 +63,10 @@ npm install                                 # sekali di root — semua workspace
 npm run dev                                 # semua dev server via turbo
 npm run build | lint | typecheck | test
 npm run docker:up | docker:down | docker:logs   # Hasura + indexer + api di Docker, DB di Neon (docker-compose.yml)
-npm run start -w @tekosoe/mobile            # Expo
-npm test -w @tekosoe/contracts              # forge test
-npm run codegen -w @tekosoe/indexer         # envio codegen
-npm install <pkg> -w @tekosoe/api           # tambah dependensi ke satu workspace (selalu dari root)
+npm run start -w @tekosue/mobile            # Expo
+npm test -w @tekosue/contracts              # forge test
+npm run codegen -w @tekosue/indexer         # envio codegen
+npm install <pkg> -w @tekosue/api           # tambah dependensi ke satu workspace (selalu dari root)
 cd apps/mobile && npx expo install <pkg>   # khusus mobile: versi cocok dengan SDK Expo
 ```
 
@@ -74,7 +74,7 @@ cd apps/mobile && npx expo install <pkg>   # khusus mobile: versi cocok dengan S
 
 - Monad testnet, chain ID **10143**.
 - AUSD testnet (Agora, **terverifikasi** di docs.agora.finance › Contract Deployments + on-chain): `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` — 6 desimal, permit EIP-2612 (domain "Agora Dollar" v1), EIP-3009, akun bisa dibekukan (`isAccountFrozen`).
-- Faucet AUSD testnet: `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)`. Konstanta di `@tekosoe/shared` (`chain.ts`).
+- Faucet AUSD testnet: `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)`. Konstanta di `@tekosue/shared` (`chain.ts`).
 
 <!-- BEGIN:turborepo-agent-rules -->
 

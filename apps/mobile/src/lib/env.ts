@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { AUSD_TESTNET_ADDRESS, AUSD_TESTNET_FAUCET_ADDRESS, GROUP_VAULT_TESTNET_ADDRESS } from '@tekosoe/shared';
+import { AUSD_TESTNET_ADDRESS, AUSD_TESTNET_FAUCET_ADDRESS, GROUP_VAULT_TESTNET_ADDRESS } from '@tekosue/shared';
 
 // Expo meng-inline EXPO_PUBLIC_* saat build, jadi setiap variabel harus diakses secara statis.
 export const env = {
@@ -11,12 +11,12 @@ export const env = {
   apiUrl: process.env.EXPO_PUBLIC_API_URL,
   /** Di bawah saldo MON ini app meminta drip sebelum transaksi (samakan dengan DRIP_MIN_BALANCE_MON di api). */
   minFeeBalanceMon: process.env.EXPO_PUBLIC_MIN_FEE_BALANCE_MON || '0.05',
-  passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosoe.mulalabs.biz.id',
+  passkeyDomain: process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosue.xyz',
   /**
    * Domain tautan undangan & verifikasi invoice (apps/web). Default = domain passkey: domain itu yang
    * melayani /.well-known, jadi hanya di sana link https://…/j/<kode> bisa langsung membuka app.
    */
-  webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN || process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosoe.mulalabs.biz.id',
+  webDomain: process.env.EXPO_PUBLIC_WEB_DOMAIN || process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosue.xyz',
   /** Penerima pembayaran "toko demo" (layar Pay / Card). Testnet saja. */
   demoShopAddress: process.env.EXPO_PUBLIC_DEMO_SHOP_ADDRESS as `0x${string}` | undefined,
   /** Penerima "Cash out" (simulasi off-ramp: "bank" demo). Testnet saja; default = toko demo. */

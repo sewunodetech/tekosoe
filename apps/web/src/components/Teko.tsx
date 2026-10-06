@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
 /**
- * Teko, maskot Tekosoe — port dari apps/mobile/src/components/teko.tsx (10 ekspresi).
+ * Teko, maskot Tekosue — port dari apps/mobile/src/components/teko.tsx (10 ekspresi).
  * Gambar tiap pose sama persis dengan app; gerakan naik-turun dan goyang memakai CSS
  * (`.tk-bob`, `.tk-sway` di globals.css) sehingga mati otomatis saat "reduce motion".
  */

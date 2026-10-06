@@ -39,7 +39,7 @@ const avatarColorSchema = z
   .max(32)
   .refine((value) => !URL_LIKE.test(value), "avatarColor must be a color or a preset key");
 
-/** Mirrors profileSchema in @tekosoe/shared; countryCode is ISO 3166-1 alpha-2. */
+/** Mirrors profileSchema in @tekosue/shared; countryCode is ISO 3166-1 alpha-2. */
 const updateBodySchema = z.object({
   displayName: displayNameSchema,
   countryCode: z

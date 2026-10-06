@@ -69,7 +69,7 @@ Scope is built in layers. If time runs out at any layer, what's done is still a 
 
 **P2 — If time allows (Mera PRF)**
 
-- [ ] Tekosoe card (simulated): a real payment from the pot to a demo shop's address, labelled as simulated, without the Visa logo
+- [ ] Tekosue card (simulated): a real payment from the pot to a demo shop's address, labelled as simulated, without the Visa logo
 - [ ] A passkey-derived encryption key, separate from the signing key
 - [ ] Encrypted notes and receipt photos; only hashes or ciphertext on-chain
 - [ ] Next step: a trip key that every member can read

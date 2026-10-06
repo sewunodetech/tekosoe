@@ -19,9 +19,9 @@ export default function GetAppPage() {
         <span className="flex h-[180px] w-[180px] items-center justify-center rounded-full bg-cream">
           <Teko mood="wink" size={130} />
         </span>
-        <h1 className="type-h1">Get the Tekosoe app</h1>
+        <h1 className="type-h1">Get the Tekosue app</h1>
         <p className="type-body max-w-[300px] text-slate">
-          Tekosoe is a preview build for now. Ask a friend for a trip invite link. Opening it on your phone takes you straight in.
+          Tekosue is a preview build for now. Ask a friend for a trip invite link. Opening it on your phone takes you straight in.
         </p>
       </div>
     </Screen>

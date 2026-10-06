@@ -1,5 +1,5 @@
 {
-  "name": "tekosoe",
+  "name": "tekosue",
   "private": true,
   "description": "Shared wallet lintas negara yang settle-up sendiri — Monad testnet, AUSD, passkey Mera",
   "packageManager": "npm@11.6.2",

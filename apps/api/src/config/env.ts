@@ -22,11 +22,11 @@ export function isRelaxedEnv(raw: NodeJS.ProcessEnv = process.env): boolean {
 const RELAXED_PLACEHOLDERS: Record<string, string> = {
   MONAD_TESTNET_RPC_URL: "http://127.0.0.1:8545",
   GROUP_VAULT_ADDRESS: "0x0000000000000000000000000000000000000000",
-  ENVIO_GRAPHQL_URL: "https://graphql.example.invalid/v1/tekosoe",
+  ENVIO_GRAPHQL_URL: "https://graphql.example.invalid/v1/tekosue",
   DRIP_PRIVATE_KEY: `0x${"11".repeat(32)}`,
   SETTLER_PRIVATE_KEY: `0x${"22".repeat(32)}`,
-  DATABASE_URL: "postgres://localhost:5432/tekosoe",
-  DATABASE_URL_UNPOOLED: "postgres://localhost:5432/tekosoe",
+  DATABASE_URL: "postgres://localhost:5432/tekosue",
+  DATABASE_URL_UNPOOLED: "postgres://localhost:5432/tekosue",
   AUTH_DOMAIN: "localhost",
   AUTH_JWT_SECRET: "relaxed-env-dev-secret-not-for-production-use",
 };

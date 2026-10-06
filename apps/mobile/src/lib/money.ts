@@ -1,4 +1,4 @@
-import { formatDollars, parseDollars } from '@tekosoe/shared';
+import { formatDollars, parseDollars } from '@tekosue/shared';
 
 /** Dolar → bigint AUSD (6 desimal). */
 export const usd = (dollars: number | string) => parseDollars(String(dollars));

@@ -1,4 +1,4 @@
-# Roadmap mobile app Tekosoe
+# Roadmap mobile app Tekosue
 
 Dokumen kerja untuk tim/agent mobile. Roadmap semua tim ada di [`docs/ROADMAP.md`](../../docs/ROADMAP.md); progres dicentang di [`docs/STATUS.md`](../../docs/STATUS.md) › Mobile.
 
@@ -58,7 +58,7 @@ src/crypto/          AES-GCM struk + keccak256 ciphertext (react-native-quick-cr
 
 - **Pemilih mode:** `EXPO_PUBLIC_DATA_SOURCE=demo|live`, dibaca di `src/lib/env.ts`. Default `demo`.
 - **Layar hanya memakai hook `src/features/*`**, tidak pernah memanggil Envio/api/kontrak langsung.
-- **Uang:** `bigint` AUSD 6 desimal; tampilkan dengan `money()`/`signed()` (`src/lib/demo.ts`, nanti dipindah ke `src/data`) yang memakai `formatDollars` dari `@tekosoe/shared`.
+- **Uang:** `bigint` AUSD 6 desimal; tampilkan dengan `money()`/`signed()` (`src/lib/demo.ts`, nanti dipindah ke `src/data`) yang memakai `formatDollars` dari `@tekosue/shared`.
 - **`noteHash`** selalu dari `computeNoteHash` (`packages/shared/src/metadata.ts`). **ABI** dari `packages/shared/src/abi/groupVault.ts`.
 - **Pakai ulang yang sudah ada:** `src/components/ui/*`, `src/components/teko.tsx`, `decor.tsx`, `trip-rows.tsx`, `receipt-paper.tsx`, `invoice/qr-code.tsx`, `src/constants/theme.ts`, `src/providers/app-providers.tsx` (React Query).
 

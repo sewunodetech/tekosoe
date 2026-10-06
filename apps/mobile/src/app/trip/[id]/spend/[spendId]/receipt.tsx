@@ -122,7 +122,7 @@ function ReceiptView({ trip, spend }: { trip: Trip; spend: Spend }) {
               Encrypted receipt
             </Text>
             <Text variant="label" style={{ fontFamily: fonts.body, textAlign: 'center', lineHeight: 21 }} color={colors.textMuted}>
-              Only the {count} of you can open it. Not even Tekosoe&apos;s servers can read it.
+              Only the {count} of you can open it. Not even Tekosue&apos;s servers can read it.
             </Text>
           </View>
         </View>

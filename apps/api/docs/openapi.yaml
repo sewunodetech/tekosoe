@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Tekosoe API
+  title: Tekosue API
   version: 0.1.0
   description: |
-    Backend mini Tekosoe — penjadwal settle-up, drip biaya jaringan untuk akun baru,
+    Backend mini Tekosue — penjadwal settle-up, drip biaya jaringan untuk akun baru,
     profil, label trip/pemakaian, invoice, struk terenkripsi, tukar kunci grup, dan push notification (Expo).
 
     Prinsipnya:
@@ -272,7 +272,7 @@ paths:
       tags: [profiles]
       summary: Simpan profil milik sendiri
       description: |
-        Sama dengan `profileSchema` di `@tekosoe/shared`. Profil bersifat publik (dipakai
+        Sama dengan `profileSchema` di `@tekosue/shared`. Profil bersifat publik (dipakai
         layar undangan). `countryCode` ISO 3166-1 alpha-2, disimpan huruf besar.
         `avatarColor` berupa warna atau kunci preset — URL ditolak.
       requestBody:
@@ -550,7 +550,7 @@ paths:
       tags: [groups]
       summary: Beri label pemakaian (spender)
       description: |
-        Body = `spendNoteSchema` (`@tekosoe/shared`). Pemanggil wajib `spender` dari `getSpend`,
+        Body = `spendNoteSchema` (`@tekosue/shared`). Pemanggil wajib `spender` dari `getSpend`,
         dan `computeNoteHash(body)` wajib sama dengan `noteHash` on-chain.
         201 pertama kali, 200 kalau diulang.
       parameters:
@@ -1318,7 +1318,7 @@ components:
         payload:
           type: string
           description: |
-            JSON kanonik yang di-hash (buildInvoicePayload di @tekosoe/shared):
+            JSON kanonik yang di-hash (buildInvoicePayload di @tekosue/shared):
             v, number, chainId, groupId, member, settleTxHash, pulled, refunded,
             remainingDebt, remainingCredit (nominal = string desimal AUSD 6 desimal).
             Status tidak ikut di-hash.

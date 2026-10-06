@@ -107,7 +107,7 @@ function InvoiceView({
           </head>
           <body>
             <div class="header">
-              <div class="brand">tekosoe</div>
+              <div class="brand">tekosue</div>
               <div class="num">${invoice.number}</div>
             </div>
             <div class="badge">${invoice.status.toUpperCase()}</div>

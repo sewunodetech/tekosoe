@@ -17,7 +17,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { MAX_GROUP_MEMBERS } from "@tekosoe/shared";
+import { MAX_GROUP_MEMBERS } from "@tekosue/shared";
 import { TekoMark } from "@/components/Logo";
 import { GET_APP_HREF } from "@/lib/links";
 import { HowSteps } from "./HowSteps";
@@ -85,7 +85,7 @@ export function GoodToKnow() {
         <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left" role="note">
           <Info className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
           <p className="text-sm leading-relaxed text-gray-800">
-            <span className="font-semibold">Tekosoe is a preview.</span> It was built for the Monad Metropolis hackathon and runs with test dollars, so no real money moves
+            <span className="font-semibold">Tekosue is a preview.</span> It was built for the Monad Metropolis hackathon and runs with test dollars, so no real money moves
             yet. The dashboard on this site shows sample data.
           </p>
         </div>
@@ -164,8 +164,8 @@ const FAQ: { q: string; a: string }[] = [
   { q: "Who can spend from the pot?", a: "Anyone in the trip. Payments under the approval limit go through right away. Above it, one friend has to say yes first." },
   { q: "What happens to money left in the pot?", a: "On the last day it goes back to the people who put it in, based on what each person actually used." },
   { q: "What if someone spent more than they put in?", a: "Their safety net covers it first, up to the amount they chose. If that isn't enough, their invoice shows what's still to pay." },
-  { q: "Can Tekosoe take or freeze our money?", a: "No. The pot is controlled by the trip's rules, not by us. Tekosoe never holds your money or the key to your account." },
-  { q: "Is the dashboard on this website my real account?", a: "Not yet. It's a preview with sample data so you can see how a trip looks. Real trips live in the Tekosoe app." },
+  { q: "Can Tekosue take or freeze our money?", a: "No. The pot is controlled by the trip's rules, not by us. Tekosue never holds your money or the key to your account." },
+  { q: "Is the dashboard on this website my real account?", a: "Not yet. It's a preview with sample data so you can see how a trip looks. Real trips live in the Tekosue app." },
 ];
 
 export function Faq() {
@@ -249,7 +249,7 @@ export function Footer() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <TekoMark className="h-7 w-7" />
-            <span className="text-lg font-semibold">Tekosoe</span>
+            <span className="text-lg font-semibold">Tekosue</span>
           </div>
           <p className="max-w-xs text-sm text-gray-600">One shared pot for group trips that settles everyone up on the last day.</p>
         </div>
@@ -275,7 +275,7 @@ export function Footer() {
         ))}
       </div>
       <div className="mx-auto max-w-7xl border-t border-black/5 px-6 py-6 text-xs text-gray-600">
-        © 2026 Tekosoe · Built for the Monad Metropolis hackathon, Consumer Products &amp; Payments
+        © 2026 Tekosue · Built for the Monad Metropolis hackathon, Consumer Products &amp; Payments
       </div>
     </footer>
   );

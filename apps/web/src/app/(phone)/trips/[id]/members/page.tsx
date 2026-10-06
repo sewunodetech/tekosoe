@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MAX_GROUP_MEMBERS } from "@tekosoe/shared";
+import { MAX_GROUP_MEMBERS } from "@tekosue/shared";
 import { Icon } from "@/components/icons";
 import { PersonRow } from "@/components/trip";
 import { AppAction } from "@/components/ui/app-sheet";

@@ -8,8 +8,8 @@ const wellKnownHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // @tekosoe/shared dikonsumsi sebagai source TypeScript
-  transpilePackages: ["@tekosoe/shared"],
+  // @tekosue/shared dikonsumsi sebagai source TypeScript
+  transpilePackages: ["@tekosue/shared"],
   async headers() {
     return [
       { source: "/.well-known/apple-app-site-association", headers: wellKnownHeaders },

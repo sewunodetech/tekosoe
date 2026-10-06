@@ -165,7 +165,7 @@ function Orbit({ logos }: { logos: OrbitLogo[] }) {
   );
 }
 
-/** "Built with": planet Tekosoe dengan Teko di atasnya, dikelilingi lencana logo teknologi yang dipakai. */
+/** "Built with": planet Tekosue dengan Teko di atasnya, dikelilingi lencana logo teknologi yang dipakai. */
 export default function OrbitScene({ logos }: { logos: OrbitLogo[] }) {
   return (
     <SceneCanvas className="h-full w-full" camera={{ position: [0, 1.2, 8], fov: 36 }}>

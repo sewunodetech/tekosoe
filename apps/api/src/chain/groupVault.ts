@@ -6,7 +6,7 @@ import {
   type Hash,
   type Hex,
 } from "viem";
-import { groupVaultAbi } from "@tekosoe/shared";
+import { groupVaultAbi } from "@tekosue/shared";
 import type { Env } from "../config/env";
 import type { Logger } from "../lib/logger";
 import { createPublicChainClient, type PublicClient } from "./clients";

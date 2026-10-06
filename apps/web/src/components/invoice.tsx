@@ -55,7 +55,7 @@ export function InvoiceLines({ invoice }: { invoice: Invoice }) {
   );
 }
 
-/** QR asli yang membuka halaman verifikasi `https://tekosoe.xyz/v/<nomor>`. */
+/** QR asli yang membuka halaman verifikasi `https://tekosue.xyz/v/<nomor>`. */
 export async function InvoiceQr({ number, size = 84 }: { number: string; size?: number }) {
   const svg = await QRCode.toString(`https://${verifyPath(number)}`, {
     type: "svg",

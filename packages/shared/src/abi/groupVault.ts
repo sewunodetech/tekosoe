@@ -1,5 +1,5 @@
 // DIHASILKAN oleh packages/contracts/script/export-abi.mjs dari `forge build` — jangan diedit manual.
-// Ubah kontrak, lalu: npm run abi -w @tekosoe/contracts
+// Ubah kontrak, lalu: npm run abi -w @tekosue/contracts
 
 /** enum GroupStatus / SpendStatus di-encode sebagai uint8. */
 export const GROUP_STATUS = { Active: 0, Settled: 1 } as const;

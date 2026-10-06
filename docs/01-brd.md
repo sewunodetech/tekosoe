@@ -1,8 +1,8 @@
-# Tekosoe — Business Requirements Document (BRD)
+# Tekosue — Business Requirements Document (BRD)
 
 _27 Sep 2026_
 
-Tekosoe is a mobile app for group money across borders. Friends chip in, track spending, pay each other and settle up in AUSD, with instant settlement on Monad, and nobody has to understand blockchains to use it.
+Tekosue is a mobile app for group money across borders. Friends chip in, track spending, pay each other and settle up in AUSD, with instant settlement on Monad, and nobody has to understand blockchains to use it.
 
 ## Background and business problem
 
@@ -19,7 +19,7 @@ People who travel or do things together across borders have no easy way to manag
 
 ## Business goals and success measures
 
-In the short term we want to win Monad Metropolis. In the long term we want to turn Tekosoe into a real product through a residency program and support from the Monad ecosystem.
+In the short term we want to win Monad Metropolis. In the long term we want to turn Tekosue into a real product through a residency program and support from the Monad ecosystem.
 
 | Goal | Success measure | Horizon |
 | --- | --- | --- |
@@ -51,13 +51,13 @@ Our primary users are groups of friends from different countries who travel or d
 | Agora (AUSD) | AUSD used for cross-border payments |
 | Monad Foundation / Category Labs (Mera) | Mera as the entire account layer; creative use of passkey-derived keys |
 | Envio | HyperIndex data powering core features |
-| Tekosoe team | Win the hackathon and keep building the product |
+| Tekosue team | Win the hackathon and keep building the product |
 
 ## Value proposition and differentiation
 
-Tekosoe brings tracking and paying back together. What moves is real money in digital dollars, across borders, in seconds.
+Tekosue brings tracking and paying back together. What moves is real money in digital dollars, across borders, in seconds.
 
-| | Splitwise | Local e-wallet (GoPay) | Bank transfer | Tekosoe |
+| | Splitwise | Local e-wallet (GoPay) | Bank transfer | Tekosue |
 | --- | --- | --- | --- | --- |
 | Tracks group spending | Yes | Limited | No | Yes |
 | Moves real money | No (IOUs only) | Yes, in one country | Yes | Yes |
@@ -68,7 +68,7 @@ Tekosoe brings tracking and paying back together. What moves is real money in di
 
 **What sets us apart**
 
-Tekosoe is a shared pot that settles up by itself. Members spend from one pot until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back.
+Tekosue is a shared pot that settles up by itself. Members spend from one pot until it runs out. On the trip's end date, the contract works out who owes whom and pays everyone back.
 
 - Real money changes hands, not just a list of debts.
 - One currency (AUSD) for every member, so nobody loses money on exchange rates between friends.

@@ -25,7 +25,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
       gap="gap-5"
       footer={
         <>
-          <Button href={appLink(`invite/${encodeURIComponent(code)}`)} label="Open in Tekosoe" />
+          <Button href={appLink(`invite/${encodeURIComponent(code)}`)} label="Open in Tekosue" />
           <Button href={GET_APP_HREF} label="Get the app" variant="outline" />
           <p className="type-caption text-center text-slate">New here? Your account is created as you join.</p>
         </>
@@ -65,7 +65,7 @@ export default async function InvitePage({ params }: { params: Promise<{ code: s
         <div className="flex flex-col gap-1.5">
           <p className="text-[15px] font-semibold text-slate">A friend invited you to</p>
           <h1 className="type-hero">a shared trip pot</h1>
-          <p className="type-body text-slate">Open Tekosoe on your phone to see who&apos;s in and join with your passkey.</p>
+          <p className="type-body text-slate">Open Tekosue on your phone to see who&apos;s in and join with your passkey.</p>
         </div>
       )}
     </Screen>

@@ -1,4 +1,4 @@
-# Tekosoe roadmap (all teams)
+# Tekosue roadmap (all teams)
 
 The big picture for every team. Per-team detail:
 - **Mobile** → [`apps/mobile/ROADMAP.md`](../apps/mobile/ROADMAP.md)

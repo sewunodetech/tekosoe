@@ -1,5 +1,5 @@
 import { parseEventLogs, type Address, type Hex, type LocalAccount, type TransactionReceipt } from 'viem';
-import { computeNoteHash, groupVaultAbi } from '@tekosoe/shared';
+import { computeNoteHash, groupVaultAbi } from '@tekosue/shared';
 
 import { api } from '@/lib/api';
 import {

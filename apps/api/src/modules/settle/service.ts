@@ -1,5 +1,5 @@
 import type { AppDeps } from "../../context";
-import { GROUP_STATUS } from "@tekosoe/shared";
+import { GROUP_STATUS } from "@tekosue/shared";
 import type { Logger } from "../../lib/logger";
 import { ensureInvoices } from "../invoices/service";
 

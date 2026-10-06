@@ -59,7 +59,7 @@ export default async function ProfilePage() {
 
       <div className="flex items-center gap-3">
         <Teko mood="idle" size={48} />
-        <p className="flex-1 text-xs leading-[17px] text-slate">Tekosoe v0.1 · made for friends who travel together</p>
+        <p className="flex-1 text-xs leading-[17px] text-slate">Tekosue v0.1 · made for friends who travel together</p>
       </div>
     </Screen>
   );

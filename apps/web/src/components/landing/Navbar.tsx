@@ -79,9 +79,9 @@ export function Navbar() {
           scrolled || open ? "" : "[--lg-shadow:0_2px_10px_-6px_rgba(15,23,42,0.12)]"
         }`}
       >
-        <Link href="/" className="flex items-center gap-2" aria-label="Tekosoe home">
+        <Link href="/" className="flex items-center gap-2" aria-label="Tekosue home">
           <TekoMark className="h-7 w-7" />
-          <span className="text-lg font-semibold whitespace-nowrap">Tekosoe</span>
+          <span className="text-lg font-semibold whitespace-nowrap">Tekosue</span>
         </Link>
 
         <ul className="hidden items-center gap-1 lg:flex">

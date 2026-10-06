@@ -1,5 +1,5 @@
 import type { Address, LocalAccount } from 'viem';
-import type { SpendNote } from '@tekosoe/shared';
+import type { SpendNote } from '@tekosue/shared';
 
 import { requireLive } from './env';
 

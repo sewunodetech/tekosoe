@@ -3,7 +3,7 @@ import { TekoMark } from "@/components/Logo";
 import { OrbitScene } from "./three/lazy";
 
 /*
- * Teknologi sponsor Monad Metropolis yang dipakai Tekosoe (docs/01-brd.md › pihak berkepentingan,
+ * Teknologi sponsor Monad Metropolis yang dipakai Tekosue (docs/01-brd.md › pihak berkepentingan,
  * docs/ROADMAP.md › lapisan P0–P3). Ini integrasi teknologi, bukan kemitraan — jangan ditulis "partner".
  * `planned` = belum dikerjakan menurut docs/STATUS.md; hapus tandanya setelah jalan di testnet.
  */
@@ -62,7 +62,7 @@ export function IntegrationMarquee() {
   );
 }
 
-/** Diagram "Built with": Tekosoe di tengah, tersambung ke tiap teknologi dengan titik yang mengalir. */
+/** Diagram "Built with": Tekosue di tengah, tersambung ke tiap teknologi dengan titik yang mengalir. */
 export function BuiltWith() {
   return (
     <section id="built-with" className="scroll-mt-24 py-24">
@@ -70,17 +70,17 @@ export function BuiltWith() {
         <div className="lg-reveal mx-auto mb-12 max-w-2xl text-center">
           <p className="lg-glass mb-4 inline-block rounded-full px-3.5 py-1 text-xs font-medium text-gray-700">Built with</p>
           <h2 className="text-4xl leading-[1.1] font-normal tracking-tight md:text-5xl">The pieces behind every pot</h2>
-          <p className="mt-4 text-lg text-gray-600">Tekosoe was built for the Monad Metropolis hackathon on technology from these teams.</p>
+          <p className="mt-4 text-lg text-gray-600">Tekosue was built for the Monad Metropolis hackathon on technology from these teams.</p>
         </div>
 
         <div className="lg-reveal">
-          {/* Simpul pusat: planet 3D Tekosoe dengan logo yang mengorbit (dekoratif; daftar lengkapnya di kartu bawah). */}
+          {/* Simpul pusat: planet 3D Tekosue dengan logo yang mengorbit (dekoratif; daftar lengkapnya di kartu bawah). */}
           <div className="lg-scene relative mx-auto h-72 max-w-3xl overflow-hidden rounded-[2.5rem] md:h-96">
             <OrbitScene logos={INTEGRATIONS.map((it) => ({ name: it.name, src: it.logo.src, w: it.logo.w, h: it.logo.h }))} />
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
               <div className="lg-btn flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white">
                 <TekoMark className="h-6 w-6" />
-                Tekosoe
+                Tekosue
               </div>
             </div>
           </div>

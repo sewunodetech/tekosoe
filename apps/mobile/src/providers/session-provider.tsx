@@ -14,7 +14,7 @@ interface SessionContextValue {
   isLoading: boolean;
   /** HP ini sudah pernah masuk (ID passkey tersimpan): buka app → langsung minta passkey (/unlock). */
   hasAccount: boolean;
-  /** Masuk dengan passkey Tekosoe yang sudah ada. Gagal dengan `NoCredentials` kalau belum ada. */
+  /** Masuk dengan passkey Tekosue yang sudah ada. Gagal dengan `NoCredentials` kalau belum ada. */
   signIn: () => Promise<void>;
   /** Buat passkey baru = akun baru. */
   signUp: () => Promise<void>;
@@ -83,7 +83,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         if (!SecureStore.canUseBiometricAuthentication()) return;
         const prfHex = await SecureStore.getItemAsync(PRF_STORAGE_KEY, {
           requireAuthentication: true,
-          authenticationPrompt: 'Unlock Tekosoe',
+          authenticationPrompt: 'Unlock Tekosue',
         });
         if (prfHex) {
           const restored = new MeraSigner(hexToBytes(prfHex as `0x${string}`));
@@ -121,7 +121,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signIn = async () => {
     if (env.signer === 'demo') return signInDemo();
 
-    // Tanpa ID tersimpan (sign out / install ulang / HP baru) sheet menawarkan semua passkey Tekosoe.
+    // Tanpa ID tersimpan (sign out / install ulang / HP baru) sheet menawarkan semua passkey Tekosue.
     const savedCredentialId = await SecureStore.getItemAsync(CREDENTIAL_ID_KEY);
     const result = await getPasskeyPrfOutput({
       rpId: env.passkeyDomain,
@@ -138,8 +138,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
     if (env.signer === 'demo') return signInDemo();
 
     const result = await createPasskeyWithPrfOutput({
-      rp: { id: env.passkeyDomain, name: 'Tekosoe' },
-      user: { name: 'user', displayName: 'Tekosoe User' },
+      rp: { id: env.passkeyDomain, name: 'Tekosue' },
+      user: { name: 'user', displayName: 'Tekosue User' },
       webAuthnClient: reactNativeWebAuthnClient,
     });
     await startSession(result);

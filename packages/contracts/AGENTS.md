@@ -32,7 +32,7 @@ Checklist di `docs/07-development-plan.md` › Rencana uji › Kontrak. Minimal:
 
 ## Setelah mengubah fungsi/event
 
-Jalankan `forge build && npm run abi -w @tekosoe/contracts` (menulis `packages/shared/src/abi/groupVault.ts`), perbarui `packages/indexer/config.yaml`, lalu catat alamat deploy di `docs/STATUS.md`.
+Jalankan `forge build && npm run abi -w @tekosue/contracts` (menulis `packages/shared/src/abi/groupVault.ts`), perbarui `packages/indexer/config.yaml`, lalu catat alamat deploy di `docs/STATUS.md`.
 
 ## Perintah
 

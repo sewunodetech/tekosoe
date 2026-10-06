@@ -115,7 +115,7 @@ function ProfileView({
       <View style={styles.footer}>
         <Teko mood="idle" size={48} />
         <Text variant="small" style={{ flex: 1, fontFamily: fonts.body, lineHeight: 17 }} color={colors.textMuted}>
-          Tekosoe v0.1 · made for friends who travel together
+          Tekosue v0.1 · made for friends who travel together
         </Text>
         <Pressable accessibilityRole="button" onPress={() => signOut()} style={styles.signOut}>
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13 }}>Sign out</Text>

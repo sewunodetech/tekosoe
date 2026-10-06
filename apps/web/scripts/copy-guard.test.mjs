@@ -2,10 +2,11 @@
 // Memindai src/**/*.{ts,tsx}, mengabaikan komentar, dan gagal kalau ada kata terlarang.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const SRC = new URL("../src", import.meta.url).pathname;
+const SRC = fileURLToPath(new URL("../src", import.meta.url));
 const FORBIDDEN = /\b(wallets?|gas|seed phrases?|blockchains?|tokens?|hash(?:es)?|transactions?)\b/i;
 
 function files(dir) {

@@ -1,5 +1,5 @@
 /**
- * Data negara dan kota untuk profil Tekosoe.
+ * Data negara dan kota untuk profil Tekosue.
  * Memastikan kota yang dipilih selalu sesuai dengan negaranya.
  */
 export const LOCATIONS: Record<string, string[]> = {

@@ -12,7 +12,7 @@ let handlerConfigured = false;
 let pushTokenFailureLogged = false;
 
 /**
- * Channel Android dengan suara khas Tekosoe (assets/sounds/tekosoe.wav, didaftarkan lewat plugin
+ * Channel Android dengan suara khas Tekosue (assets/sounds/tekosoe.wav, didaftarkan lewat plugin
  * expo-notifications di app.json). Suara channel tidak bisa diubah setelah dibuat, jadi channel
  * baru = id baru. apps/api mengirim push ke channel yang sama.
  */
@@ -64,7 +64,7 @@ export async function setupNotificationChannels() {
 
   try {
     await Notifications.setNotificationChannelAsync(NOTIFICATION_CHANNEL_ID, {
-      name: 'Tekosoe',
+      name: 'Tekosue',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 120, 80, 180],
       lightColor: colors.primary,

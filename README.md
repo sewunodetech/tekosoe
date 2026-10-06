@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner.png" alt="Tekosoe: one pot for the whole trip. It settles up by itself." width="100%" />
+  <img src="docs/assets/banner.png" alt="Tekosue: one pot for the whole trip. It settles up by itself." width="100%" />
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/showcase.png" alt="Five Tekosoe screens: sign in with a passkey, the shared pot, paying and asking for approval, the automatic settle-up, and a verifiable invoice" width="100%" />
+  <img src="docs/assets/showcase.png" alt="Five Tekosue screens: sign in with a passkey, the shared pot, paying and asking for approval, the automatic settle-up, and a verifiable invoice" width="100%" />
   <br/><sub>Real screens from the app in demo mode. Each one is also in <a href="docs/assets/screens/">docs/assets/screens</a>.</sub>
 </p>
 
@@ -38,7 +38,7 @@
 
 **The problem.** Rina (Indonesia), Wei (Singapore) and Jack (Australia) go to Japan together. Splitwise only *records* who owes whom. They still have to settle with three bank transfers across three countries, each slow, with fees and an exchange-rate loss. Local e-wallets don't cross borders. Crypto apps do, but they ask for seed phrases and gas tokens.
 
-**Tekosoe.** One pot for the whole trip:
+**Tekosue.** One pot for the whole trip:
 
 1. **Sign in with a passkey:** Face ID, fingerprint or the phone's PIN. No seed phrase, no wallet app, no gas token.
 2. **Everyone puts dollars in** (AUSD), from any country.
@@ -47,7 +47,7 @@
 
 **Why it only works on-chain.** The money and the settle-up logic live in a contract, not with us. No one holds the funds, settlement is final in seconds, and everyone uses the same digital dollar, so there's no FX loss between friends. Monad makes this cheap and fast enough to feel like a normal payment app.
 
-| | Splitwise | Local e-wallet | Bank transfer | **Tekosoe** |
+| | Splitwise | Local e-wallet | Bank transfer | **Tekosue** |
 | --- | :---: | :---: | :---: | :---: |
 | Tracks group spending | ✅ | Partly | ❌ | ✅ |
 | Moves real money | ❌ IOUs only | One country | ✅ | ✅ |
@@ -71,7 +71,7 @@ What happens to them today:
 - **Local apps stop at the border.** GoPay, PayNow and PayID each only work in one country, so the group has no shared way to pay.
 - **Nobody wants a crypto wallet** just to split a dinner.
 
-What Tekosoe changes for them: money goes in **before** the trip, any member can pay from the pot, and the **last day settles itself**. Nobody plays banker, nobody chases anyone, and nobody has to learn what a wallet is.
+What Tekosue changes for them: money goes in **before** the trip, any member can pay from the pot, and the **last day settles itself**. Nobody plays banker, nobody chases anyone, and nobody has to learn what a wallet is.
 
 | Segment | Why they need it | When |
 | --- | --- | --- |
@@ -112,7 +112,7 @@ sequenceDiagram
     autonumber
     actor R as Rina (ID)
     actor W as Wei (SG)
-    participant App as Tekosoe app<br/>(passkey key on device)
+    participant App as Tekosue app<br/>(passkey key on device)
     participant V as GroupVault<br/>(Monad testnet)
     participant E as Envio HyperIndex
     participant S as Settle scheduler
@@ -147,7 +147,7 @@ sequenceDiagram
 
 Each sponsor has one clear job in the product, and every integration runs for real on Monad testnet. The only simulated parts are the card network and the bank side of Top up / Cash out, and the app labels them as simulated.
 
-| Sponsor | Role in Tekosoe | Where |
+| Sponsor | Role in Tekosue | Where |
 | --- | --- | --- |
 | **Agora · AUSD** | The only money. Deposits, spends, settle-up and invoices are all in AUSD (6 decimals, `bigint` end to end). Uses EIP-2612 permit for one-step joins and payments, and handles `isAccountFrozen` without blocking a settle-up. | [`GroupVault.sol`](packages/contracts/src/GroupVault.sol), [`chain.ts`](apps/mobile/src/lib/chain.ts) |
 | **Monad** | Settlement layer. Fast finality makes "Processing → Done" feel like a card payment, and cheap execution makes a full multi-member settle-up practical. | [`packages/contracts`](packages/contracts) |
@@ -229,8 +229,8 @@ Requirements: Node 22+ (npm), [Foundry](https://getfoundry.sh), Docker (for the 
 npm install
 cp .env.example apps/mobile/.env           # fill in the values
 cp apps/api/.env.example apps/api/.env      # backend secrets (RELAXED_ENV=true to boot locally without all of them)
-npm run start -w @tekosoe/mobile
-npm test -w @tekosoe/contracts
+npm run start -w @tekosue/mobile
+npm test -w @tekosue/contracts
 ```
 
 The app runs with demo data by default. Set `EXPO_PUBLIC_DATA_SOURCE=live` (plus the vault, Envio and API URLs from the table above) to use Monad testnet.

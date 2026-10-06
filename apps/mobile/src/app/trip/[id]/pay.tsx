@@ -20,7 +20,7 @@ import { clearReceiptDraft, useReceiptDraft } from '@/features/spends/receipt-dr
 import { useAttachReceipt } from '@/features/spends/useAttachReceipt';
 import { useCreateSpend } from '@/features/spends/useCreateSpend';
 import { useTrip } from '@/features/trips/useTrip';
-import { splitEqually } from '@tekosoe/shared';
+import { splitEqually } from '@tekosue/shared';
 import { isLive } from '@/lib/env';
 import { money, parseAmountInput, sanitizeAmountInput } from '@/lib/money';
 import { TxOverlay } from '@/tx/tx-overlay';
