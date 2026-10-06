@@ -1,5 +1,5 @@
-# Gambar landing
+# Landing images
 
-`trip.jpg` dan `invoice.jpg` adalah tangkapan layar asli dashboard demo (`/trips/japan` dan `/trips/japan/invoice/jack`) pada viewport 375×812, 2x. Kalau tampilan dashboard berubah, ambil ulang: buka halamannya di viewport ponsel, sembunyikan indikator dev Next.js, lalu simpan tangkapan layarnya dengan nama yang sama.
+`trip.jpg` and `invoice.jpg` are real screenshots of the app in demo mode (Japan Trip, and Jack's invoice) at a 375×812 viewport, 1.56x (585×1267). They are the same captures as `docs/assets/screens/trip.png` and `invoice.png`, saved as JPEG for the web, and are used on the landing page ("Try the demo") and on `/get-app`. If the app changes, retake them and convert to JPEG under the same names (the code loads `.jpg`).
 
-Panel hero, "How it works", "Built with", dan CTA penutup tidak memakai gambar lagi: isinya scene 3D di `src/components/landing/three/` (lihat ADR 0010).
+The hero, "How it works", "Built with" and closing CTA panels no longer use images: they are 3D scenes in `src/components/landing/three/` (see ADR 0010).

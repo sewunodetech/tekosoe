@@ -8,7 +8,6 @@ import { Pill, Screen, Surface } from '@/components/ui/layout';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { MAX_GROUP_MEMBERS } from '@tekosue/shared';
-import { MAX_GROUP_MEMBERS } from '@tekosue/shared';
 
 import { QueryState } from '@/components/query-state';
 import { colors, fonts } from '@/constants/theme';

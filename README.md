@@ -56,7 +56,7 @@
 | Needs crypto knowledge | No | No | No | **No, just a passkey** |
 | Someone holds your money | n/a | Yes | Yes | **No.** The contract holds it, your key stays on your phone |
 
-> **Demo video:** _link coming 11 Oct_ · **Android APK:** [download (preview build)](https://expo.dev/artifacts/eas/qw2PmlQ3C_PuGI3Dg0P4pUvpT2aaYSVgUUblbKcJzt8.apk)
+> **Demo video:** _link coming 11 Oct_ · **Website:** [www.tekosue.xyz](https://www.tekosue.xyz) · **Android APK:** [get the app](https://www.tekosue.xyz/get-app) ([EAS build](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/542c7b62-da5e-4809-88f2-d966ed55f47e))
 
 ---
 
@@ -86,8 +86,9 @@ What Tekosue changes for them: money goes in **before** the trip, any member can
 The judge path through the app (each screen is a real route in `apps/mobile`):
 
 ```
-Welcome → Sign in (passkey) → Home → Japan Trip → Pay from pot → Request approval
-  → Rina approves on her phone → pot runs out → Preview settle-up → See your invoice
+Welcome → Sign in (passkey) → Home → New trip → Share invite → Friend joins → Pay from pot
+  → Request approval → friend approves → trip ends → settles itself → See your invoice
+  → scan the QR → www.tekosue.xyz checks the invoice against the trip record
 ```
 
 | Step | What you'll see |
@@ -97,9 +98,19 @@ Welcome → Sign in (passkey) → Home → Japan Trip → Pay from pot → Reque
 | **Join + put in** | Choose a deposit and a **safety net** (the most the trip may pull from you at settle-up), in one confirmation. |
 | **Pay from pot** | Amount, who it was for, optional receipt photo. Above the limit → a friend approves on their phone. |
 | **Trip** | Live pot balance, activity feed, "who owes whom" preview, all read from the Envio indexer. |
-| **Settled** | Each member's invoice with Paid / Refunded / Due, a **Pay** button for debts, PDF export, and a QR code anyone can verify on the web. |
+| **Settled** | Each member's invoice with Paid / Refunded / Due, a **Pay** button for debts, PDF export, and a QR code anyone can verify on the web. Someone who still owes sees "You still owe $X" and can't start or join a new trip until it's paid. |
+| **Invite link on the web** | `www.tekosue.xyz/j/<code>` shows the real trip (name, members, end date, pot) before the app is installed, then opens the app. |
+| **Invoice check on the web** | `www.tekosue.xyz/v/<number>` rebuilds the invoice from the indexed settle-up and says whether it matches. No sign-in needed. |
 
-**Install on Android:** [download the APK](https://expo.dev/artifacts/eas/qw2PmlQ3C_PuGI3Dg0P4pUvpT2aaYSVgUUblbKcJzt8.apk), or open the [build page](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/6d4b80d7-94ad-4a01-9d34-a92b4a871e77) on your phone and scan the QR code. It runs live on Monad testnet; sign in with a passkey (Android needs a screen lock, and Google Password Manager stores the passkey).
+**If someone doesn't pay.** Whatever a safety net couldn't cover at settle-up stays as a bill on their invoice. Nothing is frozen and the money stays theirs, but until the bill is paid the contract won't let them start or join another trip, the app shows what they owe with a **Pay** button, and they get a reminder once a day. Trips they're already in keep working.
+
+<p align="center">
+  <img src="docs/assets/screens/debt-home.png" alt="Home: You still owe $10.00 from Bali Weekend, with a Pay $10.00 button" width="230" />
+  &nbsp;
+  <img src="docs/assets/screens/debt-new-trip.png" alt="New trip: blocked with You still owe $10.00. Pay it first, then you can start a new trip" width="230" />
+</p>
+
+**Install on Android:** open [www.tekosue.xyz/get-app](https://www.tekosue.xyz/get-app) on your phone, or the [EAS build page](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/542c7b62-da5e-4809-88f2-d966ed55f47e) and scan its QR code. It runs live on Monad testnet; sign in with a passkey (Android needs a screen lock, and Google Password Manager stores the passkey).
 
 Run it yourself: see [Getting started](#-getting-started).
 
@@ -138,6 +149,8 @@ sequenceDiagram
 - **Invites can't be replayed or front-run.** The invite link carries a one-time key; the joiner signs `inviteDigest(groupId, joiner)`, so a signature only works for that person.
 - **One passkey confirmation per action.** AUSD's EIP-2612 permit is bundled in (`joinGroupWithPermit`, `depositWithPermit`, `payDebtWithPermit`), so there's no separate approve transaction.
 - **No gas token for users.** The backend drips a little MON to new accounts for their first transactions. It holds gas keys only, never user keys or user funds.
+- **Unpaid bills block new trips, nothing gets frozen.** Whatever a safety net couldn't cover becomes a bill. Until it's paid, the contract refuses to let that person start or join another trip (`OutstandingDebt`), and they get a daily reminder. Their money is never frozen and the trips they're already in keep working.
+- **Anyone can check an invoice.** The invoice QR opens `www.tekosue.xyz/v/<number>`, which rebuilds the invoice from the indexed settle-up with the same code the api uses and compares fingerprints. No sign-in, no trust in our server.
 - **Money lives only on-chain.** Balances, spends and settlement come from the contract via Envio. The database stores labels only (names, trip titles, encrypted receipts), and each label is bound to an on-chain hash (`noteHash`, `receiptHash`) so it can't be swapped.
 - **No crypto words in the UI.** Users see "pot", "safety net", "receipt", "invoice" and dollar amounts. Never "wallet", "gas", "token" or "hash".
 
@@ -152,7 +165,7 @@ Each sponsor has one clear job in the product, and every integration runs for re
 | **Agora · AUSD** | The only money. Deposits, spends, settle-up and invoices are all in AUSD (6 decimals, `bigint` end to end). Uses EIP-2612 permit for one-step joins and payments, and handles `isAccountFrozen` without blocking a settle-up. | [`GroupVault.sol`](packages/contracts/src/GroupVault.sol), [`chain.ts`](apps/mobile/src/lib/chain.ts) |
 | **Monad** | Settlement layer. Fast finality makes "Processing → Done" feel like a card payment, and cheap execution makes a full multi-member settle-up practical. | [`packages/contracts`](packages/contracts) |
 | **Mera (Category Labs)** | The entire account layer: passkey → PRF → on-device secp256k1 signing session → viem account. No other wallet, no extension, no seed phrase, no custody. | [`src/wallet`](apps/mobile/src/wallet), [ADR 0003](docs/decisions/0003-mera-passkey-api.md) |
-| **Envio HyperIndex** | The app's read model for money: pot balance, activity feed, positions and "who owes whom" all come from indexed `GroupVault` + AUSD events. | [`packages/indexer`](packages/indexer), [`envio.ts`](apps/mobile/src/lib/envio.ts) |
+| **Envio HyperIndex** | The read model for money: pot balance, activity feed, positions and "who owes whom" in the app; the live invite page and invoice verification on the web; and the event source for push notifications and debt reminders in the api. | [`packages/indexer`](packages/indexer), [`envio.ts`](apps/mobile/src/lib/envio.ts), [`apps/web/src/data/live`](apps/web/src/data/live), [`envioSource.ts`](apps/api/src/modules/notify/envioSource.ts) |
 
 ---
 
@@ -164,8 +177,9 @@ Each sponsor has one clear job in the product, and every integration runs for re
 | **AUSD (Agora)** | [`0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC`](https://testnet.monadvision.com/address/0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC) |
 | **Envio GraphQL** | https://graphql.mulalabs.biz.id/v1/graphql |
 | **API** | https://api.mulalabs.biz.id/health |
+| **Website** | https://www.tekosue.xyz (invite links `/j/…`, invoice checks `/v/…`, download page `/get-app`) |
 
-**Real transactions you can open right now.** Every step of the trip lifecycle, executed against `GroupVault` v1 and decoded from the transaction input:
+**Real transactions you can open right now.** Every step of the trip lifecycle, executed against the first `GroupVault` deployment (`0x1467…B7ee`, same flows; the current contract adds the unpaid-debt rule) and decoded from the transaction input. Deploy of the current contract: [`0x5bdf1228…d6a6`](https://testnet.monadvision.com/tx/0x5bdf122866c38f61110388919cca9194cd66a1be887e51b43fd3bf462fd7d6a6).
 
 | Step | Contract call | Transaction |
 | --- | --- | --- |
@@ -179,11 +193,11 @@ Each sponsor has one clear job in the product, and every integration runs for re
 
 **What's built**
 
-- [x] `GroupVault` v1 deployed: signed invites, permit flows, approvals, disputes, receipts, settle-up, debts and credits. 26 Foundry tests including fuzzed balance invariants.
-- [x] Envio indexer hosted (12 handlers, 17 events), data matches the contract.
-- [x] API deployed: settle scheduler, MON drip, SIWE login, trip/spend labels bound to on-chain hashes, invoices, push tokens.
-- [x] Mobile app: every screen of the final design, live mode against testnet, invoices with PDF + verifiable QR, invite deep links, activity feed, top up / cash out.
-- [x] Web companion: invoice verification, invite links, passkey domain files.
+- [x] `GroupVault` deployed: signed invites, permit flows, approvals, disputes, receipts, settle-up, debts and credits, and unpaid debt blocking new trips. 28 Foundry tests including fuzzed balance invariants.
+- [x] Envio indexer hosted (12 handlers, 17 events), data matches the contract; it carries what's needed to rebuild every invoice.
+- [x] API deployed: settle scheduler, MON drip, SIWE login, trip/spend labels bound to on-chain hashes, invoices, and push notifications + daily debt reminders driven by Envio. 55 tests.
+- [x] Mobile app: every screen of the final design, live mode against testnet, invoices with PDF + verifiable QR, invite deep links, activity feed, top up / cash out, "You still owe" guard on new trips.
+- [x] Website on `www.tekosue.xyz`: landing page, download page, live invite pages, invoice verification that rebuilds the invoice from the indexer (verified against real testnet invoices), passkey domain files.
 - [ ] In progress: Mera passkey sign-in verified in a release build on physical iOS and Android phones (the code path is in [`src/wallet`](apps/mobile/src/wallet); web and Expo Go fall back to an on-device demo key), receipts verified live on testnet (encryption, upload and `attachReceipt` are built, see [ADR 0008](docs/decisions/0008-encrypted-receipts.md)), EAS release build.
 
 Full progress: [`docs/STATUS.md`](docs/STATUS.md).
@@ -204,13 +218,16 @@ flowchart LR
     UI -- labels, receipts --> API[apps/api<br/>Express]
     API --> DB[(Neon Postgres<br/>labels only)]
     API -- settle on end date,<br/>MON drip --> Vault
-    Web[apps/web<br/>Next.js] -- verify invoice --> Envio
+    Envio -- new events --> API
+    API -- push + debt reminders --> Phone
+    Web[apps/web · www.tekosue.xyz<br/>static Next.js] -- trip data, settle records --> Envio
+    Web -- shared invoice, trip name --> API
 ```
 
 ```
 apps/mobile         Expo (React Native) + Expo Router: every user interaction
-apps/web            Next.js: invoice verification, invite links, passkey domain files
-apps/api            Express in Docker: settle scheduler, MON drip, metadata API, push
+apps/web            Static Next.js on Vercel (www.tekosue.xyz): landing, download page, live invite links, invoice verification, passkey domain files
+apps/api            Express in Docker: settle scheduler, MON drip, metadata API, invoices, push notifications from Envio
 packages/contracts  Foundry: GroupVault.sol
 packages/indexer    Envio HyperIndex: the read model for money
 packages/shared     ABI, addresses, chain, money helpers, metadata schemas (zod)
@@ -257,6 +274,15 @@ npm run docker:down   # stop
 | indexer | http://localhost:9898/healthz |
 
 Port 8080 clashes with `envio dev`, so stop that stack first (`envio stop`). Host ports and the Hasura secret can be overridden in a root `.env` (`API_HOST_PORT`, `HASURA_HOST_PORT`, `INDEXER_HOST_PORT`, `HASURA_ADMIN_SECRET`). Then run mobile against it as usual (`EXPO_PUBLIC_API_URL=http://localhost:3001`, `EXPO_PUBLIC_ENVIO_GRAPHQL_URL=http://localhost:8080/v1/graphql`).
+
+### Website
+
+```bash
+npm run dev -w @tekosue/web                                # landing + demo dashboard (next dev)
+npm run build -w @tekosue/web && npm run preview -w @tekosue/web   # static export with the /j and /v rewrites
+```
+
+`next dev` only knows the placeholder shells `/j/_` and `/v/_`; use the preview server to open real invite codes and invoice numbers. Point it at your own backend with `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_ENVIO_GRAPHQL_URL` at build time. Production runs on Vercel with [`apps/web/vercel.json`](apps/web/vercel.json).
 
 ### Brand assets
 
@@ -306,10 +332,11 @@ What we will watch: trips started, the share of invitees who actually join, and 
 
 | | Who | Built |
 | --- | --- | --- |
-| <img src="https://github.com/kikik27.png" width="48" alt="" /> | **Kyy** · [@kikik27](https://github.com/kikik27) | Product, the mobile app, the `GroupVault` contract, the Envio indexer, the web companion |
+| <img src="https://github.com/kikik27.png" width="48" alt="" /> | **Kyy** · [@kikik27](https://github.com/kikik27) | Product, the mobile app, the `GroupVault` contract, the Envio indexer, live invite and invoice pages on the web |
+| <img src="https://github.com/artomily.png" width="48" alt="" /> | **Rakyavara Artomily** · [@artomily](https://github.com/artomily) | The website: landing page with the 3D Teko scenes, the read-only demo dashboard, and the app's design system ported to the web |
 | <img src="https://github.com/Dapoodap.png" width="48" alt="" /> | **MasDapa** · [@Dapoodap](https://github.com/Dapoodap) | The backend API: auth, gas drip, settle-up scheduler, profiles, receipts, push |
 
-Full history: [contributors](https://github.com/sewunodetech/tekosoe/graphs/contributors).
+Full history: [contributors](https://github.com/sewunodetech/tekosue/graphs/contributors).
 
 ## 🤖 Use of AI tools
 

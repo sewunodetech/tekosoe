@@ -68,6 +68,7 @@ A story is done when every acceptance criterion passes on Monad testnet. FR numb
 
 - [ ] The bill shows the amount and who the money will go to
 - [ ] Payment goes straight to the members who are still owed
+- [ ] While the bill is unpaid, starting or joining a new trip is blocked with a clear "You still owe $X" message and a Pay button (ADR 0013)
 
 ## Epic 5 — Real-time activity (P1)
 
@@ -96,3 +97,4 @@ A story is done when every acceptance criterion passes on Monad testnet. FR numb
 **US-14. As a member, I want to be notified about new payments, approval requests and settle-up results.** (FR-18)
 
 - [ ] Notifications reach the members involved
+- [ ] A member with an unpaid bill gets a reminder at most once a day (ADR 0014)

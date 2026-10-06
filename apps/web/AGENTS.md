@@ -17,7 +17,7 @@ Tugasnya:
 
 1. **Landing page + halaman unduh `/get-app`** (gaya landing, di luar bingkai ponsel; APK dari `NEXT_PUBLIC_ANDROID_APK_URL`) **+ dashboard pratinjau hanya-baca** dengan data demo (`/`, `/trips`, `/card`, `/profile`, …). Tanpa login, tanpa aksi uang — tombol aksi memakai `AppAction` (`components/ui/app-sheet.tsx`) yang membuka sheet "buka di app".
 2. **Verifikasi invoice dari QR** (`/v/[number]`) — live (W-3): `components/verify-view.tsx` membaca nomor dari path dan kode akses dari `?token=`, membangun ulang invoice dari Envio dengan fungsi `@tekosue/shared`, lalu mencocokkan payload + sidik jari dari api. Angka yang tampil selalu dari data on-chain.
-3. **Link undangan** (`/j/[code]`) yang membuka app (deep link `tekosoe://`, fallback ke `/get-app`) — live: `components/invite-view.tsx` menampilkan trip nyata (api meta + Envio); hanya `groupId` yang dikirim, rahasia undangan tidak pernah keluar dari browser.
+3. **Link undangan** (`/j/[code]`) yang membuka app (deep link `tekosue://`, fallback ke `/get-app`) — live: `components/invite-view.tsx` menampilkan trip nyata (api meta + Envio); hanya `groupId` yang dikirim, rahasia undangan tidak pernah keluar dari browser.
 4. **File asosiasi domain untuk passkey** — `/.well-known/apple-app-site-association` dan `/.well-known/assetlinks.json` di domain yang sama dengan `EXPO_PUBLIC_PASSKEY_DOMAIN`. Tanpa ini passkey native tidak jalan.
 
 Bukan tempat backend: penjadwal, gas, dan database ada di `apps/api`. Web tidak pernah menulis ke api/database.

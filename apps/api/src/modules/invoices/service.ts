@@ -5,8 +5,8 @@ import {
   computeInvoiceHash,
   initialInvoiceStatus,
   invoiceNumber,
-  type InvoiceSettlement,
-} from "@tekosoe/shared";
+  invoiceSettlementsFromOutcome,
+} from "@tekosue/shared";
 import type { AppDeps } from "../../context";
 import type { InvoiceRow, NewInvoice } from "../../db/repos";
 import { checksumAddress } from "../../lib/address";

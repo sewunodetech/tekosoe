@@ -25,7 +25,7 @@ In the short term we want to win Monad Metropolis. In the long term we want to t
 | --- | --- | --- |
 | Top 3 in the Consumer Products & Payments track | Winners announced 3 Nov 2026 | Hackathon |
 | Win the Agora Cross-Border bounty | Every bounty requirement is met and visible in the demo | Hackathon |
-| Win the supporting bounties (Mera UX, Mera PRF, Envio, Alchemy) | Real testnet integrations, each explained per sponsor in the README | Hackathon |
+| Win the supporting bounties (Mera UX, Mera PRF, Envio; Alchemy was dropped, ADR 0014) | Real testnet integrations, each explained per sponsor in the README | Hackathon |
 | Prove everyday users can use it unaided | One non-crypto tester completes a first payment with no help | Hackathon |
 | Get a residency invitation and ecosystem support | Invitation from the Monad Foundation | After the hackathon |
 | Be ready for real money | Audited contract, mainnet deployment, fiat on-ramp and off-ramp | After the hackathon |

@@ -1,26 +1,26 @@
-# 0013 — Utang yang belum lunas menghalangi trip baru
+# 0013 — Unpaid debt blocks new trips
 
 - Status: accepted (6 Oct 2026)
 - Date: 2026-10-06
 
 ## Context
 
-Di GroupVault v1 (ADR 0005), kekurangan yang tidak tertutup safety net saat settle-up menjadi `debt`. Debt itu bisa dibayar kapan saja lewat `payDebt`, tetapi tanpa batas waktu dan tanpa konsekuensi: anggota yang tidak pernah membayar tetap bisa membuat dan ikut trip lain, sementara anggota yang punya `credit` menunggu tanpa kepastian.
+In GroupVault v1 (ADR 0005), a shortfall that the safety net doesn't cover at settle-up becomes `debt`. It can be paid at any time with `payDebt`, but with no deadline and no consequence: a member who never pays can still start and join other trips, while members holding `credit` wait without any certainty.
 
-Membekukan saldo (fitur freeze AUSD) bukan pilihan: kemampuan itu milik Agora sebagai penerbit untuk kepatuhan hukum, kontrak kita tidak punya izinnya, dan memakainya melanggar aturan "tanpa custody". Kontrak justru dirancang supaya akun yang dibekukan Agora tidak memacetkan settle-up.
+Freezing balances (AUSD's freeze feature) is not an option: that power belongs to Agora as the issuer, for legal compliance; our contract has no such permission, and using it would break the "no custody" rule. The contract is in fact designed so that an account frozen by Agora can't block a settle-up.
 
 ## Decision
 
-- `GroupVault` menyimpan `outstandingDebt[address]` = total `debt` anggota itu di semua trip vault ini. Bertambah di `_pullDebtors` (sisa yang tidak bisa ditarik), berkurang di `payDebt` / `payDebtWithPermit`.
-- `createGroup`, `joinGroup`, dan `joinGroupWithPermit` revert dengan `OutstandingDebt()` selama `outstandingDebt[msg.sender] > 0`.
-- Trip yang sudah diikuti **tidak** terpengaruh: setor, bayar, menyetujui, keberatan, dan settle tetap jalan. Yang dihalangi hanya trip baru.
-- View baru `outstandingDebtOf(address)`. Tidak ada event baru: Envio sudah punya `Member.debt` per trip.
-- App menahan tombol "Create trip" dan "Join" lebih dulu (Envio: `Member` dengan `debt > 0`) dan menampilkan "You still owe $X" dengan tombol Pay ke invoice trip tersebut. Error kontrak dipetakan ke pesan yang sama di `tx/errors.ts`.
-- Invariant baru (diuji, termasuk fuzz): `outstandingDebtOf(m) == Σ debt[g][m]`.
+- `GroupVault` keeps `outstandingDebt[address]` = the member's total `debt` across every trip in this vault. It grows in `_pullDebtors` (whatever couldn't be pulled) and shrinks in `payDebt` / `payDebtWithPermit`.
+- `createGroup`, `joinGroup` and `joinGroupWithPermit` revert with `OutstandingDebt()` while `outstandingDebt[msg.sender] > 0`.
+- Trips the member already belongs to are **not** affected: deposits, payments, approvals, disputes and settle-up keep working. Only new trips are blocked.
+- New view `outstandingDebtOf(address)`. No new event: Envio already has `Member.debt` per trip.
+- The app blocks "Create trip" and "Join" up front (Envio: `Member` with `debt > 0`), shows "You still owe $X" with a Pay button to that trip's invoice on Home, New trip, the invite screen and the settle-up screen, and maps the contract error to the same message in `tx/errors.ts`.
+- New invariant (tested, including the fuzz test): `outstandingDebtOf(m) == Σ debt[g][m]`.
 
 ## Consequences
 
-- **Kontrak baru harus di-deploy** (v1 tidak bisa di-upgrade). Trip di kontrak lama tetap ada on-chain tetapi tidak terlihat dari app setelah alamat diganti; itu hanya data uji testnet.
-- Setelah deploy: perbarui `GROUP_VAULT_TESTNET_ADDRESS` + `GROUP_VAULT_TESTNET_START_BLOCK` di `packages/shared/src/chain.ts`, `packages/indexer/config.yaml`, env api/indexer/mobile (`GROUP_VAULT_ADDRESS`, `ENVIO_GROUP_VAULT_ADDRESS`, `ENVIO_START_BLOCK`, `EXPO_PUBLIC_GROUP_VAULT_ADDRESS`), lalu sinkron ulang Envio dari blok deploy (sekalian dengan perubahan skema ADR 0012).
-- Utang lintas trip menumpuk: membayar satu trip tidak cukup kalau masih ada utang di trip lain.
-- Debt tetap tidak punya batas waktu; yang berubah hanya konsekuensinya.
+- **A new contract had to be deployed** (v1 can't be upgraded): `0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0`, block 68690383. Trips on the old contract stay on-chain but aren't shown by the app; they were testnet test data, and the matching off-chain data was cleared (backup kept by the team).
+- Addresses were updated in `packages/shared/src/chain.ts`, `packages/indexer/config.yaml`, the api/indexer/mobile env and the EAS env, and Envio was resynced (together with the ADR 0012 schema change).
+- Debt adds up across trips: paying one trip isn't enough while another still has debt.
+- Debt still has no deadline; only its consequence changed. Members who owe get a daily reminder (ADR 0014).

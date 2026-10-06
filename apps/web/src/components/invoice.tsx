@@ -52,25 +52,6 @@ export function InvoiceLines({ invoice }: { invoice: Invoice }) {
   );
 }
 
-/** QR asli yang membuka halaman verifikasi `https://tekosue.xyz/v/<nomor>`. */
-export async function InvoiceQr({ number, size = 84 }: { number: string; size?: number }) {
-  const svg = await QRCode.toString(`https://${verifyPath(number)}`, {
-    type: "svg",
-    margin: 0,
-    errorCorrectionLevel: "M",
-    color: { dark: "#1d2426", light: "#0000" },
-  });
-  return (
-    <span
-      role="img"
-      aria-label={`QR code that opens ${verifyPath(number)}`}
-      className="block shrink-0 rounded-tile bg-white p-2 [&>svg]:h-full [&>svg]:w-full"
-      style={{ width: size, height: size }}
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
-  );
-}
-
 /** Kartu "Scan to verify". */
 export function VerifyCard({ label, children }: { label: string; children?: React.ReactNode }) {
   return (

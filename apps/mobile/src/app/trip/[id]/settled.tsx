@@ -9,7 +9,7 @@ import { Icon } from '@/components/ui/icon';
 import { InfoBox, Pill, Screen, Surface } from '@/components/ui/layout';
 import { Text } from '@/components/ui/text';
 import { combine, QueryState } from '@/components/query-state';
-import { colors, fonts, radius } from '@/constants/theme';
+import { colors, fonts } from '@/constants/theme';
 import type { Settlement, Trip } from '@/data/types';
 import { useSettlement } from '@/features/trips/useSettlement';
 import { useOutstandingDebt } from '@/features/trips/useOutstandingDebt';
@@ -97,15 +97,6 @@ function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement 
           : `${short.join("'s and ")}'s $10 came from their safety nets. Nothing left to pay.`}
       </InfoBox>
 
-      {/* Tautan demo untuk varian invoice di HP anggota lain (I2, I3). */}
-      {!isLive && <View style={styles.demoRow}>
-        <Link href={`/trip/${trip.id}/invoice?who=wei`} asChild>
-          <Button label="Demo: Wei's invoice" variant="dashed" style={styles.demo} />
-        </Link>
-        <Link href={`/trip/${trip.id}/invoice?who=rina`} asChild>
-          <Button label="Demo: Rina's invoice" variant="dashed" style={styles.demo} />
-        </Link>
-      </View>}
     </Screen>
   );
 }
@@ -126,14 +117,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  demoRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  demo: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: radius.input,
   },
 });

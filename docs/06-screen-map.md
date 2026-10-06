@@ -46,7 +46,7 @@ On the end date the scheduler calls `settle`. Every member then gets an invoice 
 
 | Screen | Purpose | Comes from | Leads to | Contract & data |
 | --- | --- | --- | --- | --- |
-| 13 Settled | The settle-up result: what comes back to you, every member's position, where each shortfall was covered from. Confetti and Teko "cheer" | S1 (Preview settle-up) | See your invoice → I1; Plan another trip → 04 | `settle`; Envio `Settled`, `Pulled`, `Refunded` |
+| 13 Settled | The settle-up result: what comes back to you, every member's position, where each shortfall was covered from. Confetti and Teko "cheer"; when you still owe, "You still owe $X" with Teko "worry" and a Pay button (ADR 0013). Only reachable once the trip is settled | 07 (See how it evened out), a settle-up notification | See your invoice / Pay $X → I1; Plan another trip → 04 (hidden while you owe) | `settle`; Envio `Settled`, `Pulled`, `Refunded` |
 | I1 Invoice · Refunded | Jack's invoice: deposits, his share of each payment, a $20 refund. Every line links to its transaction; a QR code for verification | 13 | Line → Monad explorer; Save as PDF; Share; back → 13 | Envio (numbers), database `invoices` (number, status, hash) |
 | I2 Invoice · Due | The variant on Wei's phone: the safety net covered only $5 of $10, so $5 is still due | 13 (variant) | Pay $5.00 → I3 (status after paying); back → 13 | `payDebtWithPermit` → `DebtPaid`; status turns Paid |
 | I3 Invoice · Paid | Rina's invoice: $10 short, fully covered by her safety net, nothing to pay | 13; I2 after Pay | Save as PDF; Share; back → 13 | Envio `Pulled`; database `invoices` |
@@ -57,7 +57,7 @@ Screens for when things leave the happy path. Each one always has a way back to 
 
 | Screen | Purpose | Comes from | Leads to | Contract & data |
 | --- | --- | --- | --- | --- |
-| S1 Pot is empty | The pot is at $0 after the train tickets were approved: payments and the card pause. Teko "sleep" | 10 (Approve) | Add money to the pot → 08; Preview settle-up → 13; back → 03 | Envio: pot = 0 |
+| S1 Pot is empty | The pot is at $0 after the train tickets were approved: payments and the card pause. Teko "sleep" | 10 (Approve) | Add money to the pot → 08; back → 03 | Envio: pot = 0 |
 | S2 Waiting for approval | Status of the $150 request: who has seen it and who hasn't; the money stays in the pot. Teko "think" | 09 (Request approval) | Demo: open on Rina's phone → 10; Nudge → S2; Cancel request → 07; back → 07 | Envio `SpendRequested`; database `spend_reviews` (Seen); push |
 | S3 Request declined | Wei declined with a note; no money left the pot. Teko "sad" | 10 (Decline) | Change the request → 09; Back to the trip → 07 | Envio `SpendRejected`; database `spend_reviews` (note) |
 | S4 Offline | The taxi payment failed because the phone was offline, with a clear "you weren't charged twice" | 12 (Tokyo Taxi) | Try again → 07; Back to the card → 12 | Nothing was sent; no on-chain change |

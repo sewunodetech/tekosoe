@@ -26,6 +26,14 @@ export const INTEGRATIONS: {
   { name: "Envio", role: "Keeps balances and the activity feed up to date as friends spend.", logo: { src: "/sponsors/envio.svg", alt: "Envio", w: 390, h: 94 } },
 ];
 
+/** Kolom kartu "Built with" di layar lebar, sesuai jumlah teknologi. */
+const GRID_COLS: Record<number, string> = {
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+  5: "lg:grid-cols-5",
+  6: "lg:grid-cols-6",
+};
+
 /** Logo sponsor satu warna (hitam) supaya landing tetap dua warna. Tinggi diatur lewat `className`. */
 function SponsorLogo({ logo, className }: { logo: (typeof INTEGRATIONS)[number]["logo"]; className: string }) {
   return <Image src={logo.src} alt={logo.alt} width={logo.w} height={logo.h} unoptimized className={`w-auto brightness-0 ${className}`} />;
@@ -79,12 +87,14 @@ export function BuiltWith() {
             </div>
           </div>
           <div className="lg-wire" aria-hidden="true" />
-          {/* Rel mendatar (hanya di layar lebar): titik mengalir dari tengah ke kedua ujung */}
+          {/* Rel mendatar (hanya di layar lebar): titik mengalir dari tengah ke kedua ujung. Ujungnya di
+              tengah kartu pertama dan terakhir, jadi margin = setengah lebar satu kolom (50% / jumlah kartu). */}
           <div className="relative hidden lg:block" aria-hidden="true">
-            <div className="lg-bus" />
+            <div className="lg-bus" style={{ marginInline: `${50 / INTEGRATIONS.length}%` }} />
           </div>
 
-          <ul className="mx-auto grid max-w-md grid-cols-1 lg:max-w-none lg:grid-cols-5 lg:gap-4">
+          {/* Satu kolom per teknologi di layar lebar (kelas statis supaya Tailwind menghasilkannya). */}
+          <ul className={`mx-auto grid max-w-md grid-cols-1 lg:max-w-none lg:gap-4 ${GRID_COLS[INTEGRATIONS.length] ?? "lg:grid-cols-4"}`}>
             {INTEGRATIONS.map((it, i) => (
               <li key={it.name} className="flex flex-col">
                 {/* Di ponsel kartu pertama sudah tersambung ke simpul pusat lewat kabel di atas. */}
@@ -92,7 +102,7 @@ export function BuiltWith() {
                 <div className="lg-glass flex flex-1 flex-col rounded-3xl p-6 text-center lg:text-left">
                   <SponsorLogo logo={it.logo} className="mx-auto mb-5 h-7 lg:mx-0" />
                   <h3 className="text-2xl font-semibold tracking-tight">{it.name}</h3>
-                  {/* Baris "by" tetap mengambil tempat di layar lebar supaya kelima kartu sejajar. */}
+                  {/* Baris "by" tetap mengambil tempat di layar lebar supaya semua kartu sejajar. */}
                   <p className={`mt-1 min-h-5 text-sm font-medium text-teal ${it.by ? "" : "hidden lg:block"}`}>{it.by ? `by ${it.by}` : "\u00a0"}</p>
                   <p className="mt-4 text-sm leading-relaxed text-gray-600">{it.role}</p>
                   {it.planned && (

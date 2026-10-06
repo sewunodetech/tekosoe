@@ -15,7 +15,8 @@ Everything we planned, decided and built, in one place. Start with the PRD if yo
 | [../apps/mobile/ROADMAP.md](../apps/mobile/ROADMAP.md) | The detailed mobile roadmap: architecture, data needed from other teams, work packages M0–M12 |
 | [user-testing.md](user-testing.md) | The 15-minute session script, tasks, observation sheet and follow-up questions for testing with non-crypto users |
 | [STATUS.md](STATUS.md) | Live progress: what's done, contract addresses and open blockers |
-| [decisions/](decisions/) | Architecture decision records (ADRs): what we chose and why |
+| [decisions/](decisions/) | Architecture decision records (ADRs 0001–0014): what we chose and why. Latest: [0011 rebrand + www.tekosue.xyz](decisions/0011-rebrand-tekosue.md), [0012 live invite + invoice verification](decisions/0012-web-static-shell.md), [0013 unpaid debt blocks new trips](decisions/0013-debt-blocks-new-trips.md), [0014 notifications from Envio](decisions/0014-notifications-from-envio.md) |
+| [../apps/api/docs/API.md](../apps/api/docs/API.md) | The api reference: endpoints, flows, credentials and deployment |
 | [assets/](assets/) | Images used by the root README |
 
 The UI design lives on the "Tekosue — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.
