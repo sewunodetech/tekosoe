@@ -157,18 +157,6 @@ export default async function GetAppPage() {
               </div>
             </div>
           </div>
-
-          <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left" role="note">
-            <Info className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
-            <p className="text-sm leading-relaxed text-gray-800">
-              <span className="font-semibold">This is a preview build</span> made for the Monad Metropolis hackathon. It runs with test dollars, so no real money
-              moves. Not ready to install?{" "}
-              <Link href="/trips" className="font-medium underline underline-offset-2">
-                Look around the demo
-              </Link>{" "}
-              first.
-            </p>
-          </div>
         </section>
       </main>
       <Footer base="/" />
