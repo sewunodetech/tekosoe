@@ -56,4 +56,3 @@ export const repo: TripRepository = demoRepo;
 export const DEMO_TRIP_IDS = Object.keys(demo.trips);
 /** Pasangan (trip, spend) yang valid di data demo. */
 export const DEMO_SPEND_PARAMS = Object.values(demo.spends).map((s) => ({ id: s.tripId, spendId: s.id }));
-export const DEMO_INVOICE_NUMBERS = Object.values(demo.invoices).map((i) => i.number);
