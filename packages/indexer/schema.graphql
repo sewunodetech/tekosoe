@@ -93,7 +93,6 @@ type BalanceActivity {
   amount: BigInt! # bersih (TopUp sudah dikurangi pengembalian)
   timestamp: BigInt!
   txHash: String!
-  remaining: BigInt # Pulled → remainingDebt, Refunded → remainingCredit; kosong untuk event lain
 }
 
 # Penanda per akun: Top up terakhir, supaya pengembalian ke faucet mengurangi baris yang benar.
