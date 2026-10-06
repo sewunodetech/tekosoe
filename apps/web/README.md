@@ -6,7 +6,7 @@ The public website at **[www.tekosue.xyz](https://www.tekosue.xyz)**: a static N
 | --- | --- |
 | `/` | Landing page with cartoon 3D scenes (ADR 0010) |
 | `/get-app` | Download page: Android APK, a QR code for desktop visitors, install steps |
-| `/j/<code>` | Invite link. Shows the real trip (name, members, end date, pot) from Envio + the api, then opens the app with `tekosoe://invite/<code>`. Only the group id leaves the browser; the invite secret never does |
+| `/j/<code>` | Invite link. Shows the real trip (name, members, end date, pot) from Envio + the api, then opens the app with `tekosue://invite/<code>`. Only the group id leaves the browser; the invite secret never does |
 | `/v/<number>?token=…` | Invoice check. Rebuilds the invoice from the indexed settle-up with the same shared code as the api and compares it with the shared invoice: "matches", "doesn't match", "invalid link" or "can't check right now" |
 | `/trips`, `/card`, `/profile`, … | A read-only dashboard preview with demo data (ADR 0004) |
 | `/.well-known/*` | Passkey and App Links domain files for the Android/iOS app |

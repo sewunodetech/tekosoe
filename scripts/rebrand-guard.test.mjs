@@ -16,9 +16,6 @@ const EXCLUDED_PATHS = [
 
 /** Identifier lama yang sengaja dipertahankan (lihat tabel di ADR 0011). */
 const ALLOWED = [
-  "tekosoe://", // skema deep link app terpasang
-  'scheme": "tekosoe"',
-  "scheme: tekosoe",
   'slug": "tekosoe"', // proyek EAS
   "kyy27/tekosoe", // akun/proyek EAS
   "projects/tekosoe",
@@ -29,17 +26,11 @@ const ALLOWED = [
   "tekosoe-default",
   "'tekosoe']",
   "tekosoe_", // kunci penyimpanan perangkat
-  "tekosoe:invoice-share", // audience kode akses invoice yang sudah terbit
-  "Tekosoe receipts", // domain kriptografi struk
-  "tekosoe/trip-key-wrap",
+  "tekosoe/trip-key-wrap", // label internal enkripsi struk
   "tekosoe/receipt/",
-  "Sign in to Tekosoe.", // pernyataan SIWE build lama
   "tekosoe-indexer",
-  "Tekosoe — Dokumen Produk", // judul dokumen live di Claude Docs
-  "Tekosoe_-_Dokumen_Produk",
-  "Tekosoe — Wireframe", // judul canvas desain
-  "sewunodetech/tekosoe", // repo git
-  "tekosoe/\n",
+  "Tekosoe_-_Dokumen_Produk", // nama file lampiran di prompt historis (apps/api/docs)
+  "sewunodetech/tekosoe", // repo git (URL lama, redirect)
 ];
 
 test("no leftover Tekosoe outside the allowlist", () => {

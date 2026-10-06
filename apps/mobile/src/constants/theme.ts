@@ -1,5 +1,5 @@
 /**
- * Token desain Tekosue — diambil dari canvas "Tekosoe — Wireframe", halaman "Final UI" (F01–F13, S01–S12).
+ * Token desain Tekosue — diambil dari canvas "Tekosue — Wireframe", halaman "Final UI" (F01–F13, S01–S12).
  * Desain hanya punya mode terang (latar ivory). Kalau desain berubah, perbarui nilai di sini, bukan di layar.
  */
 
