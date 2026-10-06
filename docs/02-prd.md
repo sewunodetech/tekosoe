@@ -39,7 +39,7 @@ The demo uses three personas from our main story: three friends from Indonesia, 
 
 ## Functional requirements
 
-Priorities follow the scope layers: P0 is required for the track and main bounties, P1 is Envio, P2 is Mera PRF, P3 is Alchemy.
+Priorities follow the scope layers: P0 is required for the track and main bounties, P1 is Envio, P2 is Mera PRF, P3 was Alchemy, which was dropped: push notifications now come from Envio (ADR 0014).
 
 | ID | Requirement | BRD | Priority |
 | --- | --- | --- | --- |
@@ -54,13 +54,13 @@ Priorities follow the scope layers: P0 is required for the track and main bounti
 | FR-09 | Payments above the trip's limit need one other member's approval | BR-07 | P0 |
 | FR-10 | Participants can reject their share within the dispute window; that share moves to the person who paid | BR-04 | P0 |
 | FR-11 | On the end date, settle-up runs automatically: shortfalls are pulled up to each safety net, overpayments are refunded | BR-05 | P0 |
-| FR-12 | A shortfall beyond the safety net becomes a bill the member can pay in the app | BR-05 | P0 |
+| FR-12 | A shortfall beyond the safety net becomes a bill the member can pay in the app. While a bill is unpaid, the member can't start or join a new trip (ADR 0013) | BR-05 | P0 |
 | FR-13 | Every amount is shown in dollars, with no crypto terms | BR-01 | P0 |
 | FR-14 | The trip's activity feed updates without a manual refresh | BR-04 | P1 |
 | FR-15 | Each member's position (put in, spent, net) and a preview of the settle-up | BR-04, BR-05 | P1 |
 | FR-16 | A Tekosue card (simulated) to pay a demo shop straight from the pot | BR-11 | P2 |
 | FR-17 | Notes and receipt photos are encrypted with a passkey-derived key; only members can open them | BR-08 | P2 |
-| FR-18 | Push notifications for new payments, approval requests and settle-up results | BR-04 | P3 |
+| FR-18 | Push notifications for new payments, approval requests, settle-up results and unpaid-bill reminders (from Envio, ADR 0014) | BR-04 | P1 |
 | FR-19 | The payer can attach the seller's receipt (photo or multi-page PDF) when paying or later; the receipt is encrypted on the phone and its fingerprint is recorded on-chain with `attachReceipt` | BR-04, BR-08 | P0 |
 | FR-20 | Members open receipts with their passkey; Activity marks each payment "Receipt" or "No receipt"; approvers see a warning when a large payment has no receipt | BR-04, BR-08 | P0 |
 | FR-21 | On-device OCR reads the amount, shop and date from a receipt and warns when the amount doesn't match the payment | BR-04 | P1 |

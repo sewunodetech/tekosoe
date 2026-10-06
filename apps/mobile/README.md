@@ -1,56 +1,31 @@
-# Welcome to your Expo app 👋
+# Tekosue — mobile app (`apps/mobile`)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The Tekosue app: Expo (React Native, SDK 57) with Expo Router. Every user interaction happens here — passkey sign-in (Mera), trips, deposits, payments and approvals, settle-up, invoices, encrypted receipts and invites.
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Run it
 
 ```bash
-npm run reset-project
+npm install                          # once, at the repo root
+npm run start -w @tekosue/mobile     # Expo dev server
+npm test -w @tekosue/mobile          # pure-logic tests (invoice links)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- **Demo mode** (default): `EXPO_PUBLIC_DATA_SOURCE=demo` — the Rina / Wei / Jack trip to Japan, no network needed.
+- **Live mode**: `EXPO_PUBLIC_DATA_SOURCE=live` plus the api and Envio URLs — reads and writes on Monad testnet. Copy [`.env.example`](.env.example) to `.env`.
+- **Signer**: `EXPO_PUBLIC_SIGNER=mera` (passkey, needs a dev build or the APK) or `demo` (an on-device random key, for the web and Expo Go).
+- **Domain**: passkeys and invite links use `www.tekosue.xyz` (`EXPO_PUBLIC_PASSKEY_DOMAIN`, `EXPO_PUBLIC_WEB_DOMAIN`).
 
-### Other setup steps
+Push notifications need a native build: Expo Go on Android doesn't support them.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Build the APK
 
-## Learn more
+```bash
+cd apps/mobile
+npx eas-cli build --profile preview --platform android
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+The `preview` profile reads its `EXPO_PUBLIC_*` values from the EAS "preview" environment. After a build, check the domain files with `npm run check:wellknown -- www.tekosue.xyz` from the repo root.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Where things are
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+`src/app` (routes / screens) · `src/data` (demo + live data layer) · `src/features` (hooks) · `src/tx` (transaction flow and friendly errors) · `src/wallet` (Mera and demo signers) · `src/lib` (chain, Envio, api, invites, receipt crypto). Roadmap: [`ROADMAP.md`](ROADMAP.md). Rules: [`AGENTS.md`](AGENTS.md).

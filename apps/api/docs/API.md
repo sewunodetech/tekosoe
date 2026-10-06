@@ -1,115 +1,116 @@
-# Tekosue API — dokumentasi & flow
+# Tekosue API — reference and flows
 
-Dokumen ini untuk manusia (app developer / juri). Spec teknis mesin ada di
-[`openapi.yaml`](./openapi.yaml) dan interaktif di **Swagger UI**:
+This document is for people (app developers and judges). The machine spec is
+[`openapi.yaml`](./openapi.yaml), and it is browsable in **Swagger UI**:
 
 | | |
 | --- | --- |
 | Swagger UI | `GET /api/docs` → `http://localhost:3000/api/docs` |
 | OpenAPI 3.1 | `GET /api/openapi.yaml` |
-| Base URL lokal | `http://localhost:3000` |
+| Local base URL | `http://localhost:3000` |
+| Production | `https://api.mulalabs.biz.id` |
 
-Jalankan server dengan `npm run dev -w @tekosue/api` dari root repo.
+Run the server with `npm run dev -w @tekosue/api` from the repo root.
 
 ---
 
-## 1. Konvensi
+## 1. Conventions
 
-### Envelope error
+### Error envelope
 
-Semua error memakai bentuk yang sama:
+Every error has the same shape:
 
 ```json
 { "error": { "code": "NOT_GROUP_MEMBER", "message": "You are not a member of this group", "details": {} } }
 ```
 
-`code` selalu `SCREAMING_SNAKE` dan itulah yang dibaca app; `message` untuk
-debugging manusia; `details` berisi konteks (mis. `issues` untuk validasi).
+`code` is always `SCREAMING_SNAKE` and is what the app reads; `message` is for
+people debugging; `details` carries context (for example `issues` for validation).
 
-| Status | Kode yang mungkin | Arti |
+| Status | Possible codes | Meaning |
 | --- | --- | --- |
-| 400 | `VALIDATION_ERROR`, `INVALID_ADDRESS`, `INVALID_GROUP_ID` | input tidak lolos validasi |
-| 401 | `MISSING_TOKEN`, `INVALID_TOKEN`, `INVALID_SIGNATURE`, `CHALLENGE_NOT_FOUND`, `INVALID_SHARE_TOKEN`, `UNAUTHORIZED` | belum login / tanda tangan salah / tautan kedaluwarsa |
-| 403 | `FORBIDDEN`, `ADMIN_KEY_NOT_CONFIGURED`, `NOT_GROUP_MEMBER`, `NOT_GROUP_CREATOR`, `NOT_SPENDER`, `NOT_RECEIPT_OWNER` | ditolak izin |
-| 404 | `NOT_FOUND`, `PROFILE_NOT_FOUND`, `GROUP_META_NOT_FOUND`, `SPEND_NOT_FOUND`, `INVOICE_NOT_FOUND`, `RECEIPT_NOT_FOUND`, `RECEIPT_NOT_UPLOADED`, `KEY_WRAP_NOT_FOUND`, `FEATURE_DISABLED` | tidak ada / fitur mati |
-| 409 | `DRIP_IN_PROGRESS`, `GROUP_META_EXISTS` | bentrok dengan data yang sudah ada |
-| 413 | `PAYLOAD_TOO_LARGE`, `RECEIPT_TOO_LARGE` | badan/berkas terlalu besar |
-| 422 | `NOTE_HASH_MISMATCH` | isi tidak cocok dengan data on-chain |
-| 429 | `RATE_LIMITED`, `DRIP_LIMIT_REACHED` | kena batas laju |
-| 500 | `INTERNAL_ERROR` | kegagalan tak terduga |
-| 502 | `DRIP_FAILED` | pengiriman biaya jaringan gagal (boleh dicoba lagi) |
+| 400 | `VALIDATION_ERROR`, `INVALID_ADDRESS`, `INVALID_GROUP_ID` | input failed validation |
+| 401 | `MISSING_TOKEN`, `INVALID_TOKEN`, `INVALID_SIGNATURE`, `CHALLENGE_NOT_FOUND`, `INVALID_SHARE_TOKEN`, `UNAUTHORIZED` | not signed in / wrong signature / expired link |
+| 403 | `FORBIDDEN`, `ADMIN_KEY_NOT_CONFIGURED`, `NOT_GROUP_MEMBER`, `NOT_GROUP_CREATOR`, `NOT_SPENDER`, `NOT_RECEIPT_OWNER` | permission denied |
+| 404 | `NOT_FOUND`, `PROFILE_NOT_FOUND`, `GROUP_META_NOT_FOUND`, `SPEND_NOT_FOUND`, `INVOICE_NOT_FOUND`, `RECEIPT_NOT_FOUND`, `RECEIPT_NOT_UPLOADED`, `KEY_WRAP_NOT_FOUND`, `FEATURE_DISABLED` | missing / feature off |
+| 409 | `DRIP_IN_PROGRESS`, `GROUP_META_EXISTS` | conflicts with existing data |
+| 413 | `PAYLOAD_TOO_LARGE`, `RECEIPT_TOO_LARGE` | body or file too large |
+| 422 | `NOTE_HASH_MISMATCH` | content doesn't match on-chain data |
+| 429 | `RATE_LIMITED`, `DRIP_LIMIT_REACHED` | rate limit hit |
+| 500 | `INTERNAL_ERROR` | unexpected failure |
+| 502 | `DRIP_FAILED` | sending the network fee failed (safe to retry) |
 
-### Tiga jenis kredensial
+### Three kinds of credentials
 
-| Dipakai untuk | Cara |
+| Used for | How |
 | --- | --- |
-| Endpoint app | `Authorization: Bearer <JWT>` — token sesi dari `POST /api/auth/verify` |
-| Tautan invoice untuk web | `?token=<shareToken>` dari `GET /api/groups/:id/invoices/me` (7 hari, hanya untuk satu nomor invoice, tidak bisa dipakai sebagai token sesi) |
-| Endpoint admin (`/api/status`, `/api/admin/*`) | header `x-admin-key: <ADMIN_API_KEY>` |
+| App endpoints | `Authorization: Bearer <JWT>` — the session token from `POST /api/auth/verify` |
+| Invoice links for the web | `?token=<shareToken>` from `GET /api/groups/:id/invoices/me` (7 days, one invoice number only, can't be used as a session token) |
+| Admin endpoints (`/api/status`, `/api/admin/*`) | header `x-admin-key: <ADMIN_API_KEY>` |
 
-Tidak ada endpoint yang menerima kunci privat atau tanda tangan transaksi dari user —
-transaksi on-chain user ditandatangani di perangkat (Mera); backend hanya mengirim
-drip MON dan `settle`.
+No endpoint accepts a user's private key or transaction signature. Users' on-chain
+transactions are signed on the device (Mera); the backend only sends MON drips and `settle`.
 
-### Fitur bersyarat (feature flag)
+### Feature flags
 
-| Flag | Endpoint yang hanya muncul kalau `true` |
+| Flag | Endpoints that only exist when `true` |
 | --- | --- |
 | `FEATURE_RECEIPTS` | `/api/receipts/*`, `/api/groups/:id/receipts`, `/api/keys/me`, `/api/groups/:id/keys`, `/api/groups/:id/key-wraps*` |
-| `FEATURE_PUSH` | `/api/push/*`, `/api/webhooks/alchemy` |
+| `FEATURE_PUSH` | `/api/push/*`, `/api/webhooks/alchemy`; push delivery from the Envio notifier |
 
-Kalau flag mati, route tidak dipasang sama sekali → balasan `404 NOT_FOUND`.
+When a flag is off, the route isn't mounted at all → `404 NOT_FOUND`.
 
-### Konvensi lain
+### Other conventions
 
-- **`groupId` / `spendId` selalu string desimal** (`"12"`), bukan number — id on-chain adalah uint256.
-- **Saldo tidak pernah lewat API ini.** Saldo, pemakaian, dan anggota dibaca dari
-  kontrak + Envio. Satu-satunya nominal di API adalah `payload` invoice (hasil settle,
-  string desimal AUSD 6 desimal) yang juga bisa dihitung ulang dari chain.
-- **Metadata dikunci ke chain:** judul pemakaian diterima hanya kalau
-  `computeNoteHash` (dari `@tekosue/shared`) = `noteHash` on-chain; detail trip hanya dari
-  creator on-chain. Rahasia undangan tidak pernah dikirim ke api.
-- **Profil dan nama trip bersifat publik** (layar undangan butuh nama sebelum user gabung).
-- Keanggotaan selalu dicek ke kontrak (`membersOf`), bukan ke Envio.
-- Waktu selalu ISO 8601 (`2026-09-30T12:00:00.000Z`).
+- **`groupId` / `spendId` are always decimal strings** (`"12"`), not numbers — on-chain ids are uint256.
+- **Balances never go through this API.** Balances, spending and members are read from
+  the contract + Envio. The only amounts in the API are the invoice `payload` (the settle
+  result, decimal strings in AUSD with 6 decimals), which can also be rebuilt from the chain.
+- **Metadata is bound to the chain:** a payment title is only accepted when
+  `computeNoteHash` (from `@tekosue/shared`) equals the on-chain `noteHash`; trip details only
+  from the on-chain creator. Invite secrets are never sent to the api.
+- **Profiles and trip names are public** (the invite screen needs the name before the user joins).
+- Membership is always checked against the contract (`membersOf`), not Envio.
+- Times are always ISO 8601 (`2026-09-30T12:00:00.000Z`).
 
-### Rate limit
+### Rate limits
 
-| Endpoint | Batas | Kunci |
+| Endpoint | Limit | Key |
 | --- | --- | --- |
-| `POST /api/drip` | `DRIP_RATE_LIMIT_PER_HOUR` per jam (default 5) + `DRIP_DAILY_CAP` per hari (default 200) | IP |
-| `POST /api/auth/challenge`, `/verify` | 30 / menit | IP |
-| `GET /api/profiles`, `GET /api/groups/:id/meta`, `GET /api/invoices/:number` | 120 / jam | IP |
-| `POST /api/receipts/upload-url` | 30 / jam | alamat user |
+| `POST /api/drip` | `DRIP_RATE_LIMIT_PER_HOUR` per hour (default 5) + `DRIP_DAILY_CAP` per day (default 200) | IP |
+| `POST /api/auth/challenge`, `/verify` | 30 / minute | IP |
+| `GET /api/profiles`, `GET /api/groups/:id/meta` | 120 / minute | IP |
+| `GET /api/invoices/:number` | 120 / hour | IP |
+| `POST /api/receipts/upload-url` | 30 / hour | user address |
 
 ---
 
-## 2. Flow
+## 2. Flows
 
-### 2.1 Akun baru dibuka (onboarding)
+### 2.1 Opening a new account (onboarding)
 
-App belum punya sesi, jadi endpoint drip memang tanpa auth — dilindungi rate limit,
-batas harian, satu klaim per alamat, dan cek saldo.
+The app has no session yet, so the drip endpoint has no auth. It is protected by a
+rate limit, a daily cap, one claim per address and a balance check.
 
 ```mermaid
 sequenceDiagram
-  participant App as Aplikasi (Expo)
+  participant App as App (Expo)
   participant API as Tekosue API
   participant C as Monad
 
   App->>API: POST /api/drip {address}
-  API->>API: rate limit + batas harian + cek saldo
-  API->>C: kirim sedikit MON (kantong drip)
-  C-->>API: receipt terkonfirmasi
+  API->>API: rate limit + daily cap + balance check
+  API->>C: send a little MON (drip wallet)
+  C-->>API: receipt confirmed
   API-->>App: 200 {status:"funded", txHash}
-  App->>API: POST /api/auth/challenge → verify (lihat 2.2)
+  App->>API: POST /api/auth/challenge → verify (see 2.2)
   App->>API: PUT /api/profiles/me
 ```
 
-Kemungkinan balasan `200`: `funded` (terkirim dan terkonfirmasi), `already_funded`
-(alamat ini sudah pernah dapat), `sufficient_balance` (saldonya masih cukup).
+Possible `200` answers: `funded` (sent and confirmed), `already_funded` (this address
+already got one), `sufficient_balance` (its balance is still enough).
 
-### 2.2 Login (SIWE, tiap sesi)
+### 2.2 Sign in (SIWE, every session)
 
 ```mermaid
 sequenceDiagram
@@ -120,16 +121,16 @@ sequenceDiagram
   App->>API: POST /api/auth/challenge {address}
   API-->>App: {message, nonce, expiresAt}
   App->>M: signDigest(hashMessage(message))
-  M-->>App: signature (65 byte r‖s‖v)
+  M-->>App: signature (65 bytes r‖s‖v)
   App->>API: POST /api/auth/verify {address, signature}
   API-->>App: {token, expiresAt}
 ```
 
-- Tantangan berlaku **5 menit**, **hanya bisa dipakai sekali** (anti-replay).
-- Pesan EIP-4361 dibangun ulang dari nonce tersimpan; tanda tangan EIP-191 dicek dengan `verifyMessage` (akun Mera = EOA).
-- Token JWT HS256, TTL `AUTH_TOKEN_TTL_SECONDS` (default 1 jam).
+- A challenge is valid for **5 minutes** and **can only be used once** (anti-replay).
+- The EIP-4361 message is rebuilt from the stored nonce (domain = `AUTH_DOMAIN`); the EIP-191 signature is checked with `verifyMessage` (a Mera account is an EOA).
+- HS256 JWT, TTL `AUTH_TOKEN_TTL_SECONDS` (default 1 hour).
 
-### 2.3 Buat trip, pakai kas, beri label
+### 2.3 Create a trip, spend, label
 
 ```mermaid
 sequenceDiagram
@@ -139,128 +140,134 @@ sequenceDiagram
 
   App->>C: createGroup(name, inviteKey, …)
   App->>API: PUT /api/groups/:id/meta {name}
-  Note over API: hanya creator on-chain
+  Note over API: on-chain creator only
   App->>App: noteHash = computeNoteHash({title, category, note, receiptHash})
   App->>C: spend(…, noteHash)
   App->>API: PUT /api/groups/:id/spends/:spendId/meta {title, category, note, receiptHash}
-  Note over API: hanya spender; ditolak 422 kalau hash ≠ noteHash on-chain
-  App->>API: GET /api/groups/:id/spends/meta (label untuk Activity)
+  Note over API: spender only; 422 when the hash ≠ the on-chain noteHash
+  App->>API: GET /api/groups/:id/spends/meta (labels for Activity)
 ```
 
-### 2.4 Settle dan invoice
+`createGroup` and `joinGroup*` revert with `OutstandingDebt()` while the caller still owes
+from a settled trip (ADR 0013); the app checks this up front.
+
+### 2.4 Settle-up and invoices
 
 ```mermaid
 flowchart LR
-  A[Scheduler tiap SETTLE_INTERVAL_MS] --> B[Envio: grup Active yang jatuh tempo]
-  B --> C[cek endsAt + disputeWindow dari kontrak]
-  C --> D[settle oleh kantong settler]
+  A[Scheduler every SETTLE_INTERVAL_MS] --> B[Envio: Active groups past their end date]
+  B --> C[check endsAt + disputeWindow on the contract]
+  C --> D[settle from the settler wallet]
   D --> E[settle_runs]
-  D --> F[invoices dari event Pulled/Refunded di receipt tx]
-  G[Webhook Settled - anggota yang settle] --> F
+  D --> F[invoices from Pulled/Refunded in the settle receipt]
+  G[Envio notifier: Settled by a member] --> F
   H[POST /api/admin/invoices/:id] --> F
-  I[Webhook DebtPaid] --> J[invoice due → paid]
+  I[Envio notifier: DebtPaid] --> J[invoice due → paid]
 ```
 
-- Invoice: satu per anggota, nomor `INV-{trip}-{urutan}` (urutan = posisi di `membersOf`),
-  `invoiceHash = keccak256(payload)`; `payload` dibuat oleh `buildInvoicePayload` di
-  `@tekosue/shared` dan bisa dihitung ulang siapa pun dari receipt tx settle.
-- Status: `refunded` (menerima kembalian), `due` (masih ada debt), `paid`. Status tidak ikut di-hash.
-- Pembuatan invoice tidak pernah menghalangi settle; kalau gagal, sweep berikutnya mencoba lagi.
+- Invoices: one per member, number `INV-{trip}-{position}` (position in `membersOf`),
+  `invoiceHash = keccak256(payload)`. The payload is built with `invoiceSettlementsFromOutcome`
+  + `buildInvoicePayload` from `@tekosue/shared`; the web rebuilds the same payload from Envio.
+- Status: `refunded` (got money back), `due` (debt left), `paid`. The status is not hashed.
+- Creating invoices never blocks a settle-up; if it fails, the next sweep retries.
 
-### 2.5 Struk terenkripsi (butuh `FEATURE_RECEIPTS=true`)
+### 2.5 Encrypted receipts (needs `FEATURE_RECEIPTS=true`)
 
 ```mermaid
 sequenceDiagram
   participant App
   participant API
-  participant S as Penyimpanan (S3/R2)
+  participant S as Storage (S3/R2)
   participant C as GroupVault
 
   App->>API: POST /api/receipts/upload-url {groupId, spendId, sizeBytes, mime}
   API-->>App: {receiptId, uploadUrl, headers}
-  Note over App: file dienkripsi di perangkat, baru diunggah
+  Note over App: the file is encrypted on the device first
   App->>S: PUT uploadUrl (ciphertext)
   App->>API: POST /api/receipts/:id/confirm {receiptHash}
-  API->>S: ukuran wajib sama + keccak256(ciphertext) = receiptHash
+  API->>S: size must match + keccak256(ciphertext) = receiptHash
   App->>C: attachReceipt(groupId, spendId, receiptHash)
 ```
 
-Saat detail pemakaian dibuka, `receiptHash` dari Envio dipakai untuk
-`GET /api/receipts/by-hash/:receiptHash` (wajib anggota grup) → tautan unduh.
+When a payment's details are opened, the `receiptHash` from Envio is used for
+`GET /api/receipts/by-hash/:receiptHash` (members only) → a download link.
 
-### 2.6 Tukar kunci grup (butuh `FEATURE_RECEIPTS=true`)
+### 2.6 Trip key exchange (needs `FEATURE_RECEIPTS=true`)
 
 ```mermaid
 flowchart LR
-  A[PUT /api/keys/me<br/>kunci publik saya] --> B[GET /api/groups/:id/keys<br/>kunci semua anggota]
-  B --> C[App membungkus kunci grup<br/>untuk tiap anggota]
-  C --> D[PUT /api/groups/:id/key-wraps<br/>insert-only, maks 10]
-  D --> E[GET /api/groups/:id/key-wraps/me<br/>kunci grup untuk saya]
+  A[PUT /api/keys/me<br/>my public key] --> B[GET /api/groups/:id/keys<br/>every member's key]
+  B --> C[The app wraps the trip key<br/>for each member]
+  C --> D[PUT /api/groups/:id/key-wraps<br/>insert-only, max 10]
+  D --> E[GET /api/groups/:id/key-wraps/me<br/>the trip key for me]
 ```
 
-### 2.7 Notifikasi (butuh `FEATURE_PUSH=true`)
+### 2.7 Notifications (ADR 0014)
 
 ```mermaid
 flowchart LR
   A[expo-notifications: getExpoPushTokenAsync] --> B[POST /api/push/subscribe]
-  C[Event kontrak di Monad] --> D[Alchemy webhook]
-  D --> E[POST /api/webhooks/alchemy<br/>verifikasi HMAC, balas 200 dulu]
-  E --> F[filter log kontrak + dedupe]
-  F --> G[Expo Push API ke token anggota terkait]
+  C[GroupVault events on Monad] --> D[Envio Activity]
+  D --> E[Envio notifier every NOTIFY_INTERVAL_MS<br/>cursor in kv_state, dedupe processed_events]
+  E --> F[handleGroupEvent: invoices + push]
+  F --> G[Expo Push API to the members involved]
+  H[Daily debt reminder<br/>DEBT_REMINDER_HOURS] --> G
 ```
 
-Token yang dibalas `DeviceNotRegistered` oleh Expo langsung dihapus.
+- `NOTIFY_SOURCE=envio` (default). `NOTIFY_SOURCE=alchemy` switches to the optional webhook (#30) instead.
+- The notifier always updates invoices; push is only sent with `FEATURE_PUSH=true`.
+- Tokens that Expo answers with `DeviceNotRegistered` are deleted right away.
 
 ---
 
-## 3. Indeks endpoint
+## 3. Endpoint index
 
-| # | Method | Path | Auth | Fitur |
+| # | Method | Path | Auth | Area |
 | --- | --- | --- | --- | --- |
-| 1 | GET | `/health` | — | operasional |
-| 2 | GET | `/api/status` | `x-admin-key` | operasional |
+| 1 | GET | `/health` | — | operations |
+| 2 | GET | `/api/status` | `x-admin-key` | operations |
 | 3 | POST | `/api/drip` | — | onboarding |
 | 4 | POST | `/api/auth/challenge` | — | auth |
 | 5 | POST | `/api/auth/verify` | — | auth |
-| 6 | PUT | `/api/profiles/me` | Bearer | profil |
-| 7 | GET | `/api/profiles/me` | Bearer | profil |
-| 8 | GET | `/api/profiles?addresses=` | — | profil |
+| 6 | PUT | `/api/profiles/me` | Bearer | profile |
+| 7 | GET | `/api/profiles/me` | Bearer | profile |
+| 8 | GET | `/api/profiles?addresses=` | — | profile |
 | 9 | GET | `/api/groups/:groupId/meta` | — | trip |
-| 10 | PUT | `/api/groups/:groupId/meta` | Bearer + creator on-chain | trip |
-| 11 | GET | `/api/groups/:groupId/spends/meta` | Bearer + anggota | pemakaian |
-| 12 | PUT | `/api/groups/:groupId/spends/:spendId/meta` | Bearer + spender | pemakaian |
-| 13 | GET | `/api/groups/:groupId/spends/reviews` | Bearer + anggota | pemakaian (P1) |
-| 14 | PUT | `/api/groups/:groupId/spends/:spendId/review` | Bearer + anggota | pemakaian (P1) |
-| 15 | GET | `/api/groups/:groupId/invoices/me` | Bearer + anggota | invoice |
+| 10 | PUT | `/api/groups/:groupId/meta` | Bearer + on-chain creator | trip |
+| 11 | GET | `/api/groups/:groupId/spends/meta` | Bearer + member | payments |
+| 12 | PUT | `/api/groups/:groupId/spends/:spendId/meta` | Bearer + spender | payments |
+| 13 | GET | `/api/groups/:groupId/spends/reviews` | Bearer + member | payments (P1) |
+| 14 | PUT | `/api/groups/:groupId/spends/:spendId/review` | Bearer + member | payments (P1) |
+| 15 | GET | `/api/groups/:groupId/invoices/me` | Bearer + member | invoice |
 | 16 | GET | `/api/invoices/:number?token=` | share token | invoice |
-| 17 | POST | `/api/admin/settle/:groupId` | `x-admin-key` | operasional |
-| 18 | GET | `/api/admin/settle` | `x-admin-key` | operasional |
-| 19 | POST | `/api/admin/invoices/:groupId` | `x-admin-key` | operasional |
-| 20 | POST | `/api/receipts/upload-url` | Bearer + anggota | `FEATURE_RECEIPTS` |
+| 17 | POST | `/api/admin/settle/:groupId` | `x-admin-key` | operations |
+| 18 | GET | `/api/admin/settle` | `x-admin-key` | operations |
+| 19 | POST | `/api/admin/invoices/:groupId` | `x-admin-key` | operations |
+| 20 | POST | `/api/receipts/upload-url` | Bearer + member | `FEATURE_RECEIPTS` |
 | 21 | POST | `/api/receipts/:id/confirm` | Bearer | `FEATURE_RECEIPTS` |
-| 22 | GET | `/api/receipts/by-hash/:receiptHash` | Bearer + anggota | `FEATURE_RECEIPTS` |
-| 23 | GET | `/api/groups/:groupId/receipts` | Bearer + anggota | `FEATURE_RECEIPTS` |
+| 22 | GET | `/api/receipts/by-hash/:receiptHash` | Bearer + member | `FEATURE_RECEIPTS` |
+| 23 | GET | `/api/groups/:groupId/receipts` | Bearer + member | `FEATURE_RECEIPTS` |
 | 24 | PUT | `/api/keys/me` | Bearer | `FEATURE_RECEIPTS` |
-| 25 | GET | `/api/groups/:groupId/keys` | Bearer + anggota | `FEATURE_RECEIPTS` |
-| 26 | PUT | `/api/groups/:groupId/key-wraps` | Bearer + anggota | `FEATURE_RECEIPTS` |
-| 27 | GET | `/api/groups/:groupId/key-wraps/me` | Bearer + anggota | `FEATURE_RECEIPTS` |
+| 25 | GET | `/api/groups/:groupId/keys` | Bearer + member | `FEATURE_RECEIPTS` |
+| 26 | PUT | `/api/groups/:groupId/key-wraps` | Bearer + member | `FEATURE_RECEIPTS` |
+| 27 | GET | `/api/groups/:groupId/key-wraps/me` | Bearer + member | `FEATURE_RECEIPTS` |
 | 28 | POST | `/api/push/subscribe` | Bearer | `FEATURE_PUSH` |
 | 29 | DELETE | `/api/push/subscribe` | Bearer | `FEATURE_PUSH` |
-| 30 | POST | `/api/webhooks/alchemy` | HMAC header | `FEATURE_PUSH` |
+| 30 | POST | `/api/webhooks/alchemy` | HMAC header | `FEATURE_PUSH` + `NOTIFY_SOURCE=alchemy` (optional) |
 
 ---
 
-## 4. Operasional
+## 4. Operations
 
 ### 1. `GET /health`
 
-Liveness probe Railway — tanpa dependensi, tidak pernah gagal. `{"status":"ok"}`
+Liveness probe — no dependencies, never fails. `{"status":"ok"}`
 
-### 2. `GET /api/status` — status lengkap (admin)
+### 2. `GET /api/status` — full status (admin)
 
-Ping database, blok terakhir, ping Envio, isi scheduler, saldo dua kantong backend
-(`low: true` kalau di bawah `LOW_BALANCE_THRESHOLD_MON`, dan status jadi `degraded`),
-dan status fitur. Tidak pernah mengembalikan secret.
+Database ping, latest block, Envio ping, scheduler state, the two backend wallets'
+balances (`low: true` below `LOW_BALANCE_THRESHOLD_MON`, which makes the status `degraded`),
+and feature flags. Never returns secrets.
 
 ```json
 {
@@ -277,27 +284,27 @@ dan status fitur. Tidak pernah mengembalikan secret.
 }
 ```
 
-Error: `403 ADMIN_KEY_NOT_CONFIGURED` (`ADMIN_API_KEY` kosong) · `403 FORBIDDEN` (kunci salah).
+Errors: `403 ADMIN_KEY_NOT_CONFIGURED` (`ADMIN_API_KEY` empty) · `403 FORBIDDEN` (wrong key).
 
-### 17. `POST /api/admin/settle/:groupId` — settle paksa (admin)
+### 17. `POST /api/admin/settle/:groupId` — force a settle (admin)
 
-Menjalankan settle satu grup sekarang, mengabaikan backoff. Jaring pengaman demo.
+Settles one group now, ignoring backoff. A safety net for demos.
 
 ```json
 { "groupId": "1", "status": "confirmed", "txHash": "0x…", "attempts": 1, "durationMs": 842 }
 ```
 
-`status`: `confirmed` · `skipped` (sudah di-settle) · `failed` · `too_early`
-(belum lewat `endsAt + disputeWindow`) · `backoff`.
+`status`: `confirmed` · `skipped` (already settled) · `failed` · `too_early`
+(before `endsAt + disputeWindow`) · `backoff`.
 
-### 18. `GET /api/admin/settle` — riwayat settle (admin)
+### 18. `GET /api/admin/settle` — settle history (admin)
 
-50 baris `settle_runs` terbaru: `{ "runs": [ { "groupId", "status", "txHash", "attempts", "nextAttemptAt", "lastError", "updatedAt" } ] }`
+The 50 latest `settle_runs` rows: `{ "runs": [ { "groupId", "status", "txHash", "attempts", "nextAttemptAt", "lastError", "updatedAt" } ] }`
 
-### 19. `POST /api/admin/invoices/:groupId` — bangun ulang invoice (admin)
+### 19. `POST /api/admin/invoices/:groupId` — rebuild invoices (admin)
 
-Untuk grup yang di-settle anggota (bukan scheduler) atau saat penulisan invoice gagal.
-Tx settle dicari lewat Envio. Idempoten.
+For a group settled by a member (not the scheduler) or when writing invoices failed.
+The settle transaction is looked up through Envio. Idempotent.
 
 `{ "status": "created", "created": 4, "txHash": "0x…" }` · `{ "status": "exists" }` · `{ "status": "not_settled" }`
 
@@ -305,28 +312,28 @@ Tx settle dicari lewat Envio. Idempoten.
 
 ## 5. Onboarding
 
-### 3. `POST /api/drip` — biaya jaringan untuk akun baru dan isi ulang
+### 3. `POST /api/drip` — network fee for new accounts and top-ups
 
-Akun baru belum punya MON, padahal transaksi pertamanya butuh biaya jaringan.
-Balasan `funded` hanya keluar setelah transaksi terkonfirmasi.
+A new account has no MON, but its first transaction needs a network fee.
+`funded` is only returned after the transaction is confirmed.
 
-**Isi ulang:** alamat yang sudah pernah di-drip diisi lagi hanya kalau saldonya di bawah
-`DRIP_MIN_BALANCE_MON` **dan** drip terakhirnya lebih lama dari `DRIP_REFILL_COOLDOWN_MINUTES`
-(default 30). Selain itu jawabannya `already_funded`. App memanggil endpoint ini sebelum transaksi
-kalau saldo MON-nya rendah (`ensureNetworkFee` di `apps/mobile/src/lib/chain.ts`).
+**Top-up:** an address that was already dripped is only topped up again when its balance is
+below `DRIP_MIN_BALANCE_MON` **and** its last drip is older than `DRIP_REFILL_COOLDOWN_MINUTES`
+(default 30). Otherwise the answer is `already_funded`. The app calls this endpoint before a
+transaction when its MON balance is low (`ensureNetworkFee` in `apps/mobile/src/lib/chain.ts`).
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `address` | string | wajib, `0x` + 40 hex |
+| `address` | string | required, `0x` + 40 hex |
 
 Response `200`: `{ "status": "funded" | "already_funded" | "sufficient_balance", "txHash"? }`
 
-| Status | Kode | Kapan |
+| Status | Code | When |
 | --- | --- | --- |
-| 400 | `VALIDATION_ERROR` | alamat tidak valid |
-| 409 | `DRIP_IN_PROGRESS` | klaim sebelumnya masih berjalan — coba lagi |
-| 429 | `DRIP_LIMIT_REACHED` | rate limit per IP **atau** batas harian tercapai |
-| 502 | `DRIP_FAILED` | gagal kirim — klaim dilepas, boleh ulang |
+| 400 | `VALIDATION_ERROR` | invalid address |
+| 409 | `DRIP_IN_PROGRESS` | a previous claim is still running — try again |
+| 429 | `DRIP_LIMIT_REACHED` | per-IP rate limit **or** daily cap reached |
+| 502 | `DRIP_FAILED` | sending failed — the claim is released, safe to retry |
 
 ---
 
@@ -335,104 +342,104 @@ Response `200`: `{ "status": "funded" | "already_funded" | "sufficient_balance",
 ### 4. `POST /api/auth/challenge`
 
 Body `{ "address": "0x…" }` → `200 { "message", "nonce", "expiresAt" }`. `message`
-adalah pesan EIP-4361 yang harus ditandatangani **persis**.
-Error: `400 VALIDATION_ERROR` · `429 RATE_LIMITED`.
+is the EIP-4361 message to sign **exactly as is**.
+Errors: `400 VALIDATION_ERROR` · `429 RATE_LIMITED`.
 
 ### 5. `POST /api/auth/verify`
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
 | `address` | string | `0x` + 40 hex |
-| `signature` | string | `0x` + hex, maks 1030 karakter |
+| `signature` | string | `0x` + hex, at most 1030 characters |
 
 Response `200`: `{ "token": "…", "expiresAt": "…" }` → `Authorization: Bearer <token>`.
 
-| Status | Kode | Kapan |
+| Status | Code | When |
 | --- | --- | --- |
-| 401 | `INVALID_SIGNATURE` | tanda tangan tidak cocok dengan `address` |
-| 401 | `CHALLENGE_NOT_FOUND` | tantangan sudah dipakai / kedaluwarsa / bukan milik alamat ini |
-| 429 | `RATE_LIMITED` | 30/menit per IP |
+| 401 | `INVALID_SIGNATURE` | the signature doesn't match `address` |
+| 401 | `CHALLENGE_NOT_FOUND` | the challenge was used / expired / belongs to another address |
+| 429 | `RATE_LIMITED` | 30/minute per IP |
 
 ---
 
-## 7. Profil
+## 7. Profiles
 
-### 6. `PUT /api/profiles/me` — simpan profil
+### 6. `PUT /api/profiles/me` — save the profile
 
-Sama dengan `profileSchema` di `@tekosue/shared`. Bersifat **publik**.
+Same as `profileSchema` in `@tekosue/shared`. **Public.**
 
 ```bash
 curl -X PUT -H "authorization: Bearer $TOKEN" -H "content-type: application/json" \
   -d '{"displayName":"Naya","countryCode":"ID","city":"Jakarta"}' $BASE/api/profiles/me
 ```
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `displayName` | string | wajib; 1–40 karakter setelah trim; tanpa karakter kontrol |
-| `countryCode` | string | wajib; ISO 3166-1 alpha-2 (`"ID"`, `"AU"`), disimpan huruf besar. App memetakan nama negara → kode |
-| `city` | string | opsional, maks 60 |
-| `avatarColor` | string | opsional, maks 32; warna/kunci preset — **URL ditolak** |
+| `displayName` | string | required; 1–40 characters after trimming; no control characters |
+| `countryCode` | string | required; ISO 3166-1 alpha-2 (`"ID"`, `"AU"`), stored upper-case. The app maps country names → codes |
+| `city` | string | optional, max 60 |
+| `avatarColor` | string | optional, max 32; a colour/preset key — **URLs are rejected** |
 
 Response `200`: `{ "address", "displayName", "countryCode", "city", "avatarColor", "updatedAt" }`
 
 ### 7. `GET /api/profiles/me`
 
-Seperti #6. `404 PROFILE_NOT_FOUND` = belum mengisi profil (app mengarahkan ke Set up profile).
+Like #6. `404 PROFILE_NOT_FOUND` = no profile yet (the app sends the user to Set up profile).
 
-### 8. `GET /api/profiles?addresses=…` — banyak profil (publik)
+### 8. `GET /api/profiles?addresses=…` — several profiles (public)
 
-Maks 20 alamat dipisah koma. `{ "profiles": [ { "address", "displayName", "city", "countryCode", "avatarColor" } ] }` —
-hanya alamat yang punya profil. Error: `400` · `429` (120/jam).
+At most 20 comma-separated addresses. `{ "profiles": [ { "address", "displayName", "city", "countryCode", "avatarColor" } ] }` —
+only addresses that have a profile. Errors: `400` · `429` (120/minute).
 
 ---
 
-## 8. Trip dan pemakaian
+## 8. Trips and payments
 
-### 9. `GET /api/groups/:groupId/meta` — detail trip (publik)
+### 9. `GET /api/groups/:groupId/meta` — trip details (public)
 
-Untuk layar undangan sebelum bergabung. `{ "groupId", "name", "createdBy", "createdAt" }`.
+For the invite screen before joining (the app and `www.tekosue.xyz/j/…`). `{ "groupId", "name", "createdBy", "createdAt" }`.
 `404 GROUP_META_NOT_FOUND`.
 
-### 10. `PUT /api/groups/:groupId/meta` — simpan detail trip
+### 10. `PUT /api/groups/:groupId/meta` — save trip details
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `name` | string | 1–60 karakter setelah trim |
+| `name` | string | 1–60 characters after trimming |
 
-Hanya creator on-chain (`getGroup().creator`). Insert-only: `201` pertama kali, `200`
-kalau isinya sama. Error: `403 NOT_GROUP_CREATOR` · `409 GROUP_META_EXISTS`.
+On-chain creator only (`getGroup().creator`). Insert-only: `201` the first time, `200`
+when the content is the same. Errors: `403 NOT_GROUP_CREATOR` · `409 GROUP_META_EXISTS`.
 
-### 11. `GET /api/groups/:groupId/spends/meta` — label semua pemakaian
+### 11. `GET /api/groups/:groupId/spends/meta` — labels for every payment
 
 `{ "spends": [ { "groupId", "spendId", "noteHash", "title", "category", "note", "receiptHash", "createdBy", "createdAt" } ] }`.
-Pemakaian tanpa baris di sini ditampilkan app tanpa judul ("Unverified" bila perlu).
+Payments without a row here are shown by the app without a title ("Unverified" when needed).
 
-### 12. `PUT /api/groups/:groupId/spends/:spendId/meta` — beri label pemakaian
+### 12. `PUT /api/groups/:groupId/spends/:spendId/meta` — label a payment
 
-Body = `spendNoteSchema` di `@tekosue/shared`:
+Body = `spendNoteSchema` in `@tekosue/shared`:
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
 | `title` | string | 1–80 |
-| `category` | string | maks 32, default `"other"` |
-| `note` | string | maks 500, default `""` |
+| `category` | string | max 32, default `"other"` |
+| `note` | string | max 500, default `""` |
 | `receiptHash` | string \| null | bytes32, default `null` |
 
-Server membaca `getSpend` on-chain: pemanggil wajib `spender`, dan
-`computeNoteHash(body)` wajib = `noteHash` on-chain. `201` pertama kali, `200` kalau
-diulang (isinya pasti sama karena hash-nya sama).
-Error: `403 NOT_SPENDER` · `403 NOT_GROUP_MEMBER` · `422 NOTE_HASH_MISMATCH` (`details.expected`, `details.computed`).
+The server reads `getSpend` on-chain: the caller must be the `spender`, and
+`computeNoteHash(body)` must equal the on-chain `noteHash`. `201` the first time, `200` on
+repeat (the content is the same because the hash is the same).
+Errors: `403 NOT_SPENDER` · `403 NOT_GROUP_MEMBER` · `422 NOTE_HASH_MISMATCH` (`details.expected`, `details.computed`).
 
-### 13–14. Review pemakaian (P1)
+### 13–14. Payment reviews (P1)
 
-- `PUT /api/groups/:groupId/spends/:spendId/review` body `{ "seen"?: true, "decisionNote"?: string | null }` (maks 280) → `{ "spendId", "member", "seenAt", "decisionNote" }`. `seenAt` menyimpan waktu pertama kali dilihat.
+- `PUT /api/groups/:groupId/spends/:spendId/review` body `{ "seen"?: true, "decisionNote"?: string | null }` (max 280) → `{ "spendId", "member", "seenAt", "decisionNote" }`. `seenAt` keeps the first time it was seen.
 - `GET /api/groups/:groupId/spends/reviews` → `{ "reviews": [ … ] }`.
 
 ---
 
-## 9. Invoice
+## 9. Invoices
 
-### 15. `GET /api/groups/:groupId/invoices/me` — invoice saya
+### 15. `GET /api/groups/:groupId/invoices/me` — my invoice
 
 ```json
 {
@@ -448,64 +455,65 @@ Error: `403 NOT_SPENDER` · `403 NOT_GROUP_MEMBER` · `422 NOTE_HASH_MISMATCH` (
 }
 ```
 
-`payload` adalah byte persis yang di-hash; parse untuk membaca `pulled`, `refunded`,
-`remainingDebt`, `remainingCredit` (string desimal, AUSD 6 desimal) dan `settleTxHash`.
-Rincian pemakaian di layar invoice tetap diambil dari Envio + #11.
-`shareToken` dipakai untuk QR/tautan ke halaman web `/v/{number}?token=…`.
-`404 INVOICE_NOT_FOUND` = settle belum selesai atau invoice belum dibuat.
+`payload` is exactly the bytes that were hashed; parse it to read `pulled`, `refunded`,
+`remainingDebt`, `remainingCredit` (decimal strings, AUSD with 6 decimals) and `settleTxHash`.
+The payment lines on the invoice screen still come from Envio + #11.
+`shareToken` goes into the QR code and link to `https://www.tekosue.xyz/v/{number}?token=…`.
+`404 INVOICE_NOT_FOUND` = the settle-up isn't done or the invoice isn't created yet.
 
-### 16. `GET /api/invoices/:number?token=…` — invoice untuk halaman verifikasi web
+### 16. `GET /api/invoices/:number?token=…` — the invoice for the web verification page
 
-Sama seperti #15 tanpa `shareToken`. Halaman web menghitung ulang `payload` dari
-receipt tx settle (`buildInvoicePayload`) dan mencocokkan `invoiceHash`.
-Error: `401 INVALID_SHARE_TOKEN` (token salah/kedaluwarsa/untuk nomor lain) · `404` · `429`.
+Same as #15 without `shareToken`. The web page rebuilds the `payload` from Envio with the
+same shared mapping (`invoiceSettlementsFromOutcome` → `buildInvoicePayload`) and compares
+it and the `invoiceHash` (ADR 0012).
+Errors: `401 INVALID_SHARE_TOKEN` (wrong, expired, or for another number) · `404` · `429`.
 
 ---
 
-## 10. Struk (`FEATURE_RECEIPTS=true`)
+## 10. Receipts (`FEATURE_RECEIPTS=true`)
 
-Backend hanya menerima **ciphertext** — enkripsi terjadi di perangkat.
+The backend only ever receives **ciphertext** — encryption happens on the device.
 
 ### 20. `POST /api/receipts/upload-url`
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `groupId` | string | wajib, desimal; pemanggil wajib anggota (on-chain) |
-| `spendId` | string | wajib, desimal; pemakaian wajib ada on-chain |
+| `groupId` | string | required, decimal; the caller must be a member (on-chain) |
+| `spendId` | string | required, decimal; the payment must exist on-chain |
 | `sizeBytes` | integer | > 0, ≤ `RECEIPT_MAX_BYTES` (default 5 MB) |
-| `mime` | string | tipe file asli, mis. `image/jpeg`, `application/pdf` |
+| `mime` | string | the original file type, e.g. `image/jpeg`, `application/pdf` |
 
-Response `201`: `{ "receiptId", "uploadUrl", "headers", "expiresInSeconds": 300 }`. Objek
-disimpan di `receipts/{groupId}/{spendId}/{uuid}.bin`.
-Error: `403 NOT_GROUP_MEMBER` · `404 SPEND_NOT_FOUND` · `413 RECEIPT_TOO_LARGE` · `429`.
+Response `201`: `{ "receiptId", "uploadUrl", "headers", "expiresInSeconds": 300 }`. The object
+is stored at `receipts/{groupId}/{spendId}/{uuid}.bin`.
+Errors: `403 NOT_GROUP_MEMBER` · `404 SPEND_NOT_FOUND` · `413 RECEIPT_TOO_LARGE` · `429`.
 
 ### 21. `POST /api/receipts/:id/confirm`
 
-Body `{ "receiptHash": "0x…64hex" }` = `keccak256(ciphertext)` = nilai yang dikirim ke
-`attachReceipt`. Ukuran wajib persis sama; kalau `RECEIPT_VERIFY_HASH=true` isi diunduh
-dan hash-nya dibandingkan. Idempoten. `200 { "receiptId", "status": "ready" }`.
-Error: `400 VALIDATION_ERROR` (ukuran/hash beda) · `403 NOT_RECEIPT_OWNER` · `404` · `413`.
+Body `{ "receiptHash": "0x…64hex" }` = `keccak256(ciphertext)` = the value sent to
+`attachReceipt`. The size must match exactly; with `RECEIPT_VERIFY_HASH=true` the content is
+downloaded and its hash compared. Idempotent. `200 { "receiptId", "status": "ready" }`.
+Errors: `400 VALIDATION_ERROR` (size or hash differs) · `403 NOT_RECEIPT_OWNER` · `404` · `413`.
 
 ### 22. `GET /api/receipts/by-hash/:receiptHash`
 
 `{ "receiptId", "groupId", "spendId", "mime", "sizeBytes", "downloadUrl" }` —
-`downloadUrl` berlaku 5 menit. Error: `403 NOT_GROUP_MEMBER` · `404 RECEIPT_NOT_FOUND`.
+`downloadUrl` is valid for 5 minutes. Errors: `403 NOT_GROUP_MEMBER` · `404 RECEIPT_NOT_FOUND`.
 
 ### 23. `GET /api/groups/:groupId/receipts`
 
-Struk `ready` satu grup (tanpa tautan unduh):
+A group's `ready` receipts (without download links):
 `{ "receipts": [ { "receiptId", "groupId", "spendId", "mime", "uploader", "receiptHash", "sizeBytes", "status", "createdAt" } ] }`
 
 ---
 
-## 11. Kunci grup (`FEATURE_RECEIPTS=true`)
+## 11. Trip keys (`FEATURE_RECEIPTS=true`)
 
-Backend hanya menyimpan **kunci publik** dan salinan kunci grup yang sudah dibungkus.
+The backend only stores **public keys** and copies of the trip key that are already wrapped.
 
 - **24.** `PUT /api/keys/me` body `{ "encPublicKey" }` (1–200) → `{ "address", "encPublicKey" }` (upsert).
-- **25.** `GET /api/groups/:groupId/keys` → `{ "keys": [ { "address", "encPublicKey" | null } ] }` (anggota dari `membersOf`).
-- **26.** `PUT /api/groups/:groupId/key-wraps` body `{ "wraps": [ { "member", "wrappedKey" } ] }` (1–10, member wajib anggota) → `{ "created", "requested" }`. Insert-only.
-- **27.** `GET /api/groups/:groupId/key-wraps/me` → `{ "wrappedKey", "wrappedBy", "createdAt" }`; `404 KEY_WRAP_NOT_FOUND` kalau belum ada.
+- **25.** `GET /api/groups/:groupId/keys` → `{ "keys": [ { "address", "encPublicKey" | null } ] }` (members from `membersOf`).
+- **26.** `PUT /api/groups/:groupId/key-wraps` body `{ "wraps": [ { "member", "wrappedKey" } ] }` (1–10, each member must be in the trip) → `{ "created", "requested" }`. Insert-only.
+- **27.** `GET /api/groups/:groupId/key-wraps/me` → `{ "wrappedKey", "wrappedBy", "createdAt" }`; `404 KEY_WRAP_NOT_FOUND` when there is none yet.
 
 ---
 
@@ -513,44 +521,45 @@ Backend hanya menyimpan **kunci publik** dan salinan kunci grup yang sudah dibun
 
 ### 28. `POST /api/push/subscribe`
 
-| Field | Tipe | Aturan |
+| Field | Type | Rule |
 | --- | --- | --- |
-| `expoPushToken` | string | `ExponentPushToken[…]` / `ExpoPushToken[…]` dari `getExpoPushTokenAsync()` |
-| `platform` | `"ios"` \| `"android"` | wajib |
+| `expoPushToken` | string | `ExponentPushToken[…]` / `ExpoPushToken[…]` from `getExpoPushTokenAsync()` |
+| `platform` | `"ios"` \| `"android"` | required |
 
-`201 { "ok": true }` (upsert per alamat + token).
+`201 { "ok": true }` (upsert per address + token).
 
 ### 29. `DELETE /api/push/subscribe`
 
-Body `{ "expoPushToken" }` → `200 { "ok": true }`. Idempoten; hanya menghapus token milik pemanggil.
+Body `{ "expoPushToken" }` → `200 { "ok": true }`. Idempotent; only deletes the caller's own token.
 
-### 30. `POST /api/webhooks/alchemy`
+### 30. `POST /api/webhooks/alchemy` (optional)
 
-Dipanggil **oleh Alchemy**. Body mentah diverifikasi HMAC-SHA256
-(`ALCHEMY_WEBHOOK_SIGNING_KEY`) terhadap header `x-alchemy-signature`. Setelah balasan
-`200 { "received": true }`: filter log `GROUP_VAULT_ADDRESS` → dedupe `processed_events` →
-decode → `Settled` membuat invoice, `DebtPaid` memperbarui invoice → push lewat Expo.
-`401 INVALID_SIGNATURE` kalau signature salah.
+Only used with `NOTIFY_SOURCE=alchemy`. Called **by Alchemy**. The raw body is checked with
+HMAC-SHA256 (`ALCHEMY_WEBHOOK_SIGNING_KEY`) against the `x-alchemy-signature` header. After
+answering `200 { "received": true }`: keep logs from `GROUP_VAULT_ADDRESS` → dedupe
+`processed_events` → decode → the same `handleGroupEvent` as the Envio notifier.
+`401 INVALID_SIGNATURE` when the signature is wrong.
 
 ---
 
-## 13. Menjalankan & deploy
+## 13. Running and deploying
 
 ```bash
 npm run dev -w @tekosue/api
 npm run typecheck -w @tekosue/api
 npm test -w @tekosue/api
-npm run db:generate -w @tekosue/api   # setelah mengubah src/db/schema.ts
+npm run db:generate -w @tekosue/api   # after changing src/db/schema.ts
 npm run db:migrate -w @tekosue/api
-docker build -f apps/api/Dockerfile .  # dari root repo
+docker build -f apps/api/Dockerfile .  # from the repo root
 ```
 
-Semua variabel ada di [`.env.example`](../.env.example). `RELAXED_ENV=true` hanya
-untuk mengangkat server sebelum env lengkap (development saja).
+Every variable is in [`.env.example`](../.env.example). `RELAXED_ENV=true` only exists to
+boot the server before the env is complete (development only).
 
-**Railway (checklist):** Root Directory `/`, Dockerfile Path `apps/api/Dockerfile` ·
-1 replika (scheduler in-process) · healthcheck `/health` · pre-deploy
-`npm run db:migrate` · set `CORS_ORIGINS` untuk web · jangan pernah `RELAXED_ENV=true`.
+**Deploy checklist:** build from the repo root with `apps/api/Dockerfile` · exactly 1 replica
+(the scheduler and notifier run in-process) · healthcheck `/health` · run `npm run db:migrate`
+before deploying · set `CORS_ORIGINS` for the web (`https://www.tekosue.xyz`) and
+`AUTH_DOMAIN=www.tekosue.xyz` · never set `RELAXED_ENV=true`.
 
-> Spek mesin (`openapi.yaml`) dan dokumen ini ditulis dari kode yang sama;
-> kalau ada beda, kode yang menang — perbaiki keduanya.
+> The machine spec (`openapi.yaml`) and this document describe the same code;
+> if they differ, the code wins — fix both.

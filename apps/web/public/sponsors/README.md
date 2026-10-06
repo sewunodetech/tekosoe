@@ -1,12 +1,12 @@
-# Logo sponsor
+# Sponsor logos
 
-Dipakai di bagian "Built with" landing (`src/components/landing/Integrations.tsx`). Semua diambil dari situs resmi pemiliknya pada 30 Sep 2026 dan tetap merek dagang masing-masing. Ditampilkan satu warna lewat CSS (`brightness-0`); file aslinya tidak diubah kecuali dicatat di bawah.
+Used in the landing page's "Built with" section (`src/components/landing/Integrations.tsx`). All were taken from each owner's official site on 30 Sep 2026 and remain their trademarks. They are shown in one colour through CSS (`brightness-0`); the original files are unchanged unless noted below.
 
-| File | Sumber |
+| File | Source |
 | --- | --- |
-| `monad.svg` | SVG inline di header https://monad.xyz (atribut tampilan dibuang, `currentColor` → hitam) |
-| `agora.svg` | SVG inline di header https://www.agora.finance (kelas CSS dibuang, fill hitam) |
-| `category-labs.svg` | https://www.category.xyz — "C1 Logotype.svg" (Mera adalah produk Category Labs) |
+| `monad.svg` | Inline SVG in the header of https://monad.xyz (presentation attributes removed, `currentColor` → black) |
+| `agora.svg` | Inline SVG in the header of https://www.agora.finance (CSS classes removed, black fill) |
+| `category-labs.svg` | https://www.category.xyz — "C1 Logotype.svg" (Mera is a Category Labs product) |
 | `envio.svg` | https://envio.dev/brand — `envio-logo-primary.svg` |
 
-Sebelum submit, cek panduan merek tiap sponsor (warna, ruang kosong) kalau mau menampilkan versi berwarna.
+Only technologies that really run in Tekosue on testnet are listed (Alchemy was removed, ADR 0014). Check each sponsor's brand guidelines (colours, clear space) before showing a coloured version.

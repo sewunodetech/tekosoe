@@ -74,10 +74,10 @@ Scope is built in layers. If time runs out at any layer, what's done is still a 
 - [ ] Encrypted notes and receipt photos; only hashes or ciphertext on-chain
 - [ ] Next step: a trip key that every member can read
 
-**P3 — Optional (Alchemy)**
+**P3 — Optional (Alchemy) — dropped on 6 Oct (ADR 0014)**
 
-- [ ] Try Gas Manager with a Mera account (time-boxed to half a day)
-- [ ] Webhooks for push notifications on new spending and top-up reminders
+- [ ] ~~Try Gas Manager with a Mera account~~ — not pursued; the MON drip covers network fees
+- [x] Push notifications on new spending, approvals, settle-up and unpaid bills — built from Envio instead of Alchemy webhooks (ADR 0014)
 
 **Roadmap (in the pitch, not built)**
 
@@ -103,7 +103,7 @@ User keys never leave the device. The gas sponsor only pays gas; it never holds 
 | Money | AUSD on Monad testnet (6 decimals) | Every amount and every settlement |
 | Indexer | Envio HyperIndex | Activity feed, per-member balances, history |
 | Gas | Alchemy Gas Manager, or a MON drip / our own relayer | Users never hold MON |
-| Notifications (optional) | Alchemy Webhooks | Push notifications to members |
+| Notifications | Envio notifier in the api (ADR 0014; Alchemy webhooks optional) | Push notifications to members |
 | Off-chain database | Postgres + object storage, accessed through the mini backend | Profiles, trip names, payment titles and notes, encrypted receipts, read status, push subscriptions; never balances |
 
 ### GroupVault contract (draft functions)

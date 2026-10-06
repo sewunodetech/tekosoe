@@ -15,12 +15,12 @@ Everything is TypeScript in one monorepo: an Expo mobile app (iOS and Android), 
 | Money | AUSD (Agora), 6 decimals | Required by the Agora bounty |
 | Contract | Solidity + Foundry + OpenZeppelin | Fast unit and fuzz tests for the balance invariants |
 | Indexer | Envio HyperIndex | Required by the Envio bounty; comes with its own database and GraphQL |
-| Mini backend | Node/TypeScript service in Docker | Settle-up scheduler, gas sponsorship / MON drip, Alchemy Webhooks endpoint |
-| Gas | Alchemy Gas Manager, or a MON drip / relayer through the mini backend | Users never hold MON |
+| Mini backend | Node/TypeScript service in Docker | Settle-up scheduler, MON drip, notifications and invoice updates from Envio (ADR 0014) |
+| Gas | MON drip through the mini backend (Alchemy Gas Manager was evaluated and dropped, ADR 0014) | Users never hold MON |
 | Our own database | Postgres + object storage from P0, accessed only through the mini backend | Profiles, trip names, payment titles and notes, encrypted receipts, read status, push subscriptions. Never balances |
 | Repo | npm workspaces + Turborepo; a shared package with ABIs and types | One ABI shared by the app, the backend and the indexer |
 | App distribution | Expo EAS | EAS Build: an Android APK and iOS TestFlight for judges; Expo Go for quick team testing |
-| Small website | Static Next.js on Vercel | Invoice verification from a QR code, invite links that open the app, passkey domain-association files |
+| Small website | Static Next.js on Vercel at `www.tekosue.xyz` (ADR 0011, ADR 0012) | Invoice verification from a QR code, invite links that open the app, passkey domain-association files |
 | Camera, files, on-device crypto | expo-camera, expo-image-picker, expo-document-picker, expo-print; react-native-quick-crypto | Receipt photos, AES-GCM and X25519 encryption on the phone, invoice PDFs |
 | Notifications | Expo Notifications (tokens stored in `push_subs`) | Approval requests, nudges, invoice ready |
 

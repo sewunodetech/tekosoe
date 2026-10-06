@@ -10,7 +10,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 | --- | --- | --- | --- |
 | 27–29 Sep | Mera spike (passkey + PRF on iOS/Android), AUSD faucet, gas test; contract v0 + unit tests | One AUSD transaction from a Mera account without the user holding MON | 🟡 contract, faucet and gas drip done; Mera still to verify in a release build on phones |
 | 30 Sep – 2 Oct | Complete contract + fuzz tests, testnet deployment, Envio indexer | Every event indexed, indexer balances = contract | ✅ GroupVault v1 deployed, indexer hosted and matching the contract |
-| 3–6 Oct | App P0: onboarding, trips, deposits, spending, settle-up | Demo scenario end to end on testnet | ⏳ |
+| 3–6 Oct | App P0: onboarding, trips, deposits, spending, settle-up | Demo scenario end to end on testnet | 🟡 every P0 screen runs live on testnet; new contract (ADR 0013), live web (ADR 0012) and notifications (ADR 0014) deployed 6 Oct; the full demo on phones waits on the new APK |
 | 7–8 Oct | Real-time feed (P1); start encryption (P2) if safe | Feed updates without a manual refresh | ⏳ |
 | 9–10 Oct | E2E testing, UX testing with non-crypto users, Slither | Every P0 test passes | ⏳ |
 | 11 Oct | Demo video, README, write-up | Final | ⏳ |
@@ -24,8 +24,8 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [x] Express backend (PR #5) moved from `backend/` to `apps/api`; ADR 0004 (proposed)
 - [x] api: ABI structs + custom errors in `@tekosoe/shared`, database schema unified in Drizzle (`database/` removed), push through Expo, trip/payment metadata tied to on-chain hashes, invoices after settle-up. 38 api tests pass (fake chain, not yet on testnet). Remaining: `apps/api/docs/coverage.md` › Still open
 - [x] Skeletons for `packages/contracts`, `packages/indexer`, `packages/shared` (`database/` removed; the schema lives in `apps/api`)
-- [ ] `npm install`, and every workspace passes `typecheck`
-- [x] Foundry (WSL) + `forge-std`: `forge build` passes, 26 tests (including fuzz) pass
+- [x] `npm install`, and every workspace passes `typecheck`
+- [x] Foundry (WSL) + `forge-std`: `forge build` passes, 28 tests (including fuzz) pass
 
 ## Mobile — see `apps/mobile/ROADMAP.md`
 
@@ -49,6 +49,12 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] M11 P1/P2: real-time feed, push, simulated card, PRF key. *Activity screen (`/activity`, ADR 0007) done in demo + live from Envio; Top up / Cash out rows wait for an indexer codegen + redeploy (`BalanceActivity`)*
 - [x] P1 Set up profile + P2 Profile designed on the Final UI canvas (28 Sep)
 - [ ] M12 Profile & account: P1 screen + P2 tab, saved to `profiles` through the api, Sign out. *P1 UI + P2 tab + gate + Sign out + local save done; api `profiles` wired up in live mode (not yet tested live)*
+
+## Contract, indexer, api (6 Oct)
+
+- [x] GroupVault redeployed with the debt rule (ADR 0013): unpaid debt blocks starting or joining new trips (`outstandingDebt`, `OutstandingDebt()`, `outstandingDebtOf`). 28 Foundry tests including fuzz. **Deployed** at `0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0` (block 68690383, `ausd()` = Agora AUSD). Old trips stay on the old contract; their off-chain data was cleared (backup kept by the team).
+- [x] Indexer: `Member.position` and `Activity.remaining` (ADR 0012), pointed at the new contract and resynced in production (6 Oct). Tip: restart `graphql-engine` after `envio start -r`, otherwise Hasura keeps stale enum types ("cache lookup failed for type").
+- [x] api: invoices built through the shared settle mapping (`@tekosue/shared`), notifications and invoice updates from Envio (ADR 0014), CORS + `AUTH_DOMAIN` for `www.tekosue.xyz`. **Deployed** on the VPS (6 Oct). 55 tests.
 
 ## Contract, indexer, api (30 Sep)
 
@@ -74,15 +80,16 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] Receipts: encrypted on the phone, `attachReceipt`, opened with a passkey (FR-19, FR-20)
 - [ ] Per-member invoice: Paid/Refunded/Due, Pay, PDF (FR-22)
 
-## Web (`apps/web`) — lihat ADR 0004
+## Web (`apps/web`) — see ADR 0004 and ADR 0012
 
-- [x] W-4 Landing page + dashboard demo hanya-baca (`/`, `/trips`, `/trips/[id]`, members, payment details, settle preview, invoice, `/card`, `/profile`), mobile-only, desain dari app, data demo lewat `TripRepository`
-- [x] `/j/[code]` (undangan) dan `/v/[number]` (verifikasi) memakai sistem desain yang sama; `/v` masih data demo
-- [x] Rebrand ke **Tekosue** + domain **`www.tekosue.xyz`** (6 Oct, ADR 0011; apex redirects to www on Vercel): paket `@tekosue/*`, rpId passkey/App Links/link undangan/QR invoice di `tekosue.xyz`, identifier native & kunci perangkat lama dipertahankan (`scripts/rebrand-guard.test.mjs`). *Passkey lama di `tekosoe.mulalabs.biz.id` tidak bisa dipakai lagi. Tertunda manual: DNS `tekosue.xyz` → VPS, router Traefik, `CORS_ORIGINS` api produksi, env EAS + APK baru, `npm run check:wellknown -- www.tekosue.xyz` (Android ✅ 6 Oct; AASA content type fixed by `apps/web/vercel.json` after deploy).*
-- [ ] W-1 `.well-known`: Team ID Apple, bundle ID `com.tekosoe.xyz`, `Content-Type: application/json` untuk `apple-app-site-association`
-- [ ] 🟡 W-3 Verifikasi invoice nyata + undangan live (6 Oct, ADR 0012): kode selesai dan dites (vitest + fast-check). `/j/<kode>` sudah menampilkan trip nyata dari Envio + api (diuji lokal terhadap testnet: trip 10 "Halan halan", trip 8, trip tidak ada, link salah). `/v/<nomor>?token=` membangun ulang invoice dari Envio dengan `invoiceSettlementsFromOutcome` (sama dengan api) dan mencocokkan payload + sidik jari; app memasukkan kode akses ke QR/share/PDF. Web sekarang static export + nginx (`apps/web/Dockerfile`). *Belum dicentang: butuh deploy indexer baru (`Member.position`, `Activity.remaining`) + sinkron ulang Envio dari `start_block`, deploy image web, lalu uji QR invoice nyata → "cocok" di testnet.*
-- [ ] Sambungkan dashboard ke Envio/api (implementasi live `TripRepository`) — menunggu C-6, D-1
-- [x] Halaman unduh `/get-app` (6 Oct): gaya landing, tombol "Download for Android" (APK EAS, `NEXT_PUBLIC_ANDROID_APK_URL`), QR untuk laptop, 4 langkah instal, iPhone "coming soon"; `/j/japan` kembali menampilkan undangan contoh
+- [x] W-4 Landing page + read-only demo dashboard (`/`, `/trips`, `/trips/[id]`, members, payment details, settle preview, invoice, `/card`, `/profile`), mobile-only, design taken from the app, demo data through `TripRepository`
+- [x] `/j/[code]` (invite) and `/v/[number]` (verification) use the same design system
+- [x] Rebrand to **Tekosue** + domain **`www.tekosue.xyz`** (6 Oct, ADR 0011; the apex redirects to www on Vercel): packages `@tekosue/*`; passkey rpId, App Links, invite links and invoice QR on `www.tekosue.xyz`; native identifiers and device keys kept (`scripts/rebrand-guard.test.mjs`). *Old passkeys on `tekosoe.mulalabs.biz.id` no longer work. `npm run check:wellknown -- www.tekosue.xyz`: Android ✅ (Google Digital Asset Links links the EAS fingerprint), AASA served as JSON ✅. Remaining: a new APK with the www domain.*
+- [ ] W-1 `.well-known`: Apple Team ID (still `TEAMID` in the AASA). Android done (above).
+- [ ] 🟡 W-3 Real invoice verification + live invites (6 Oct, ADR 0012): `/j/<code>` shows the real trip from Envio + api (tested against testnet: a real trip, a missing trip, an invalid link) and only sends the group id. `/v/<number>?token=` rebuilds the invoice from Envio with the same shared mapping as the api and compares payload + fingerprint; the app puts the access key in the QR, share message and PDF. Verified end to end on a local stack against testnet: 5 real invoices "match", a changed key is rejected, an edited invoice "doesn't match". Production indexer resynced with the new columns (6 Oct). *Not ticked yet: needs one real invoice from the new contract verified on `www.tekosue.xyz`.*
+- [ ] Connect the dashboard to Envio/api (a live `TripRepository`) — waits on C-6, D-1
+- [x] Download page `/get-app` (6 Oct): landing style, "Download for Android" button (EAS APK, `NEXT_PUBLIC_ANDROID_APK_URL`), a QR code for desktop visitors, four install steps, iPhone "coming soon"; `/j/japan` shows the sample invite again
+- [x] Hosting on Vercel with `apps/web/vercel.json` (rewrites `/j/*`, `/v/*` to the static shells; `.well-known` as JSON). The VPS `web` service was stopped (6 Oct).
 
 ### P1 — Envio
 

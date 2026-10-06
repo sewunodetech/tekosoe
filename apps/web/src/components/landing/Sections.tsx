@@ -28,7 +28,7 @@ import { TekoScene } from "./three/lazy";
  * kalau aturan di kontrak berubah (batas anggota, jendela keberatan, dsb.), ubah juga di sini.
  */
 
-const REPO_URL = "https://github.com/sewunodetech/tekosoe";
+const REPO_URL = "https://github.com/sewunodetech/tekosue";
 
 function SectionHead({ eyebrow, title, intro }: { eyebrow: string; title: string; intro?: string }) {
   return (
