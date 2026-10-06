@@ -23,7 +23,7 @@ The product's correct name is **Tekosue**; the repo, packages and UI still said 
 | The SIWE statement `"Sign in to Tekosoe."` | Compared with the message installed APKs build; not shown as UI text |
 | `SHARE_AUDIENCE = "tekosoe:invoice-share"` | Changing it invalidates invoice access keys already issued (valid 7 days) |
 | `tekosoe-indexer` | Internal HyperIndex name |
-| Asset file names `tekosoe-mark*.svg`, `tekosoe-logo.svg`, the repo folder | Out of scope |
+| The repo folder on disk | Out of scope |
 | Live document titles "Tekosoe — Dokumen Produk" and the "Tekosoe — Wireframe" canvas | External document names; rename them at the source first |
 | History in ADRs 0001–0010 and older `docs/STATUS.md` entries | History is not rewritten |
 
@@ -34,3 +34,4 @@ The product's correct name is **Tekosue**; the repo, packages and UI still said 
 - Passkeys are bound to `www.tekosue.xyz`. Don't move to the apex later without an account migration plan.
 - Workspace commands are now `-w @tekosue/<name>`; delete the old `node_modules/@tekosoe` and run `npm install` at the root.
 - The GitHub repo moved to `sewunodetech/tekosue` (the old URL redirects).
+- The brand source files were renamed to `tekosue-mark*.svg` / `tekosue-logo*.svg`, the wordmark was redrawn as "tekosue" (Bricolage Grotesque 700, same size and spacing), and every generated image (app icons, splash, favicons, Open Graph image, README banner) was regenerated with `scripts/brand-assets.mjs`.

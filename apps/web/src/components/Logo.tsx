@@ -21,7 +21,7 @@ export function Logo({ size = 24, dot = true }: { size?: number; dot?: boolean }
   );
 }
 
-/** Ikon brand: maskot Teko tanpa latar — bentuk sama persis dengan apps/mobile/assets/tekosoe-mark.svg. */
+/** Ikon brand: maskot Teko tanpa latar — bentuk sama persis dengan apps/mobile/assets/tekosue-mark.svg. */
 export function TekoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="9 28 180 180" className={className} aria-hidden="true" focusable="false">

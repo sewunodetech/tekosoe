@@ -278,7 +278,7 @@ npm run build -w @tekosue/web && npm run preview -w @tekosue/web   # static expo
 
 ### Brand assets
 
-App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosoe-mark.svg`](apps/mobile/assets/tekosoe-mark.svg), [`tekosoe-mark-mono.svg`](apps/mobile/assets/tekosoe-mark-mono.svg) and [`tekosoe-logo.svg`](apps/mobile/assets/tekosoe-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
+App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosue-mark.svg`](apps/mobile/assets/tekosue-mark.svg), [`tekosue-mark-mono.svg`](apps/mobile/assets/tekosue-mark-mono.svg) and [`tekosue-logo.svg`](apps/mobile/assets/tekosue-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
 
 ---
 
@@ -324,7 +324,8 @@ What we will watch: trips started, the share of invitees who actually join, and 
 
 | | Who | Built |
 | --- | --- | --- |
-| <img src="https://github.com/kikik27.png" width="48" alt="" /> | **Kyy** · [@kikik27](https://github.com/kikik27) | Product, the mobile app, the `GroupVault` contract, the Envio indexer, the web companion |
+| <img src="https://github.com/kikik27.png" width="48" alt="" /> | **Kyy** · [@kikik27](https://github.com/kikik27) | Product, the mobile app, the `GroupVault` contract, the Envio indexer, live invite and invoice pages on the web |
+| <img src="https://github.com/artomily.png" width="48" alt="" /> | **Rakyavara Artomily** · [@artomily](https://github.com/artomily) | The website: landing page with the 3D Teko scenes, the read-only demo dashboard, and the app's design system ported to the web |
 | <img src="https://github.com/Dapoodap.png" width="48" alt="" /> | **MasDapa** · [@Dapoodap](https://github.com/Dapoodap) | The backend API: auth, gas drip, settle-up scheduler, profiles, receipts, push |
 
 Full history: [contributors](https://github.com/sewunodetech/tekosue/graphs/contributors).

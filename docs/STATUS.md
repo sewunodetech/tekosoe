@@ -30,7 +30,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 ## Mobile — see `apps/mobile/ROADMAP.md`
 
 - [x] UI for every Final UI screen + the Teko mascot + design system (demo data), branch `mobile-dev`
-- [ ] M0 Setup: merge to `main`, Home at `/trips`, `eas.json`, dev build on 2 phones, icons & splash. *Home at `/trips` ✅; app icon, adaptive icon, splash, favicon + web/OG icons from `tekosoe-mark.svg` ✅ (`scripts/brand-assets.mjs`); remaining: merge, `eas.json`, dev build*
+- [ ] M0 Setup: merge to `main`, Home at `/trips`, `eas.json`, dev build on 2 phones, icons & splash. *Home at `/trips` ✅; app icon, adaptive icon, splash, favicon + web/OG icons from `tekosue-mark.svg` ✅ (`scripts/brand-assets.mjs`); remaining: merge, `eas.json`, dev build*
 - [x] M1 Data layer: `src/data` (demo) + `src/features/*` hooks, loading/error states through `QueryState`. Every screen is decoupled from demo data
 - [ ] M2 Mera spike: passkey + sign one transaction in a dev build, ADR with the result. *ADR 0003 + code exist. 4 Oct: passkey + PRF verified in a dev build on Android (Xiaomi, MIUI) with rpId `tekosoe.mulalabs.biz.id` — `.well-known` served from the VPS, signing back in with the same passkey opens the same account (profile + balance). Remaining: sign a transaction, iOS (needs Apple Team ID in AASA), second phone*
 - [x] M3 Session & account: Signer, SessionProvider, route gate, real passkey prompt. *Signer, SessionProvider and route gate done. SecureStore blocker resolved (using `requireAuthentication: true`). 4 Oct: 02 Sign in now has an explicit "Create account with Passkey" (new passkey) next to "I already have an account" (existing passkey); sign up no longer depends on a `NoCredentials` fallback, which iOS never returns.*

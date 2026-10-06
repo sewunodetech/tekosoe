@@ -35,8 +35,6 @@ const ALLOWED = [
   "tekosoe/receipt/",
   "Sign in to Tekosoe.", // pernyataan SIWE build lama
   "tekosoe-indexer",
-  "tekosoe-mark", // nama file aset sumber
-  "tekosoe-logo",
   "Tekosoe — Dokumen Produk", // judul dokumen live di Claude Docs
   "Tekosoe_-_Dokumen_Produk",
   "Tekosoe — Wireframe", // judul canvas desain
