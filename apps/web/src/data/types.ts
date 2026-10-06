@@ -53,6 +53,8 @@ export type Profile = {
   country: string;
   tint: AvatarTint;
   stats: { activeTrips: number; settled: number; gotBack: bigint };
+  /** Saldo dolar pribadi di luar trip (kartu "Your balances", ADR 0006). */
+  balance: bigint;
 };
 
 export type InvoiceStatus = "refunded" | "due" | "paid";
