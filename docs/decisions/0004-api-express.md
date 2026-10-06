@@ -9,7 +9,7 @@ ADR 0001 and the technical spec chose Hono for `apps/api`, and `apps/api` only h
 
 ## Decision
 
-- Move the Express backend into `apps/api`, replacing the Hono skeleton; the package is `@tekosoe/api`, with a single `package-lock.json` at the root.
+- Move the Express backend into `apps/api`, replacing the Hono skeleton; the package is `@tekosue/api`, with a single `package-lock.json` at the root.
 - api stack: Express 5, Drizzle ORM + `pg`, `drizzle-kit` migrations in `apps/api/drizzle/`, S3-compatible storage for receipt ciphertext, SIWE sign-in → HS256 JWT.
 - Docker builds from the repo root: `docker build -f apps/api/Dockerfile .`.
 

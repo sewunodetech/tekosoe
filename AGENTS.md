@@ -18,7 +18,7 @@ Dokumen perencanaan ada di [`docs/`](docs/README.md). Baca dokumen yang relevan 
 | Alasan bisnis | [`docs/01-brd.md`](docs/01-brd.md) |
 | Keputusan yang sudah diambil | [`docs/decisions/`](docs/decisions/) |
 
-Dokumen asli (live) ada di Claude Docs: "Tekosoe — Dokumen Produk" dan "Monad Metropolis — Dokumen Pengembangan". Salinan di `docs/` adalah snapshot; kalau berbeda, tanya user mana yang benar.
+Dokumen asli (live) ada di Claude Docs: "Tekosue — Dokumen Produk" dan "Monad Metropolis — Dokumen Pengembangan". Salinan di `docs/` adalah snapshot; kalau berbeda, tanya user mana yang benar.
 
 ## Peta repo
 

@@ -48,7 +48,7 @@ export function Button(props: LinkProps | NativeProps) {
   );
 
   if (props.href !== undefined) {
-    // Deep link (tekosoe://) dan URL luar memakai <a> biasa; rute internal memakai next/link.
+    // Deep link (tekosue://) dan URL luar memakai <a> biasa; rute internal memakai next/link.
     const external = props.external || /^[a-z][a-z0-9+.-]*:/i.test(props.href);
     return external ? (
       <a href={props.href} className={classes}>

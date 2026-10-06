@@ -260,7 +260,7 @@ Port 8080 clashes with `envio dev`, so stop that stack first (`envio stop`). Hos
 
 ### Brand assets
 
-App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosoe-mark.svg`](apps/mobile/assets/tekosoe-mark.svg), [`tekosoe-mark-mono.svg`](apps/mobile/assets/tekosoe-mark-mono.svg) and [`tekosoe-logo.svg`](apps/mobile/assets/tekosoe-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
+App icons, Android adaptive icon, splash, favicons, the web Open Graph image and the banner above are generated from [`tekosue-mark.svg`](apps/mobile/assets/tekosue-mark.svg), [`tekosue-mark-mono.svg`](apps/mobile/assets/tekosue-mark-mono.svg) and [`tekosue-logo.svg`](apps/mobile/assets/tekosue-logo.svg) by [`scripts/brand-assets.mjs`](scripts/brand-assets.mjs) (instructions at the top of the file).
 
 ---
 

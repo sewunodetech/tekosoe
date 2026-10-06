@@ -1,6 +1,6 @@
 /**
  * Generate semua aset brand (ikon app, adaptive icon Android, splash, favicon, ikon web, banner README)
- * dari SVG sumber di apps/mobile/assets (tekosoe-mark.svg, tekosoe-mark-mono.svg, tekosoe-logo.svg).
+ * dari SVG sumber di apps/mobile/assets (tekosue-mark.svg, tekosue-mark-mono.svg, tekosue-logo.svg).
  *
  * Butuh sharp + opentype.js + font Manrope (tidak dipasang di workspace supaya lockfile tetap ramping):
  *   mkdir /tmp/brand && cd /tmp/brand && npm i sharp opentype.js @expo-google-fonts/manrope
@@ -35,9 +35,9 @@ const readSvg = (name) => {
   const src = readFileSync(join(mobile, name), 'utf8');
   return { viewBox: src.match(/viewBox="([^"]+)"/)[1], body: src.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '') };
 };
-const markColor = readSvg('tekosoe-mark.svg');
-const markMono = readSvg('tekosoe-mark-mono.svg');
-const logo = readSvg('tekosoe-logo.svg');
+const markColor = readSvg('tekosue-mark.svg');
+const markMono = readSvg('tekosue-mark-mono.svg');
+const logo = readSvg('tekosue-logo.svg');
 
 /** SVG sumber ditaruh di kotak persegi `size` px yang berpusat di (cx, cy). */
 const place = (src, cx, cy, size) =>

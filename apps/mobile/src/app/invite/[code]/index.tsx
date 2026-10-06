@@ -25,7 +25,7 @@ import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { money, moneyShort } from '@/lib/money';
 
-// 05 Invite — canvas "Final UI" › F05Invite. Dibuka dari tekosoe://invite/<code> atau tautan web.
+// 05 Invite — canvas "Final UI" › F05Invite. Dibuka dari tekosue://invite/<code> atau tautan web.
 // Live: kode = `<groupId>-<rahasia>`; trip dibaca dari Envio + profil dari api. Rahasia tetap di link.
 // "Join with Passkey" langsung gabung (satu transaksi joinGroup, tanpa setoran/safety net — ADR 0009).
 export default function InviteScreen() {

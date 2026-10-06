@@ -9,7 +9,7 @@ The technical spec calls for one TypeScript monorepo holding the mobile app, a s
 
 ## Decision
 
-- npm workspaces + Turborepo (pnpm at first, switched to npm at the team's request). Packages are named `@tekosoe/*`; internal packages are referenced with version `"*"`.
+- npm workspaces + Turborepo (pnpm at first, switched to npm at the team's request). Packages are named `@tekosue/*`; internal packages are referenced with version `"*"`.
 - `apps/mobile`: Expo SDK 57 + Expo Router (from the default `create-expo-app` template). NativeWind to be added once UI work starts.
 - `apps/web`: Next.js 16 (App Router, Tailwind v4), deployed statically to Vercel.
 - `apps/api`: Hono + `@hono/node-server`, running in Docker. Kept separate from Next.js so the settle-up scheduler runs continuously and on time. _(Superseded by [ADR 0004](0004-api-express.md): Express.)_

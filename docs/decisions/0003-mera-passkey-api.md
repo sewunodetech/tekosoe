@@ -22,7 +22,7 @@ We use the official `@category-labs/mera` SDK API, set up for React Native as fo
    import { reactNativeWebAuthnClient } from '@category-labs/mera/react-native-webauthn-client';
 
    const { prfOutput, credentialId, transports } = await createPasskeyWithPrfOutput({
-     rp: { id: 'tekosoe.xyz', name: 'Tekosoe' },
+     rp: { id: 'tekosue.xyz', name: 'Tekosue' },
      user: { name: 'user', displayName: 'User' },
      webAuthnClient: reactNativeWebAuthnClient,
    });
@@ -33,7 +33,7 @@ We use the official `@category-labs/mera` SDK API, set up for React Native as fo
    import { getPasskeyPrfOutput } from '@category-labs/mera';
 
    const { prfOutput, credentialId } = await getPasskeyPrfOutput({
-     rpId: 'tekosoe.xyz',
+     rpId: 'tekosue.xyz',
      credential: { credentialId, transports }, // optional
      webAuthnClient: reactNativeWebAuthnClient,
    });

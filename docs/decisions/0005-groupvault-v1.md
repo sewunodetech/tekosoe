@@ -21,7 +21,7 @@ The spec draft ([`03-technical-spec.md`](../03-technical-spec.md)) had gaps that
 - **payDebt** forwards AUSD straight to members holding `credit` (in member order).
 - Invariants: before settle-up `sum(deposited − used) == pool`; after settle-up `sum(credit) == sum(debt) + pool`, and the vault's AUSD balance == the sum of every trip's pool.
 - Events: `GroupCreated` + `disputeWindow`; `SpendRequested` + `participants, shares, noteHash`. New views: `positionOf`, `spendParticipants`, `spendCount`, `inviteDigest`. `getSpend` reverts with `SpendNotFound` for unknown ids.
-- The ABI in `@tekosoe/shared` is now generated from `forge build` (`npm run abi -w @tekosoe/contracts`).
+- The ABI in `@tekosue/shared` is now generated from `forge build` (`npm run abi -w @tekosue/contracts`).
 - `foundry.toml`: `evm_version = "prague"` (required for Monad).
 
 ## Consequences

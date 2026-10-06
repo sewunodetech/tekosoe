@@ -1,6 +1,6 @@
 # Prompt: Generate Backend Tekosue (Express.js)
 
-**Cara pakai:** buka Claude Code (atau AI coding tool lain) di root monorepo, lampirkan `Tekosoe_-_Dokumen_Produk.md`, lalu tempel semua isi di bawah garis ini sebagai prompt.
+**Cara pakai:** buka Claude Code (atau AI coding tool lain) di root monorepo, lampirkan `Tekosue_-_Dokumen_Produk.md`, lalu tempel semua isi di bawah garis ini sebagai prompt.
 
 ---
 

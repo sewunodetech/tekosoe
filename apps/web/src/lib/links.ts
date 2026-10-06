@@ -1,5 +1,5 @@
-/** Deep link skema app (apps/mobile/app.json → scheme: tekosoe). */
-export const APP_SCHEME = "tekosoe://";
+/** Deep link skema app (apps/mobile/app.json → scheme: tekosue). */
+export const APP_SCHEME = "tekosue://";
 
 /** Domain publik — sama dengan EXPO_PUBLIC_PASSKEY_DOMAIN di app. */
 export const SITE_DOMAIN = "www.tekosue.xyz";
