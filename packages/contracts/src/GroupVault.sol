@@ -37,6 +37,9 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
     mapping(uint256 => mapping(uint256 => mapping(address => uint256))) internal shareOf;
     mapping(uint256 => mapping(address => uint256)) internal debt; // sisa tagihan setelah settle
     mapping(uint256 => mapping(address => uint256)) internal credit; // sisa hak yang belum terbayar
+    /// @dev Total debt per alamat di semua grup (== jumlah debt[g][m] untuk semua g). > 0 → tidak bisa
+    /// membuat atau ikut grup baru sampai lunas (ADR 0013). Tidak memblokir apa pun di grup yang sudah diikuti.
+    mapping(address => uint256) internal outstandingDebt;
 
     constructor(IERC20 ausd_) {
         if (address(ausd_) == address(0)) revert InvalidRecipient();
@@ -58,6 +61,10 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
     function _settled(uint256 groupId) internal view returns (Group storage g) {
         g = _existing(groupId);
         if (g.status != GroupStatus.Settled) revert GroupNotSettled();
+    }
+
+    function _noOutstandingDebt() internal view {
+        if (outstandingDebt[msg.sender] > 0) revert OutstandingDebt();
     }
 
     function _onlyMember(uint256 groupId) internal view {
@@ -85,6 +92,7 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
         if (inviteKey == address(0)) revert InvalidInvite();
         if (endsAt <= block.timestamp) revert InvalidEndsAt();
         if (disputeWindow > MAX_DISPUTE_WINDOW) revert InvalidDisputeWindow();
+        _noOutstandingDebt();
 
         groupId = ++groupCount;
         groups[groupId] = Group({
@@ -134,6 +142,7 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
         if (block.timestamp >= g.endsAt) revert GroupEnded();
         if (isMember[groupId][msg.sender]) revert AlreadyMember();
         if (members[groupId].length >= MAX_MEMBERS) revert GroupFull();
+        _noOutstandingDebt();
 
         bytes32 digest = MessageHashUtils.toEthSignedMessageHash(inviteDigest(groupId, msg.sender));
         (address signer, ECDSA.RecoverError err,) = ECDSA.tryRecover(digest, inviteSig);
@@ -350,6 +359,7 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
                     pull = 0;
                 }
                 debt[groupId][m] = owed - pull;
+                outstandingDebt[m] += owed - pull;
                 emit Pulled(groupId, m, pull, owed - pull);
             }
         }
@@ -420,6 +430,7 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
         if (amount > owed) amount = owed;
 
         debt[groupId][msg.sender] = owed - amount;
+        outstandingDebt[msg.sender] -= amount;
         emit DebtPaid(groupId, msg.sender, amount);
         ausd.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -529,5 +540,9 @@ contract GroupVault is IGroupVault, ReentrancyGuard {
 
     function spendCount(uint256 groupId) external view returns (uint256) {
         return spends[groupId].length;
+    }
+
+    function outstandingDebtOf(address member) external view returns (uint256) {
+        return outstandingDebt[member];
     }
 }

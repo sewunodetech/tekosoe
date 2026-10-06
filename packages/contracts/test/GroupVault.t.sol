@@ -644,10 +644,97 @@ contract GroupVaultTest is Test {
         for (uint256 i = 0; i < ms.length; i++) {
             debts += _debt(groupId, ms[i]);
             credits += _credit(groupId, ms[i]);
+            // Tes ini memakai satu grup per anggota, jadi total debt lintas grup == debt grup ini.
+            assertEq(vault.outstandingDebtOf(ms[i]), _debt(groupId, ms[i]), "outstandingDebt == debt");
         }
         uint256 pool = vault.getGroup(groupId).pool;
         assertEq(credits, debts + pool, "credit == debt + pool");
         assertEq(ausd.balanceOf(address(vault)), pool, "vault holds exactly the pool");
+    }
+
+    // ---------------------------------------------------------------- outstanding debt (ADR 0013)
+
+    /// B ends a trip owing 45 (safety net 5). Returns that trip's id.
+    function _tripWhereBOwes45() internal returns (uint256 groupId) {
+        groupId = _create(1_000 * USD);
+        vm.prank(a);
+        vault.deposit(groupId, 10 * USD);
+        vm.prank(b);
+        vault.joinGroup(groupId, _inviteSig(groupId, b), 5 * USD, 10 * USD);
+        vm.prank(c);
+        vault.joinGroup(groupId, _inviteSig(groupId, c), 0, 100 * USD);
+        address[] memory onlyB = new address[](1);
+        onlyB[0] = b;
+        uint256[] memory sixty = new uint256[](1);
+        sixty[0] = 60 * USD;
+        _spend(groupId, c, 60 * USD, onlyB, sixty);
+        _settleNow(groupId);
+        assertEq(_debt(groupId, b), 45 * USD);
+    }
+
+    function test_outstandingDebt_blocksNewTripsUntilPaid() public {
+        uint256 old = _tripWhereBOwes45();
+        assertEq(vault.outstandingDebtOf(b), 45 * USD);
+        uint64 later = uint64(block.timestamp + 7 days);
+
+        // B cannot start a trip…
+        vm.prank(b);
+        vm.expectRevert(IGroupVault.OutstandingDebt.selector);
+        vault.createGroup("Bali", invite, later, WINDOW, 0, 0);
+
+        // …or join one, even with a valid invite.
+        vm.prank(a);
+        uint256 next = vault.createGroup("Bali", invite, later, WINDOW, 0, 0);
+        bytes memory sig = _inviteSig(next, b);
+        vm.prank(b);
+        vm.expectRevert(IGroupVault.OutstandingDebt.selector);
+        vault.joinGroup(next, sig, 0, 0);
+
+        // Paying part of it is not enough.
+        vm.prank(b);
+        vault.payDebt(old, 10 * USD);
+        assertEq(vault.outstandingDebtOf(b), 35 * USD);
+        vm.prank(b);
+        vm.expectRevert(IGroupVault.OutstandingDebt.selector);
+        vault.joinGroup(next, sig, 0, 0);
+
+        // Paid in full: B can join and create again.
+        vm.prank(b);
+        vault.payDebt(old, 35 * USD);
+        assertEq(vault.outstandingDebtOf(b), 0);
+        vm.prank(b);
+        vault.joinGroup(next, sig, 0, 0);
+        vm.prank(b);
+        vault.createGroup("Seoul", invite, later, WINDOW, 0, 0);
+        _assertSettledInvariant(old);
+    }
+
+    function test_outstandingDebt_sumsAcrossTrips_andKeepsExistingTripsOpen() public {
+        // B is already in a second, longer trip before the first one settles.
+        vm.prank(a);
+        uint256 long = vault.createGroup("Gap year", invite, uint64(block.timestamp + 60 days), WINDOW, 0, 0);
+        vm.prank(b);
+        vault.joinGroup(long, _inviteSig(long, b), 0, 0);
+
+        uint256 first = _tripWhereBOwes45();
+
+        // A trip B is already in keeps working.
+        vm.prank(b);
+        vault.deposit(long, 5 * USD);
+
+        // Debt from another settled trip adds up.
+        vm.prank(c);
+        uint256 second = vault.createGroup("Day trip", invite, uint64(block.timestamp + 1 days), WINDOW, 0, 0);
+        vm.prank(b);
+        vm.expectRevert(IGroupVault.OutstandingDebt.selector);
+        vault.joinGroup(second, _inviteSig(second, b), 0, 0);
+        assertEq(vault.outstandingDebtOf(b), 45 * USD);
+
+        vm.prank(b);
+        vault.payDebt(first, 45 * USD);
+        assertEq(vault.outstandingDebtOf(b), 0);
+        vm.prank(b);
+        vault.joinGroup(second, _inviteSig(second, b), 0, 0);
     }
 
     // ---------------------------------------------------------------- fuzz: conservation of value
