@@ -102,6 +102,14 @@ Welcome → Sign in (passkey) → Home → New trip → Share invite → Friend 
 | **Invite link on the web** | `www.tekosue.xyz/j/<code>` shows the real trip (name, members, end date, pot) before the app is installed, then opens the app. |
 | **Invoice check on the web** | `www.tekosue.xyz/v/<number>` rebuilds the invoice from the indexed settle-up and says whether it matches. No sign-in needed. |
 
+**If someone doesn't pay.** Whatever a safety net couldn't cover at settle-up stays as a bill on their invoice. Nothing is frozen and the money stays theirs, but until the bill is paid the contract won't let them start or join another trip, the app shows what they owe with a **Pay** button, and they get a reminder once a day. Trips they're already in keep working.
+
+<p align="center">
+  <img src="docs/assets/screens/debt-home.png" alt="Home: You still owe $10.00 from Bali Weekend, with a Pay $10.00 button" width="230" />
+  &nbsp;
+  <img src="docs/assets/screens/debt-new-trip.png" alt="New trip: blocked with You still owe $10.00. Pay it first, then you can start a new trip" width="230" />
+</p>
+
 **Install on Android:** open [www.tekosue.xyz/get-app](https://www.tekosue.xyz/get-app) on your phone, or the [EAS build page](https://expo.dev/accounts/kyy27/projects/tekosoe/builds/542c7b62-da5e-4809-88f2-d966ed55f47e) and scan its QR code. It runs live on Monad testnet; sign in with a passkey (Android needs a screen lock, and Google Password Manager stores the passkey).
 
 Run it yourself: see [Getting started](#-getting-started).
