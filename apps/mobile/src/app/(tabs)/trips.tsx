@@ -20,6 +20,8 @@ import { useProfile } from '@/features/profile/useProfile';
 import { TourOverlay } from '@/features/tour/tour-overlay';
 import { useTour } from '@/features/tour/use-tour';
 import { useTrips } from '@/features/trips/useTrips';
+import { useOutstandingDebt } from '@/features/trips/useOutstandingDebt';
+import { DebtNotice } from '@/components/debt-notice';
 import { money, signed } from '@/lib/money';
 
 // 03 Home — canvas "Final UI" › F03Home, plus kartu grup besar dari S05BigGroup.
@@ -50,6 +52,8 @@ function HomeView({
   const me = { name: profile?.name ?? 'there', tint: profile?.tint ?? palette.sky };
   // Titik di lonceng = ada permintaan bayar yang menunggu persetujuanmu.
   const needsYou = useFeed().data?.some((item) => item.needsYou) ?? false;
+  // Utang dari trip yang sudah settle menahan trip baru (ADR 0013): tampilkan di depan, bukan saat ditolak.
+  const debt = useOutstandingDebt().data;
   // Kunci struk menyebar ke teman setiap kali app dibuka (bukan hanya saat ada yang membuka struk).
   useReceiptKeySync(list.map((trip) => trip.id));
 
@@ -91,6 +95,8 @@ function HomeView({
           {needsYou && <View style={styles.badgeDot} />}
         </Pressable>
       </View>
+
+      {debt && debt.total > 0n ? <DebtNotice debt={debt} action="start" /> : null}
 
       <Text variant="h2">Your trips</Text>
 
