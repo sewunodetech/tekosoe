@@ -25,7 +25,7 @@ export const VERIFY_COPY: Record<Exclude<VerifyResult["kind"], "match">, { mood:
   unavailable: { mood: "sleep", tone: "bg-sand text-slate", text: "We can't check this invoice right now. Try again in a minute." },
 };
 
-// Halaman tujuan QR invoice (tekosue.xyz/v/<nomor>?<kode akses>). Shell statis /v/_: nomor dari path,
+// Halaman tujuan QR invoice (www.tekosue.xyz/v/<nomor>?<kode akses>). Shell statis /v/_: nomor dari path,
 // kode akses dari query; invoice dibangun ulang dari catatan trip (Envio) lalu dicocokkan dengan invoice dari api.
 export function VerifyView() {
   const location = useBrowserLocation();

@@ -4,7 +4,7 @@ import { SITE_DOMAIN } from "./links";
 export const ACCESS_PARAM = "token"; // copy-guard-ignore: nama parameter URL, bukan teks layar
 
 /**
- * URL lengkap untuk QR dan link: `https://tekosue.xyz/v/<nomor>[?<kode akses>]`.
+ * URL lengkap untuk QR dan link: `https://www.tekosue.xyz/v/<nomor>[?<kode akses>]`.
  * Kode akses ikut di URL supaya siapa pun yang memindai bisa memeriksa invoice tanpa login.
  */
 export function verifyHref(number: string, accessKey?: string | null): string {
@@ -13,7 +13,7 @@ export function verifyHref(number: string, accessKey?: string | null): string {
   return url.toString();
 }
 
-/** Teks yang terlihat: `tekosue.xyz/v/<nomor>`, tanpa query. */
+/** Teks yang terlihat: `www.tekosue.xyz/v/<nomor>`, tanpa query. */
 export function verifyLabel(number: string): string {
   return `${SITE_DOMAIN}/v/${number}`;
 }
