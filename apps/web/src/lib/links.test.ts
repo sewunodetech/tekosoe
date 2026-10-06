@@ -10,7 +10,7 @@ const secret = fc.array(hexChar, { minLength: 64, maxLength: 64 }).map((c) => c.
 
 describe("invite code", () => {
   it("uses the new domain", () => {
-    expect(SITE_DOMAIN).toBe("tekosue.xyz");
+    expect(SITE_DOMAIN).toBe("www.tekosue.xyz");
   });
 
   // Feature: tekosue-rebrand-live-web, Property 1: Parse kode undangan — round trip dan penolakan
@@ -18,7 +18,7 @@ describe("invite code", () => {
     fc.assert(
       fc.property(fc.bigInt({ min: 0n, max: 2n ** 64n }), secret, (groupId, s) => {
         const code = `${groupId}-${s}`;
-        const parsed = parseInviteCode(segmentAfter(new URL(`https://tekosue.xyz/j/${code}`).pathname, "/j/"));
+        const parsed = parseInviteCode(segmentAfter(new URL(`https://www.tekosue.xyz/j/${code}`).pathname, "/j/"));
         expect(parsed).toEqual({ groupId: String(groupId) });
         expect(JSON.stringify(parsed).toLowerCase()).not.toContain(s.toLowerCase());
       }),
@@ -48,11 +48,11 @@ describe("verify link", () => {
     fc.assert(
       fc.property(number, fc.string({ minLength: 1, maxLength: 60 }), (n, key) => {
         const url = new URL(verifyHref(n, key));
-        expect(url.host).toBe("tekosue.xyz");
+        expect(url.host).toBe("www.tekosue.xyz");
         expect(url.pathname).toBe(`/v/${n}`);
         expect(url.searchParams.get("token")).toBe(key);
         const label = verifyLabel(n);
-        expect(label).toBe(`tekosue.xyz/v/${n}`);
+        expect(label).toBe(`www.tekosue.xyz/v/${n}`);
         expect(label).not.toMatch(/token|\?/i);
       }),
       { numRuns: 100 },
@@ -60,6 +60,6 @@ describe("verify link", () => {
   });
 
   it("has no query without an access key", () => {
-    for (const key of [undefined, null, ""]) expect(verifyHref("INV-1-001", key)).toBe("https://tekosue.xyz/v/INV-1-001");
+    for (const key of [undefined, null, ""]) expect(verifyHref("INV-1-001", key)).toBe("https://www.tekosue.xyz/v/INV-1-001");
   });
 });

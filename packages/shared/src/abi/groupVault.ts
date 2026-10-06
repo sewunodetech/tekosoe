@@ -550,6 +550,25 @@ export const groupVaultAbi = [
   },
   {
     "type": "function",
+    "name": "outstandingDebtOf",
+    "inputs": [
+      {
+        "name": "member",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "payDebt",
     "inputs": [
       {
@@ -1282,6 +1301,11 @@ export const groupVaultAbi = [
   {
     "type": "error",
     "name": "NotSpender",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OutstandingDebt",
     "inputs": []
   },
   {

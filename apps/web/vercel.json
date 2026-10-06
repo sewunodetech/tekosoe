@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/j/:code", "destination": "/j/_" },
+    { "source": "/v/:number", "destination": "/v/_" }
+  ],
+  "headers": [
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
+    {
+      "source": "/.well-known/assetlinks.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
+    {
+      "source": "/(j|v)/(.*)",
+      "headers": [{ "key": "Referrer-Policy", "value": "no-referrer" }]
+    }
+  ]
+}

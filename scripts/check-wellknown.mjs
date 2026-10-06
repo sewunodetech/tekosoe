@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Cek file asosiasi domain untuk passkey native (Mera via react-native-passkey).
 //
-//   node scripts/check-wellknown.mjs                         # domain = EXPO_PUBLIC_PASSKEY_DOMAIN / tekosue.xyz
-//   node scripts/check-wellknown.mjs tekosue.xyz --sha256 AB:CD:...   # pastikan fingerprint build EAS terdaftar
+//   node scripts/check-wellknown.mjs                         # domain = EXPO_PUBLIC_PASSKEY_DOMAIN / www.tekosue.xyz
+//   node scripts/check-wellknown.mjs www.tekosue.xyz --sha256 AB:CD:...   # pastikan fingerprint build EAS terdaftar
 //   node scripts/check-wellknown.mjs http://localhost:3000   # cek build lokal sebelum deploy (lewati cek HTTPS/Google/Apple)
 //
 // Passkey Android butuh: https://<rpId>/.well-known/assetlinks.json → 200 langsung (tanpa redirect),
@@ -27,7 +27,7 @@ for (let i = 0; i < args.length; i++) {
   else target = args[i];
 }
 
-target ??= readEnvDomain() ?? "tekosue.xyz";
+target ??= readEnvDomain() ?? "www.tekosue.xyz";
 const isLocal = /^http:\/\//.test(target);
 const base = /^https?:\/\//.test(target) ? target.replace(/\/$/, "") : `https://${target}`;
 const host = new URL(base).hostname;

@@ -3,9 +3,8 @@ import express, { Router } from "express";
 import { decodeEventLog, type Hex } from "viem";
 import { groupVaultAbi } from "@tekosue/shared";
 import type { RouteContext } from "../../context";
-import { ensureInvoices } from "../invoices/service";
 import { extractLogs } from "./extract";
-import { dispatchEvent } from "./notify";
+import { handleGroupEvent } from "../notify/events";
 
 /**
  * HMAC-SHA256 over the raw body compared with `x-alchemy-signature`.
@@ -70,25 +69,7 @@ export async function handleAlchemyWebhook(
       continue;
     }
 
-    if (decoded.eventName === "DebtPaid") {
-      // Invoice "due" → "paid" once the paid amount covers the remaining debt.
-      await ctx.repos.invoices
-        .recordDebtPaid(
-          Number(decoded.args.groupId),
-          decoded.args.member.toLowerCase(),
-          decoded.args.amount,
-        )
-        .catch((error: unknown) => {
-          ctx.logger.error({ err: error, txHash: log.txHash }, "could not record DebtPaid on invoice");
-        });
-    }
-    if (decoded.eventName === "Settled") {
-      // Covers groups settled by a member instead of our scheduler.
-      await ensureInvoices(ctx, decoded.args.groupId, log.txHash).catch((error: unknown) => {
-        ctx.logger.error({ err: error, txHash: log.txHash }, "could not create invoices from webhook");
-      });
-    }
-    await dispatchEvent(ctx, decoded);
+    await handleGroupEvent(ctx, { eventName: decoded.eventName, args: decoded.args as Record<string, unknown> }, log.txHash);
   }
 }
 

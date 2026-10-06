@@ -36,7 +36,9 @@ contracts:
 # Nilai per lingkungan dari env (awalan wajib ENVIO_, lihat .env.example). Default = GroupVault v1 testnet.
 chains:
   - id: ${ENVIO_CHAIN_ID:-10143} # Monad testnet
-    start_block: ${ENVIO_START_BLOCK:-66921819} # blok deploy GroupVault v1 (30 Sep 2026)
+    # Blok deploy GroupVault v1 lama (30 Sep 2026): menjaga riwayat Top up / Cash out AUSD. GroupVault saat ini
+    # (ADR 0013) di-deploy di blok 68690383; sebelum itu tidak ada event-nya, jadi tidak perlu dimajukan.
+    start_block: ${ENVIO_START_BLOCK:-66921819}
     # Sumber utama: HyperSync (butuh ENVIO_API_TOKEN). RPC Monad hanya cadangan saat realtime macet.
     # Tanpa token: set ENVIO_RPC_FOR=sync supaya seluruh sinkron lewat RPC.
     rpc:
@@ -47,6 +49,6 @@ chains:
       interval_ceiling: 100
     contracts:
       - name: GroupVault
-        address: "${ENVIO_GROUP_VAULT_ADDRESS:-0x1467c9de54C1e4570AF062E80E860F94852BB7ee}"
+        address: "${ENVIO_GROUP_VAULT_ADDRESS:-0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0}"
       - name: Ausd
         address: "${ENVIO_AUSD_ADDRESS:-0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC}"

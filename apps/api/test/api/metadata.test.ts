@@ -1,7 +1,7 @@
 import request from "supertest";
 import { keccak256 } from "viem";
 import { describe, expect, it } from "vitest";
-import { sendPlan } from "../../src/modules/webhooks/notify";
+import { sendPlan } from "../../src/modules/notify/plan";
 import {
   authHeader,
   createFakeChain,

@@ -17,6 +17,10 @@ export function mapTxError(error: unknown): string {
   ) {
     return "We're getting your account ready. Please try again in a minute.";
   }
+  // GroupVault.OutstandingDebt (ADR 0013): masih ada utang dari trip yang sudah settle.
+  if (lower.includes('outstandingdebt')) {
+    return "You still owe money from a past trip. Pay it from that trip's invoice, then try again.";
+  }
   if (lower.includes('top up first')) {
     return 'Not enough dollars. Top up first from your Profile.';
   }
@@ -39,7 +43,7 @@ export function mapTxError(error: unknown): string {
   if (lower.includes('expired')) {
     return 'This request has expired.';
   }
-  if (lower.includes('group full') || lower.includes('limit reached')) {
+  if (lower.includes('group full') || lower.includes('groupfull') || lower.includes('limit reached')) {
     return 'This trip has reached its member limit.';
   }
   return 'Unable to complete request. Please try again.';

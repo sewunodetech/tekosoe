@@ -4,7 +4,7 @@ Kontrak `GroupVault` (Foundry + OpenZeppelin v5). Spesifikasi: `docs/03-technica
 
 ## Status
 
-`src/GroupVault.sol` **v1 terimplementasi** (ADR 0005), 25 test termasuk fuzz konservasi nilai, akun AUSD dibekukan, dan reentrancy. Belum di-deploy. `src/interfaces/IGroupVault.sol` adalah kontrak antarmuka yang dipakai app, api, dan indexer — ubah dengan hati-hati.
+`src/GroupVault.sol` **v1 + ADR 0013** (utang yang belum lunas menghalangi trip baru: `outstandingDebt`, `OutstandingDebt()`, `outstandingDebtOf`), 28 test termasuk fuzz konservasi nilai, akun AUSD dibekukan, dan reentrancy. `src/interfaces/IGroupVault.sol` adalah kontrak antarmuka yang dipakai app, api, dan indexer — ubah dengan hati-hati.
 
 ## Model
 
@@ -16,6 +16,7 @@ Kontrak `GroupVault` (Foundry + OpenZeppelin v5). Spesifikasi: `docs/03-technica
 - `payDebt` langsung meneruskan AUSD ke pemilik `credit`; `claimCredit` mengambil credit yang dananya ditahan kas.
 - `joinGroupWithPermit` / `depositWithPermit` memakai permit AUSD (EIP-2612) supaya satu transaksi.
 - Maks. 10 anggota → settle cukup satu transaksi dengan loop sederhana.
+- `outstandingDebt[m]` = total debt m di semua grup; > 0 → `createGroup`/`joinGroup*` revert `OutstandingDebt()` (ADR 0013). Grup yang sudah diikuti tidak terpengaruh.
 
 ## Aturan keamanan (wajib)
 

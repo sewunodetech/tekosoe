@@ -12,6 +12,7 @@ import { combine, QueryState } from '@/components/query-state';
 import { colors, fonts, radius } from '@/constants/theme';
 import type { Settlement, Trip } from '@/data/types';
 import { useSettlement } from '@/features/trips/useSettlement';
+import { useOutstandingDebt } from '@/features/trips/useOutstandingDebt';
 import { useTrip } from '@/features/trips/useTrip';
 import { isLive } from '@/lib/env';
 import { money } from '@/lib/money';
@@ -29,6 +30,8 @@ export default function SettledScreen() {
 }
 
 function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement }) {
+  // Sisa yang belum tertutup safety net (debt on-chain, dari Envio). Selama > 0 tidak bisa membuat/ikut trip baru.
+  const owed = useOutstandingDebt().data?.trips.find((t) => t.tripId === trip.id)?.debt ?? 0n;
   // Belum settle: belum ada hasil maupun invoice, jadi kembali ke layar trip (mis. dari link lama).
   if (!trip.settled) return <Redirect href={`/trip/${trip.id}`} />;
   const mine = settlement.rows.find((r) => r.member.label === 'You');
@@ -36,27 +39,35 @@ function SettledView({ trip, settlement }: { trip: Trip; settlement: Settlement 
 
   return (
     <Screen
-      background={<Confetti />}
+      background={owed > 0n ? undefined : <Confetti />}
       footer={
         <>
           <Link href={`/trip/${trip.id}/invoice?who=jack`} asChild>
-            <Button label="See your invoice" />
+            <Button label={owed > 0n ? `Pay ${money(owed)}` : 'See your invoice'} />
           </Link>
-          <Link href="/trip/new" asChild>
-            <Button label="Plan another trip" variant="ghost" />
-          </Link>
+          {owed === 0n && (
+            <Link href="/trip/new" asChild>
+              <Button label="Plan another trip" variant="ghost" />
+            </Link>
+          )}
         </>
       }>
       <View style={styles.center}>
         <Pop>
-          <Teko mood="cheer" size={150} />
+          <Teko mood={owed > 0n ? 'worry' : 'cheer'} size={150} />
         </Pop>
         <Pill label={`${trip.name} · settled ${settlement.date}`} bg={colors.positiveBg} color={colors.positiveText} />
         <Text variant="hero" style={[styles.textCenter, { fontSize: 34 }]}>
-          {(mine?.net ?? 0n) >= 0n ? `You got ${money(mine?.net ?? 0n)} back` : `You covered ${money(-(mine?.net ?? 0n))}`}
+          {owed > 0n
+            ? `You still owe ${money(owed)}`
+            : (mine?.net ?? 0n) >= 0n
+              ? `You got ${money(mine?.net ?? 0n)} back`
+              : `You covered ${money(-(mine?.net ?? 0n))}`}
         </Text>
-        <Text style={{ fontFamily: fonts.body, fontSize: 15 }} color={colors.textMuted}>
-          Already in your balance. Nothing to chase.
+        <Text style={[styles.textCenter, { fontFamily: fonts.body, fontSize: 15 }]} color={colors.textMuted}>
+          {owed > 0n
+            ? 'Your safety net covered part of it. Pay the rest to start or join your next trip.'
+            : 'Already in your balance. Nothing to chase.'}
         </Text>
       </View>
 

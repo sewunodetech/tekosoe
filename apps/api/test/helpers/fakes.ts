@@ -28,7 +28,7 @@ import type {
   SpendReviewRow,
 } from "../../src/db/repos";
 import type { StorageService } from "../../src/integrations/storage";
-import type { DueGroup, EnvioClient } from "../../src/integrations/envio";
+import type { ActivityRow, DueGroup, EnvioClient, OpenDebt } from "../../src/integrations/envio";
 import type { PushMessage, PushResult, PushService } from "../../src/integrations/expoPush";
 import { createSilentLogger } from "../../src/lib/logger";
 import { createSchedulerState } from "../../src/modules/settle/state";
@@ -463,13 +463,32 @@ export interface FakeEnvio extends EnvioClient {
   groups: DueGroup[];
   failNext: boolean;
   settleTxs: Map<string, string>;
+  activities: ActivityRow[];
+  debts: OpenDebt[];
+  shares: Map<string, { participant: string; share: bigint }[]>;
 }
 
 export function createFakeEnvio(groups: DueGroup[] = []): FakeEnvio {
   const state = { groups: [...groups], failNext: false };
   const settleTxs = new Map<string, string>();
+  const activities: ActivityRow[] = [];
+  const debts: OpenDebt[] = [];
+  const shares = new Map<string, { participant: string; share: bigint }[]>();
   return {
     settleTxs,
+    activities,
+    debts,
+    shares,
+    async activitiesSince(fromTimestamp, limit) {
+      if (state.failNext) throw new Error("indexer unavailable");
+      return activities.filter((row) => row.timestamp >= fromTimestamp).slice(0, limit);
+    },
+    async openDebts(limit) {
+      return debts.slice(0, limit);
+    },
+    async spendShares(groupId, spendId) {
+      return shares.get(`${groupId}-${spendId}`) ?? [];
+    },
     get groups() {
       return state.groups;
     },

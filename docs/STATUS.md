@@ -78,7 +78,7 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 
 - [x] W-4 Landing page + dashboard demo hanya-baca (`/`, `/trips`, `/trips/[id]`, members, payment details, settle preview, invoice, `/card`, `/profile`), mobile-only, desain dari app, data demo lewat `TripRepository`
 - [x] `/j/[code]` (undangan) dan `/v/[number]` (verifikasi) memakai sistem desain yang sama; `/v` masih data demo
-- [x] Rebrand ke **Tekosue** + domain **`tekosue.xyz`** (6 Oct, ADR 0011): paket `@tekosue/*`, rpId passkey/App Links/link undangan/QR invoice di `tekosue.xyz`, identifier native & kunci perangkat lama dipertahankan (`scripts/rebrand-guard.test.mjs`). *Passkey lama di `tekosoe.mulalabs.biz.id` tidak bisa dipakai lagi. Tertunda manual: DNS `tekosue.xyz` → VPS, router Traefik, `CORS_ORIGINS` api produksi, env EAS + APK baru, `npm run check:wellknown -- tekosue.xyz`.*
+- [x] Rebrand ke **Tekosue** + domain **`www.tekosue.xyz`** (6 Oct, ADR 0011; apex redirects to www on Vercel): paket `@tekosue/*`, rpId passkey/App Links/link undangan/QR invoice di `tekosue.xyz`, identifier native & kunci perangkat lama dipertahankan (`scripts/rebrand-guard.test.mjs`). *Passkey lama di `tekosoe.mulalabs.biz.id` tidak bisa dipakai lagi. Tertunda manual: DNS `tekosue.xyz` → VPS, router Traefik, `CORS_ORIGINS` api produksi, env EAS + APK baru, `npm run check:wellknown -- www.tekosue.xyz` (Android ✅ 6 Oct; AASA content type fixed by `apps/web/vercel.json` after deploy).*
 - [ ] W-1 `.well-known`: Team ID Apple, bundle ID `com.tekosoe.xyz`, `Content-Type: application/json` untuk `apple-app-site-association`
 - [ ] 🟡 W-3 Verifikasi invoice nyata + undangan live (6 Oct, ADR 0012): kode selesai dan dites (vitest + fast-check). `/j/<kode>` sudah menampilkan trip nyata dari Envio + api (diuji lokal terhadap testnet: trip 10 "Halan halan", trip 8, trip tidak ada, link salah). `/v/<nomor>?token=` membangun ulang invoice dari Envio dengan `invoiceSettlementsFromOutcome` (sama dengan api) dan mencocokkan payload + sidik jari; app memasukkan kode akses ke QR/share/PDF. Web sekarang static export + nginx (`apps/web/Dockerfile`). *Belum dicentang: butuh deploy indexer baru (`Member.position`, `Activity.remaining`) + sinkron ulang Envio dari `start_block`, deploy image web, lalu uji QR invoice nyata → "cocok" di testnet.*
 - [ ] Sambungkan dashboard ke Envio/api (implementasi live `TripRepository`) — menunggu C-6, D-1
@@ -95,16 +95,17 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 - [ ] Simulated card (FR-16)
 - [ ] Passkey-derived encryption key, trip key (FR-17)
 
-### P3 — Alchemy (dropped from scope, see `docs/ROADMAP.md`)
+### P3 — Alchemy (dropped, ADR 0014)
 
-- [ ] Gas Manager with Mera accounts (half a day max)
-- [ ] Webhooks → push notifications (FR-18)
+- [x] Alchemy removed from the landing page "Built with" (6 Oct). Network fees stay covered by our MON drip.
+- [ ] 🟡 Push notifications from **Envio** instead of Alchemy webhooks (6 Oct, ADR 0014): approval requests, payments with your share, declined/disputed payments, settle-up results, and a daily "You still owe $X" reminder (ADR 0013). *Needs `FEATURE_PUSH=true` on the api and a native build (Expo Go on Android has no push). Not yet verified on a phone.*
 
 ## Deployments
 
 | Item | Value |
 | --- | --- |
-| GroupVault v1 (Monad testnet) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee`, block 66921819 (source verified, exact match, Sourcify via BlockVision, 3 Oct; built from commit `39827cd`), tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
+| GroupVault v1 + ADR 0013 (Monad testnet, **current**) | `0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0`, block 68690383, tx `0x5bdf122866c38f61110388919cca9194cd66a1be887e51b43fd3bf462fd7d6a6` (6 Oct; unpaid debt blocks new trips). Source verification pending |
+| GroupVault v1 (old, test data only) | `0x1467c9de54C1e4570AF062E80E860F94852BB7ee`, block 66921819 (source verified, exact match, Sourcify via BlockVision, 3 Oct; built from commit `39827cd`), tx `0xdb7fc5e2da71b71ae27ad0d72025215c52588d8fa93b4243b7987bb913731dcb` |
 | AUSD testnet | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` (verified: Agora docs + on-chain) |
 | AUSD testnet faucet | `0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C`, `requestFunds(address)` |
 | Envio GraphQL | `https://graphql.mulalabs.biz.id/v1/graphql` (`docker-compose.yml`) |

@@ -5,7 +5,7 @@ Express 5 (Node 22/TypeScript, ESM, dijalankan dengan `tsx`) dalam Docker, deplo
 1. **Penjadwal settle** — `setInterval` di dalam proses (`src/modules/settle/scheduler.ts`): cari grup Active yang jatuh tempo lewat Envio, cek `endsAt + disputeWindow` dari kontrak (waktu blok, bukan jam server), `simulate` lalu kirim `settle(groupId)`, backoff eksponensial di `settle_runs`.
 2. **Gas** — drip MON untuk alamat baru, dan isi ulang kalau saldonya di bawah minimum setelah cooldown (`POST /api/drip`), dibatasi rate limit per IP, cap harian, dan cek saldo minimum.
 3. **Satu-satunya pintu ke database** (Postgres via `DATABASE_URL`, Drizzle) dan object storage struk (S3-compatible, presigned URL) — app tidak pernah terhubung langsung.
-4. **Push notification** — webhook Alchemy → decode event GroupVault → kirim push lewat Expo (P3, `FEATURE_PUSH`).
+4. **Push notification** — `modules/notify`: poller Envio (`NOTIFY_SOURCE=envio`, default) membaca `Activity` baru → `handleGroupEvent` (invoice DebtPaid/Settled + push lewat Expo kalau `FEATURE_PUSH`), plus pengingat utang harian (ADR 0013/0014). Webhook Alchemy hanya sumber opsional.
 5. **Metadata & invoice** — profil, label trip/pemakaian (dikunci ke hash on-chain), invoice per anggota setelah settle.
 
 Referensi endpoint: [`docs/API.md`](docs/API.md), OpenAPI di [`docs/openapi.yaml`](docs/openapi.yaml) (Swagger UI di `GET /api/docs`). Asumsi dan celah terhadap spesifikasi: [`docs/coverage.md`](docs/coverage.md).

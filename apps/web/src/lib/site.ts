@@ -1,5 +1,5 @@
 /** Domain web = domain passkey (rpId): di sanalah /.well-known dilayani dan link undangan membuka app. */
-export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tekosue.xyz";
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.tekosue.xyz";
 
 /** apps/api publik: nama trip (`GET /api/groups/:id/meta`) dan invoice bertoken (`GET /api/invoices/:number?token=`). */
 export const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "https://api.mulalabs.biz.id").replace(/\/$/, "");

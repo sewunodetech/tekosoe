@@ -21,6 +21,7 @@ export function usePayDebt(tripId: string) {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['invoice'] });
       queryClient.invalidateQueries({ queryKey: ['ausd'] });
+      queryClient.invalidateQueries({ queryKey: ['outstanding-debt'] });
     },
   });
 }

@@ -8,9 +8,9 @@ export const MONAD_TESTNET_CHAIN_ID = 10143;
 /** Maksimal anggota per grup; settle-up berjalan dalam satu transaksi dengan loop sederhana. */
 export const MAX_GROUP_MEMBERS = 10;
 
-/** GroupVault v1 (ADR 0005) di Monad testnet — deploy 30 Sep 2026, blok 66921819. */
-export const GROUP_VAULT_TESTNET_ADDRESS = "0x1467c9de54C1e4570AF062E80E860F94852BB7ee" as const;
-export const GROUP_VAULT_TESTNET_START_BLOCK = 66921819;
+/** GroupVault v1 + ADR 0013 (utang menghalangi trip baru) di Monad testnet — deploy 6 Okt 2026, blok 68690383. */
+export const GROUP_VAULT_TESTNET_ADDRESS = "0x02Fb964B6b4470C14D61738EC0a296fa9F2dbCE0" as const;
+export const GROUP_VAULT_TESTNET_START_BLOCK = 68690383;
 
 /**
  * AUSD (Agora Dollar) di Monad testnet — terverifikasi 30 Sep 2026 di

@@ -227,3 +227,23 @@ export async function waitForIndexer(blockNumber: bigint, timeoutMs = 45_000): P
 }
 
 export const envioConfigured = () => Boolean(env.envioGraphqlUrl);
+
+const MY_DEBTS = gql`
+  query MyDebts($address: String!) {
+    Member(where: { address: { _eq: $address }, debt: { _gt: "0" } }) {
+      debt
+      group {
+        id
+        name
+      }
+    }
+  }
+`;
+
+/** Trip yang masih menyisakan utang untuk alamat ini (setelah settle-up). Kosong = boleh buat/ikut trip baru. */
+export async function fetchMyDebts(address: string): Promise<{ tripId: string; tripName: string; debt: bigint }[]> {
+  const data = await query<{ Member: { debt: string; group: { id: string; name: string } }[] }>(MY_DEBTS, {
+    address: address.toLowerCase(),
+  });
+  return data.Member.map((row) => ({ tripId: row.group.id, tripName: row.group.name, debt: BigInt(row.debt) }));
+}

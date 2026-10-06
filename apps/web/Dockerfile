@@ -22,7 +22,7 @@ RUN npm ci -w @tekosue/web -w @tekosue/shared --include-workspace-root
 COPY packages/shared packages/shared
 COPY apps/web apps/web
 
-ARG NEXT_PUBLIC_SITE_URL=https://tekosue.xyz
+ARG NEXT_PUBLIC_SITE_URL=https://www.tekosue.xyz
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ENVIO_GRAPHQL_URL
 ARG NEXT_PUBLIC_ANDROID_APK_URL

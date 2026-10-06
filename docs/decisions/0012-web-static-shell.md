@@ -46,3 +46,7 @@
 - `next dev` hanya mengenal `/j/_` dan `/v/_`; uji kode/nomor nyata dengan `npm run build && npm run preview`.
 - Prefetch segmen RSC (`__next.*.__PAGE__.txt`) mendapat 404 di static export versi Next ini karena file ditulis bersarang; navigasi tetap jalan.
 - `CORS_ORIGINS` produksi api harus memuat `https://tekosue.xyz` (kosong = terbuka); endpoint Envio publik harus HTTPS dan mengizinkan origin itu.
+
+## Update (6 Oct 2026): hosting di Vercel
+
+`www.tekosue.xyz` dilayani Vercel (project root `apps/web`). Aturan nginx dicerminkan di `apps/web/vercel.json`: rewrite `/j/:code` → `/j/_` dan `/v/:number` → `/v/_` (tujuan tanpa `.html` karena build Next di Vercel menyajikan route tanpa ekstensi, dan rewrite hanya jalan kalau tujuannya ada), `Content-Type: application/json` untuk kedua file `.well-known`, dan `Referrer-Policy: no-referrer` untuk `/j` dan `/v`. Image nginx (`apps/web/Dockerfile`) tetap ada sebagai opsi hosting di VPS.

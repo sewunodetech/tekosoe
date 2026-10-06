@@ -122,6 +122,8 @@ interface IGroupVault {
     error NotSpender();
     error NoDebt();
     error NoCredit();
+    /// @notice Pemanggil masih punya debt di trip lain; lunasi dulu sebelum membuat/ikut trip baru.
+    error OutstandingDebt();
 
     // ---------------------------------------------------------------- mutations
 
@@ -210,6 +212,9 @@ interface IGroupVault {
         returns (address[] memory participants, uint256[] memory shares);
 
     function spendCount(uint256 groupId) external view returns (uint256);
+
+    /// @notice Total debt `member` di semua trip vault ini. > 0 → tidak bisa membuat/ikut trip baru.
+    function outstandingDebtOf(address member) external view returns (uint256);
 
     /// @notice Digest yang ditandatangani kunci undangan (EIP-191 personal_sign atas 32 byte ini).
     function inviteDigest(uint256 groupId, address joiner) external view returns (bytes32);

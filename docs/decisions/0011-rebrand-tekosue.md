@@ -32,3 +32,7 @@ Nama produk yang benar adalah **Tekosue**; repo, paket, dan UI masih memakai "Te
 - **Build native baru wajib** (associated domains + intent filter ikut biner): set env EAS `EXPO_PUBLIC_PASSKEY_DOMAIN=tekosue.xyz` dan `EXPO_PUBLIC_WEB_DOMAIN=tekosue.xyz`, build APK/iOS, lalu `npm run check:wellknown -- tekosue.xyz --sha256 <fingerprint EAS>`.
 - DNS `tekosue.xyz` → VPS, router Traefik (lihat ADR 0012), dan `CORS_ORIGINS` produksi api harus memuat `https://tekosue.xyz`.
 - Perintah workspace sekarang `-w @tekosue/<nama>`; hapus `node_modules/@tekosoe` lama lalu `npm install` di root.
+
+## Update (6 Oct 2026): `www.tekosue.xyz`
+
+Apex `tekosue.xyz` di Vercel me-redirect (308) ke `www.tekosue.xyz`, sedangkan passkey dan App Links butuh `/.well-known` yang menjawab 200 tanpa redirect. Domain app (rpId passkey, associated domains, App Links `/j/*`, link undangan, QR invoice, `SITE_DOMAIN`) karena itu **`www.tekosue.xyz`**. Apex tetap me-redirect ke www untuk pengunjung. Passkey terikat ke rpId `www.tekosue.xyz`; jangan pindah ke apex nanti tanpa rencana migrasi akun. Dicek dengan `npm run check:wellknown -- www.tekosue.xyz` (Digital Asset Links Google sudah menautkan fingerprint EAS).

@@ -1,10 +1,11 @@
-import type { RouteContext } from "../../context";
+import type { AppDeps } from "../../context";
 import { formatAusd } from "../../lib/money";
 
 /**
- * Event → notification mapping from the backend spec (all copy is Indonesian and
- * never mentions crypto terms, NFR-07). Every message ends up as a small
- * `{ title, body, url, tag }` push payload.
+ * Event → push notification mapping. Copy is English like the app, and never uses crypto
+ * terms (no wallet, gas, token, hash, transaction — NFR-07). Each plan links into the app
+ * (`/trip/...` routes in apps/mobile). Fed by the Envio poller (ADR 0014) or the optional
+ * Alchemy webhook; both go through `handleGroupEvent`.
  */
 
 export interface DecodedGroupEvent {
@@ -21,7 +22,7 @@ export interface NotifyPlan {
   bodies: Map<string, string>;
 }
 
-const ANONYMOUS = "Seorang anggota";
+const SOMEONE = "Someone";
 
 function big(value: unknown, fallback = 0n): bigint {
   if (typeof value === "bigint") return value;
@@ -38,19 +39,23 @@ function addresses(value: unknown): string[] {
   return Array.isArray(value) ? value.map(addr).filter(Boolean) : [];
 }
 
-async function resolveGroup(ctx: RouteContext, groupId: bigint): Promise<string> {
+/** Trip name as the app shows it: the creator's name from metadata, else the on-chain name. */
+export async function resolveTripName(ctx: AppDeps, groupId: bigint): Promise<string> {
+  try {
+    const meta = await ctx.repos.groupMeta.get(Number(groupId));
+    if (meta?.name) return meta.name;
+  } catch {
+    // fall through to the chain
+  }
   try {
     const group = await ctx.chain.getGroup(groupId);
-    return group.name || `kas #${groupId}`;
+    return group.name || "Your trip";
   } catch {
-    return `kas #${groupId}`;
+    return "Your trip";
   }
 }
 
-async function loadNames(
-  ctx: RouteContext,
-  members: string[],
-): Promise<Map<string, string>> {
+async function loadNames(ctx: AppDeps, members: string[]): Promise<Map<string, string>> {
   if (members.length === 0) return new Map();
   try {
     const rows = await ctx.repos.profiles.list([...new Set(members)]);
@@ -61,36 +66,31 @@ async function loadNames(
 }
 
 function displayName(names: Map<string, string>, address: string): string {
-  return names.get(address) ?? ANONYMOUS;
+  return names.get(address) ?? SOMEONE;
 }
 
-/** Build the per-recipient bodies for one decoded event. Returns null when the event does not notify. */
-export async function buildNotifyPlan(
-  ctx: RouteContext,
-  event: DecodedGroupEvent,
-): Promise<NotifyPlan | null> {
+/** Build the per-recipient bodies for one event. Returns null when the event does not notify. */
+export async function buildNotifyPlan(ctx: AppDeps, event: DecodedGroupEvent): Promise<NotifyPlan | null> {
   const groupId = big(event.args.groupId);
   const spendId = big(event.args.spendId, -1n);
-  const groupName = await resolveGroup(ctx, groupId);
+  const trip = await resolveTripName(ctx, groupId);
   const bodies = new Map<string, string>();
   const tagParts = [event.eventName, groupId.toString()];
+  const tripUrl = `/trip/${groupId}`;
+  let url = tripUrl;
 
   switch (event.eventName) {
     case "SpendRequested": {
       const spender = addr(event.args.spender);
       const amount = big(event.args.amount);
-      const members = addresses(await ctx.chain.membersOf(groupId)).filter(
-        (member) => member !== spender,
-      );
+      const members = addresses(await ctx.chain.membersOf(groupId)).filter((member) => member !== spender);
       const names = await loadNames(ctx, [...members, spender]);
-      const sender = displayName(names, spender);
-      for (const member of members) {
-        bodies.set(
-          member,
-          `Butuh persetujuanmu: ${sender} ingin memakai ${formatAusd(amount)} dari kas ${groupName}.`,
-        );
+      const body = `${displayName(names, spender)} wants to pay ${formatAusd(amount)} from the pot. Tap to approve.`;
+      for (const member of members) bodies.set(member, body);
+      if (spendId >= 0n) {
+        tagParts.push(spendId.toString());
+        url = `${tripUrl}/spend/${spendId}/approve`;
       }
-      if (spendId >= 0n) tagParts.push(spendId.toString());
       break;
     }
 
@@ -99,46 +99,51 @@ export async function buildNotifyPlan(
       const amount = big(event.args.amount);
       const participants = addresses(event.args.participants);
       const shares = Array.isArray(event.args.shares) ? event.args.shares : [];
-      const members = participants.filter((member) => member !== spender);
-      members.forEach((member, index) => {
-        const share = participants.length === shares.length ? big(shares[index]) : null;
-        bodies.set(
-          member,
-          share === null
-            ? `Pemakaian baru ${formatAusd(amount)} di ${groupName}.`
-            : `Pemakaian baru ${formatAusd(amount)} di ${groupName}. Bagianmu ${formatAusd(share)}.`,
-        );
-      });
-      if (spendId >= 0n) tagParts.push(spendId.toString());
+      const names = await loadNames(ctx, [spender]);
+      const who = displayName(names, spender);
+      participants
+        .filter((member) => member !== spender)
+        .forEach((member) => {
+          const index = participants.indexOf(member);
+          const share = participants.length === shares.length ? big(shares[index]) : null;
+          bodies.set(
+            member,
+            share === null
+              ? `${who} paid ${formatAusd(amount)} from the pot.`
+              : `${who} paid ${formatAusd(amount)} from the pot. Your share is ${formatAusd(share)}.`,
+          );
+        });
+      if (spendId >= 0n) {
+        tagParts.push(spendId.toString());
+        url = `${tripUrl}/spend/${spendId}`;
+      }
       break;
     }
 
     case "SpendRejected": {
       const spend = await ctx.chain.getSpend(groupId, big(event.args.spendId));
-      const spender = addr(spend.spender);
-      bodies.set(spender, `Pemakaianmu di ${groupName} ditolak.`);
+      bodies.set(addr(spend.spender), `Your payment of ${formatAusd(spend.amount)} was declined.`);
       tagParts.push(big(event.args.spendId).toString());
       break;
     }
 
     case "ShareDisputed": {
       const spend = await ctx.chain.getSpend(groupId, big(event.args.spendId));
-      const spender = addr(spend.spender);
       const participant = addr(event.args.participant);
-      const share = big(event.args.share);
       const names = await loadNames(ctx, [participant]);
       bodies.set(
-        spender,
-        `${displayName(names, participant)} menolak bagiannya sebesar ${formatAusd(share)} di ${groupName}.`,
+        addr(spend.spender),
+        `${displayName(names, participant)} wasn't part of a payment, so their ${formatAusd(big(event.args.share))} moved to you.`,
       );
       tagParts.push(big(event.args.spendId).toString());
+      url = `${tripUrl}/spend/${big(event.args.spendId)}`;
       break;
     }
 
     case "Settled": {
       const members = addresses(await ctx.chain.membersOf(groupId));
-      const body = `Settle-up ${groupName} sudah selesai. Lihat hasilnya.`;
-      for (const member of members) bodies.set(member, body);
+      for (const member of members) bodies.set(member, "Settle-up is done. See how it evened out.");
+      url = `${tripUrl}/settled`;
       break;
     }
 
@@ -146,18 +151,24 @@ export async function buildNotifyPlan(
       const member = addr(event.args.member);
       const amount = big(event.args.amount);
       const remaining = big(event.args.remainingDebt);
-      let body = `Kekuranganmu ${formatAusd(amount)} di ${groupName} sudah diselesaikan.`;
-      if (remaining > 0n) body += ` Masih ada tagihan ${formatAusd(remaining)}.`;
-      bodies.set(member, body);
+      bodies.set(
+        member,
+        remaining > 0n
+          ? `Your safety net covered ${formatAusd(amount)}. You still owe ${formatAusd(remaining)}. Pay it to start your next trip.`
+          : `Your safety net covered the ${formatAusd(amount)} you were short. You're all square.`,
+      );
       tagParts.push(member);
+      url = `${tripUrl}/invoice`;
       break;
     }
 
     case "Refunded": {
       const member = addr(event.args.member);
       const amount = big(event.args.amount);
-      bodies.set(member, `Kamu menerima ${formatAusd(amount)} dari kas ${groupName}.`);
+      if (amount === 0n) break; // only the credit bookkeeping changed
+      bodies.set(member, `You got ${formatAusd(amount)} back from the pot.`);
       tagParts.push(member);
+      url = `${tripUrl}/invoice`;
       break;
     }
 
@@ -167,20 +178,14 @@ export async function buildNotifyPlan(
 
   if (bodies.size === 0) return null;
 
-  return {
-    groupId,
-    title: groupName,
-    url: `/groups/${groupId}`,
-    tag: tagParts.join(":"),
-    bodies,
-  };
+  return { groupId, title: trip, url, tag: tagParts.join(":"), bodies };
 }
 
 /**
  * Deliver a plan to every recipient that has registered an Expo push token.
  * Never throws: one broken token must not stop the rest.
  */
-export async function sendPlan(ctx: RouteContext, plan: NotifyPlan): Promise<number> {
+export async function sendPlan(ctx: AppDeps, plan: NotifyPlan): Promise<number> {
   if (!ctx.push) return 0;
 
   const recipients = [...plan.bodies.keys()];
@@ -219,19 +224,4 @@ export async function sendPlan(ctx: RouteContext, plan: NotifyPlan): Promise<num
     "push notifications dispatched",
   );
   return sent;
-}
-
-/** Decode → plan → send. Defensive: always resolves so webhook processing never dies. */
-export async function dispatchEvent(
-  ctx: RouteContext,
-  event: DecodedGroupEvent,
-): Promise<void> {
-  try {
-    if (!ctx.push) return;
-    const plan = await buildNotifyPlan(ctx, event);
-    if (!plan) return;
-    await sendPlan(ctx, plan);
-  } catch (error) {
-    ctx.logger.error({ err: error, eventName: event.eventName }, "notification dispatch failed");
-  }
 }
