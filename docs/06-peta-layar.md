@@ -88,5 +88,5 @@ Bukan bagian dari alur app. Web adalah pintu masuk publik: landing, pratinjau da
 | `/trips/[id]/invoice/[who]` | I1–I3 | Invoice dengan QR asli, Save as PDF (cetak browser), Share |
 | `/card` | 12 Card | Kartu simulasi |
 | `/profile` | P2 Profile | Profil dan ringkasan |
-| `/j/[code]` | 05 Invite | Buka app lewat `tekosoe://invite/<code>`, fallback "Get the app" |
+| `/j/[code]` | 05 Invite | Buka app lewat `tekosue://invite/<code>`, fallback "Get the app" |
 | `/v/[number]` | (tujuan QR invoice) | Invoice demo, belum verifikasi nyata |

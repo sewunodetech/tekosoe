@@ -18,4 +18,4 @@ Everything we planned, decided and built, in one place. Start with the PRD if yo
 | [decisions/](decisions/) | Architecture decision records (ADRs): what we chose and why |
 | [assets/](assets/) | Images used by the root README |
 
-The UI design lives on the "Tekosoe — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.
+The UI design lives on the "Tekosue — Wireframe" canvas, **Final UI** page (screens 01–13, R1–R3, I1–I3, S1–S6). The other pages on that canvas are early explorations.

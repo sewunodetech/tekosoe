@@ -5,7 +5,7 @@
 
 ## Context
 
-Tekosoe is pitched as cross-border payments with an on-ramp and off-ramp (BRD: fiat on/off-ramp on the roadmap). The app has two layers of money: the **personal dollar balance** (AUSD in the user's account) and the **trip pot** (GroupVault). Until now the personal balance only appeared in passing ("From your balance of …"). On testnet it was filled with an "Add demo funds" button, which was confusing next to "Add money" for the pot, and later replaced by automatic top-ups. Automatic top-ups hid the balance layer, yet that layer is exactly what carries the on/off-ramp story. The Final UI design had no screen for it.
+Tekosue is pitched as cross-border payments with an on-ramp and off-ramp (BRD: fiat on/off-ramp on the roadmap). The app has two layers of money: the **personal dollar balance** (AUSD in the user's account) and the **trip pot** (GroupVault). Until now the personal balance only appeared in passing ("From your balance of …"). On testnet it was filled with an "Add demo funds" button, which was confusing next to "Add money" for the pot, and later replaced by automatic top-ups. Automatic top-ups hid the balance layer, yet that layer is exactly what carries the on/off-ramp story. The Final UI design had no screen for it.
 
 ## Decision
 
@@ -19,4 +19,4 @@ Tekosoe is pitched as cross-border payments with an on-ramp and off-ramp (BRD: f
 - These screens sit outside the Final UI and need an official design if the canvas is updated. [`06-screen-map.md`](../06-screen-map.md) already lists B1/B2.
 - New users have to top up once before they can deposit. The faucet has a global cooldown of about a minute; a friendly message shows when it's busy.
 - On mainnet, Top up / Cash out are replaced by an on/off-ramp partner (for example Mercuryo); the UI and flow stay the same.
-- The AUSD ABI in `@tekosoe/shared` gains `transfer`.
+- The AUSD ABI in `@tekosue/shared` gains `transfer`.

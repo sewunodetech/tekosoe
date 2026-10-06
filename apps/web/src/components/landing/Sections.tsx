@@ -6,7 +6,6 @@ import {
   ChevronDown,
   CircleDollarSign,
   FileCheck,
-  Info,
   LayoutDashboard,
   MailOpen,
   PartyPopper,
@@ -80,14 +79,6 @@ export function GoodToKnow() {
               <p className="text-sm leading-relaxed text-gray-600">{f.body}</p>
             </div>
           ))}
-        </div>
-
-        <div className="lg-glass lg-reveal mx-auto mt-8 flex max-w-3xl items-start gap-3 rounded-3xl p-5 text-left" role="note">
-          <Info className="mt-0.5 h-5 w-5 shrink-0 text-teal" aria-hidden="true" />
-          <p className="text-sm leading-relaxed text-gray-800">
-            <span className="font-semibold">Tekosue is a preview.</span> It was built for the Monad Metropolis hackathon and runs with test dollars, so no real money moves
-            yet. The dashboard on this site shows sample data.
-          </p>
         </div>
       </div>
     </section>

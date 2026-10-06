@@ -5,14 +5,14 @@
 
 ## Context
 
-Landing `/` (apps/web) memakai video stok di hero dan dua ilustrasi AI statis (`path.webp`, `lake.webp`). Tim ingin landing lebih hidup dan lebih "Tekosoe": maskot Teko yang sama dengan di app, bukan visual generik. Aturan landing sebelumnya membatasi warna ke netral + satu aksen teal.
+Landing `/` (apps/web) memakai video stok di hero dan dua ilustrasi AI statis (`path.webp`, `lake.webp`). Tim ingin landing lebih hidup dan lebih "Tekosue": maskot Teko yang sama dengan di app, bukan visual generik. Aturan landing sebelumnya membatasi warna ke netral + satu aksen teal.
 
 ## Decision
 
 - Empat section memakai scene 3D (three.js lewat `@react-three/fiber` + `@react-three/drei`), semua di `apps/web/src/components/landing/three/`:
   - **Hero** (`HeroScene`): Teko 3D, empat teman, dan koin yang bergerak sesuai tab Plan / Chip in / Spend / Settle. Menggantikan video stok.
   - **How it works** (`StepsScene` + `HowSteps`): diorama pulau dengan empat pos. Teko berjalan ke pos langkah yang aktif (otomatis bergilir, atau mengikuti kartu yang disorot).
-  - **Built with** (`OrbitScene`): planet Tekosoe dengan lencana logo sponsor yang mengorbit. Kartu HTML di bawahnya tetap jadi sumber isi.
+  - **Built with** (`OrbitScene`): planet Tekosue dengan lencana logo sponsor yang mengorbit. Kartu HTML di bawahnya tetap jadi sumber isi.
   - **CTA penutup** (`TekoScene`): Teko besar yang menoleh ke kursor dan melompat + menyemburkan koin saat diklik.
 - **Gaya kartun**: material toon + garis tinta (drei `Outlines`) dengan palet maskot (`three/palette.ts`). Ini pengecualian dari aturan "dua warna" landing, **hanya untuk objek 3D dan latar `.lg-scene`**. Teks, tombol, dan kartu tetap netral + teal.
 - **Kinerja dan aksesibilitas**: scene dimuat dengan `next/dynamic({ ssr: false })` lewat `three/lazy.tsx`, jadi three.js hanya diunduh di `/` dan halaman tetap statis. Canvas hanya menggambar saat terlihat (IntersectionObserver), diam saat "kurangi gerakan", jatuh ke latar gradasi tanpa WebGL, dan `aria-hidden`. Semua informasi tetap ada di HTML.

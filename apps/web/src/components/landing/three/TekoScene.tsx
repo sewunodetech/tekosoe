@@ -116,7 +116,7 @@ function Mascot() {
   );
 }
 
-/** Teko besar di CTA penutup: menoleh ke kursor, tersenyum saat disorot, melompat + koin saat diklik. */
+/** Teko besar di CTA penutup dan halaman 404: menoleh ke kursor, tersenyum saat disorot, melompat + koin saat diklik. */
 export default function TekoScene() {
   return (
     <SceneCanvas className="h-full w-full" camera={{ position: [0, 0.6, 6.5], fov: 38 }}>

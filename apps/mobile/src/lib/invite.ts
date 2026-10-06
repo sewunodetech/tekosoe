@@ -11,7 +11,7 @@ import { env } from './env';
  * `inviteDigest(vault, chainId, groupId, dirinya)` dengan kunci itu. Rahasia tidak pernah dikirim ke api
  * dan tidak pernah muncul di chain.
  *
- * Kode undangan = `${groupId}-${secret tanpa 0x}` → tekosoe://invite/<kode>, https://<webDomain>/j/<kode> (route app/j/[code]).
+ * Kode undangan = `${groupId}-${secret tanpa 0x}` → tekosue://invite/<kode>, https://<webDomain>/j/<kode> (route app/j/[code]).
  */
 export function newInviteSecret(): { secret: Hex; inviteKey: Address } {
   const secret = generatePrivateKey();
