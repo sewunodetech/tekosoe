@@ -8,6 +8,5 @@ Dipakai di bagian "Built with" landing (`src/components/landing/Integrations.tsx
 | `agora.svg` | SVG inline di header https://www.agora.finance (kelas CSS dibuang, fill hitam) |
 | `category-labs.svg` | https://www.category.xyz — "C1 Logotype.svg" (Mera adalah produk Category Labs) |
 | `envio.svg` | https://envio.dev/brand — `envio-logo-primary.svg` |
-| `alchemy.svg` | https://www.alchemy.com/brand — `1749761632-logo.svg` |
 
 Sebelum submit, cek panduan merek tiap sponsor (warna, ruang kosong) kalau mau menampilkan versi berwarna.

@@ -24,12 +24,6 @@ export const INTEGRATIONS: {
     logo: { src: "/sponsors/category-labs.svg", alt: "Category Labs", w: 1344, h: 234 },
   },
   { name: "Envio", role: "Keeps balances and the activity feed up to date as friends spend.", logo: { src: "/sponsors/envio.svg", alt: "Envio", w: 390, h: 94 } },
-  {
-    name: "Alchemy",
-    role: "Covers the network fees, so you never have to think about them.",
-    planned: true,
-    logo: { src: "/sponsors/alchemy.svg", alt: "Alchemy", w: 160, h: 35 },
-  },
 ];
 
 /** Logo sponsor satu warna (hitam) supaya landing tetap dua warna. Tinggi diatur lewat `className`. */
