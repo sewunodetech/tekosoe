@@ -15,6 +15,8 @@ import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import { useCreateTrip } from '@/features/trips/useCreateTrip';
+import { useOutstandingDebt } from '@/features/trips/useOutstandingDebt';
+import { DebtNotice } from '@/components/debt-notice';
 import { TxOverlay } from '@/tx/tx-overlay';
 import { useTx } from '@/tx/useTx';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -60,6 +62,8 @@ export default function NewTripScreen() {
   });
 
   const createTrip = useCreateTrip();
+  const debt = useOutstandingDebt().data;
+  const owes = (debt?.total ?? 0n) > 0n;
   const tx = useTx(createTrip.mutateAsync, {
     onSuccess: (data) => {
       router.replace(`/trip/${data.id}`);
@@ -86,11 +90,13 @@ export default function NewTripScreen() {
         footer={
           <Button
             label="Create trip"
-            disabled={!isValid || tx.isProcessing}
+            disabled={!isValid || tx.isProcessing || owes}
             onPress={handleSubmit(onSubmit)}
           />
         }>
         <ScreenHeader title="New trip" onPress={handleBack} />
+
+        {owes && debt ? <DebtNotice debt={debt} action="start" /> : null}
 
         <Controller
           control={control}

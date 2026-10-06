@@ -14,6 +14,8 @@ import { QueryState } from '@/components/query-state';
 import { colors, fonts, palette, radius } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useJoinTrip } from '@/features/trips/useJoinTrip';
+import { useOutstandingDebt } from '@/features/trips/useOutstandingDebt';
+import { DebtNotice } from '@/components/debt-notice';
 import { useTrip } from '@/features/trips/useTrip';
 import { useTripSafetyNet } from '@/features/trips/useTripSafetyNet';
 import { tripIdFromInvite } from '@/lib/invite';
@@ -42,6 +44,9 @@ function InviteView({ trip, code, autoJoin }: { trip: Trip; code: string; autoJo
   // Join = setuju dengan safety net trip; tombol menunggu angkanya supaya yang disetujui = yang dipakai.
   const safetyNet = useTripSafetyNet(trip.id).data;
   const joinTrip = useJoinTrip(code);
+  // Masih berutang dari trip lain: kontrak menolak join (ADR 0013), jadi tahan tombolnya di sini.
+  const debt = useOutstandingDebt().data;
+  const owes = !isMember && (debt?.total ?? 0n) > 0n;
   const joinTx = useTx(joinTrip.mutateAsync, {
     onSuccess: () => {
       notify({ title: 'Joined trip', body: `You joined ${trip.name}.`, data: { url: `/trip/${trip.id}` } });
@@ -60,10 +65,10 @@ function InviteView({ trip, code, autoJoin }: { trip: Trip; code: string; autoJo
   // Kembali dari sign in (user sudah menekan Join sebelumnya): gabung sekali, tanpa ketukan kedua.
   const autoJoined = useRef(false);
   useEffect(() => {
-    if (!autoJoin || !signer || isMember || safetyNet === undefined || autoJoined.current) return;
+    if (!autoJoin || !signer || isMember || owes || safetyNet === undefined || autoJoined.current) return;
     autoJoined.current = true;
     void joinTx.execute(undefined);
-  }, [autoJoin, signer, isMember, safetyNet, joinTx]);
+  }, [autoJoin, signer, isMember, owes, safetyNet, joinTx]);
   // Anggota pertama = pembuat trip; yang ditampilkan hanya anggota lain (bukan "You").
   const organizer = trip.members[0];
   const others = trip.members.filter((m) => m.label !== 'You');
@@ -76,7 +81,7 @@ function InviteView({ trip, code, autoJoin }: { trip: Trip; code: string; autoJo
           <Button
             label={isMember ? 'Open trip' : 'Join with Passkey'}
             onPress={join}
-            disabled={joinTx.isProcessing || (!isMember && safetyNet === undefined)}
+            disabled={joinTx.isProcessing || owes || (!isMember && safetyNet === undefined)}
           />
           <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center' }}>
             {isMember
@@ -103,6 +108,8 @@ function InviteView({ trip, code, autoJoin }: { trip: Trip; code: string; autoJo
         </Text>
         <Text variant="hero">{trip.name}</Text>
       </View>
+
+      {owes && debt ? <DebtNotice debt={debt} action="join" /> : null}
 
       <Surface style={{ paddingVertical: 6 }}>
         {others.map((m) => (
