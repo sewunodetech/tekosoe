@@ -242,7 +242,8 @@ const FOOTER: { title: string; links: { label: string; href: string }[] }[] = [
   },
 ];
 
-export function Footer() {
+/** `base` = "/" di luar landing supaya tautan bagian (#how, …) kembali ke landing. */
+export function Footer({ base = "" }: { base?: string } = {}) {
   return (
     <footer className="border-t border-black/5 bg-white/40 backdrop-blur-md">
       <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 md:grid-cols-[2fr_1fr_1fr_1fr]">
@@ -264,7 +265,7 @@ export function Footer() {
                       {l.label}
                     </a>
                   ) : (
-                    <Link href={l.href} className="text-sm text-gray-600 hover:text-black">
+                    <Link href={l.href.startsWith("#") ? `${base}${l.href}` : l.href} className="text-sm text-gray-600 hover:text-black">
                       {l.label}
                     </Link>
                   )}

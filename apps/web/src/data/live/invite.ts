@@ -11,6 +11,10 @@ export type InviteTrip = {
   pot: bigint;
   approvalLimit: bigint;
   settled: boolean;
+  /** Label tanggal siap pakai (trip contoh); kalau kosong dihitung dari `endsAt`. */
+  endsLabel?: string;
+  /** Undangan contoh dari data demo (landing), bukan trip nyata. */
+  sample?: boolean;
 };
 
 export type InviteResult =

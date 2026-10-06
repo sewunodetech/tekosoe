@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   output: "export",
   // @tekosue/shared dikonsumsi sebagai source TypeScript
   transpilePackages: ["@tekosue/shared"],
+  // Tidak ada server untuk optimasi gambar di static export; gambar dilayani apa adanya dari public/.
+  images: { unoptimized: true },
 };
 
 export default nextConfig;

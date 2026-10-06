@@ -7,12 +7,32 @@ import { Teko } from "@/components/Teko";
 import { Button } from "@/components/ui/button";
 import { Screen } from "@/components/ui/layout";
 import { GENERIC_TRIP_NAME, loadInvite, type InviteResult } from "@/data/live/invite";
+import { DEMO_TRIP_IDS, repo } from "@/data/repo";
 import { inviteFacts } from "@/lib/invite-facts";
 import { GET_APP_HREF, appLink } from "@/lib/links";
 import { segmentAfter } from "@/lib/shell-path";
 import { useBrowserLocation } from "@/lib/use-location";
 
 type State = { kind: "loading" } | InviteResult;
+
+/** Undangan contoh untuk tautan demo di landing (`/j/japan`): data demo, bukan trip nyata. */
+async function loadSampleInvite(code: string): Promise<InviteResult> {
+  const trip = await repo.getTrip(code);
+  if (!trip) return { kind: "invalid" };
+  return {
+    kind: "found",
+    trip: {
+      name: trip.name,
+      memberCount: trip.members.length,
+      endsAt: 0,
+      endsLabel: trip.settlesOn,
+      pot: trip.pot,
+      approvalLimit: trip.approvalLimit,
+      settled: false,
+      sample: true,
+    },
+  };
+}
 
 // 05 Invite, versi web — apps/mobile/src/app/invite/[code]/index.tsx.
 // Shell statis /j/_: kode dibaca dari path di browser, data trip dari Envio + api (hanya groupId yang dikirim).
@@ -25,7 +45,7 @@ export function InviteView() {
   useEffect(() => {
     if (code === null) return;
     let alive = true;
-    loadInvite(code).then(
+    (DEMO_TRIP_IDS.includes(code) ? loadSampleInvite(code) : loadInvite(code)).then(
       (result) => alive && setState(result),
       () => alive && setState({ kind: "generic" }),
     );
@@ -84,6 +104,7 @@ function InviteBody({ state, onRetry }: { state: State; onRetry: () => void }) {
             <p className="text-[15px] font-semibold text-slate">A friend invited you to</p>
             <h1 className="type-hero">{state.trip.name}</h1>
             {state.trip.settled ? <p className="type-body text-slate">This trip has already settled up.</p> : null}
+            {state.trip.sample ? <p className="type-body text-slate">This is a sample invite with demo data.</p> : null}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {inviteFacts(state.trip).map((f) => (

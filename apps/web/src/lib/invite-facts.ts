@@ -8,7 +8,7 @@ const endsLabel = (seconds: number) =>
 export function inviteFacts(trip: InviteTrip): { label: string; value: string }[] {
   return [
     { label: "Members", value: String(trip.memberCount) },
-    { label: "Ends", value: endsLabel(trip.endsAt) },
+    { label: "Ends", value: trip.endsLabel ?? endsLabel(trip.endsAt) },
     { label: "In the pot", value: money(trip.pot) },
     { label: "Approval", value: `Over ${moneyShort(trip.approvalLimit)}` },
   ];
