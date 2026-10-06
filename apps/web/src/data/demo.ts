@@ -104,6 +104,8 @@ export const profile: Profile = {
   country: "Australia",
   tint: "bg-sky",
   stats: { activeTrips: 2, settled: 1, gotBack: usd("12.5") },
+  // Sama dengan demo app (useBalance di apps/mobile/src/features/wallet/useFunds.ts).
+  balance: usd(420),
 };
 
 const commonLines = {

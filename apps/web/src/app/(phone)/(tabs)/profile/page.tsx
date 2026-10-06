@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BalanceCard } from "@/components/balance-card";
 import { Icon, type IconName } from "@/components/icons";
 import { Teko } from "@/components/Teko";
 import { AppAction } from "@/components/ui/app-sheet";
@@ -34,6 +35,8 @@ export default async function ProfilePage() {
           Edit
         </AppAction>
       </section>
+
+      <BalanceCard balance={profile.balance} />
 
       <div className="flex gap-2.5">
         <Stat label="Active trips" value={String(profile.stats.activeTrips)} />
