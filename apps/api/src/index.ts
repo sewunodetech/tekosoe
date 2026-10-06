@@ -8,6 +8,7 @@ import { createRepos } from "./db/repos";
 import { createEnvioClient } from "./integrations/envio";
 import { createStorageService } from "./integrations/storage";
 import { createPushService } from "./integrations/expoPush";
+import { startEnvioNotifier } from "./modules/notify/envioSource";
 import { createLogger, type Logger } from "./lib/logger";
 import { checksumAddress } from "./lib/address";
 import { startNonceCleanup } from "./modules/auth/service";
@@ -139,6 +140,10 @@ async function main(): Promise<void> {
   const jobs: BackgroundJob[] = [startSettleScheduler(ctx), startNonceCleanup(ctx)];
   if (env.FEATURE_RECEIPTS) {
     jobs.push(startReceiptCleanup(ctx));
+  }
+  // Envio → invoice updates (DebtPaid, settled by a member) and, with FEATURE_PUSH, push notifications.
+  if (env.NOTIFY_SOURCE === "envio") {
+    jobs.push(startEnvioNotifier(ctx));
   }
 
   let shuttingDown = false;

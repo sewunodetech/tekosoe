@@ -104,12 +104,16 @@ export const envSchema = z.object({
   RECEIPT_MAX_BYTES: int(5_242_880, 1),
   RECEIPT_VERIFY_HASH: bool(true),
 
-  // P3 — push notifications (only required when FEATURE_PUSH=true)
+  // Push notifications (ADR 0014). Events come from Envio by default; Alchemy webhooks are optional.
   FEATURE_PUSH: bool(false),
   /** Optional: only needed when "enhanced push security" is enabled for the Expo project. */
   EXPO_ACCESS_TOKEN: optionalString(""),
   ALCHEMY_WEBHOOK_SIGNING_KEY: optionalString(""),
-  NOTIFY_SOURCE: z.preprocess(unset, z.enum(["alchemy", "envio"]).default("alchemy")),
+  NOTIFY_SOURCE: z.preprocess(unset, z.enum(["alchemy", "envio"]).default("envio")),
+  /** Envio poll interval for notifications and invoice updates. */
+  NOTIFY_INTERVAL_MS: int(15_000, 1_000),
+  /** Hours between "You still owe" reminders per trip and member (ADR 0013). */
+  DEBT_REMINDER_HOURS: int(24, 1),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -133,17 +137,8 @@ function collectProblems(env: Env): string[] {
     }
   }
 
-  if (env.FEATURE_PUSH) {
-    const missing = ["ALCHEMY_WEBHOOK_SIGNING_KEY"].filter((key) => !env[key as keyof Env]);
-    if (missing.length > 0) {
-      problems.push(`FEATURE_PUSH=true requires: ${missing.join(", ")}`);
-    }
-  }
-
-  if (env.NOTIFY_SOURCE === "envio") {
-    problems.push(
-      "NOTIFY_SOURCE=envio is reserved for the optional Envio poller and is not implemented yet",
-    );
+  if (env.NOTIFY_SOURCE === "alchemy" && !env.ALCHEMY_WEBHOOK_SIGNING_KEY) {
+    problems.push("NOTIFY_SOURCE=alchemy requires: ALCHEMY_WEBHOOK_SIGNING_KEY");
   }
 
   return problems;
