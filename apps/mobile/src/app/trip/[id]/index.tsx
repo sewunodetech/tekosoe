@@ -18,6 +18,8 @@ import { useTrip } from '@/features/trips/useTrip';
 import { useReceiptKeySync } from '@/features/spends/useReceiptKeySync';
 import { isLive } from '@/lib/env';
 import { money, signed, usd } from '@/lib/money';
+import { shareInvite } from '@/features/trips/shareInvite';
+import { MAX_GROUP_MEMBERS } from '@tekosue/shared';
 
 // 07 Trip — canvas "Final UI" › F07Group. Dengan `?state=empty` menjadi S1 Pot is empty (S01PotEmpty),
 // yang muncul setelah permintaan $150 disetujui di layar 10.
@@ -80,6 +82,8 @@ function TripView({ trip, lastSpend, empty }: { trip: Trip; lastSpend?: Spend; e
       />
 
       {empty ? <EmptyPot /> : <PotCard potLabel={money(trip.pot)} settles={`Settles ${trip.settlesOn} · ${trip.status}`} balance={signed(trip.myBalance)} />}
+
+      <MembersCard trip={trip} />
 
       {empty ? (
         <>
@@ -189,6 +193,53 @@ function PotCard({ potLabel, settles, balance }: { potLabel: string; settles: st
   );
 }
 
+/** "Who's in": siapa saja di trip (ke layar anggota) + tombol undang selama trip belum settle dan belum penuh. */
+function MembersCard({ trip }: { trip: Trip }) {
+  const count = trip.members.length;
+  const room = MAX_GROUP_MEMBERS - count;
+  const canInvite = !trip.settled && room > 0;
+  const shown = trip.members.slice(0, 4);
+
+  const inviteButton = (
+    <Pressable
+      style={styles.invite}
+      accessibilityRole="button"
+      accessibilityLabel="Invite friends"
+      onPress={isLive ? () => void shareInvite(trip) : undefined}>
+      <Icon name="plus" size={16} color={colors.textOnPrimary} strokeWidth={2.6} />
+      <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 13 }} color={colors.textOnPrimary}>
+        Invite
+      </Text>
+    </Pressable>
+  );
+
+  return (
+    <Surface style={styles.members} padded={false}>
+      <Link href={`/trip/${trip.id}/members`} asChild>
+        <Pressable style={styles.membersMain} accessibilityRole="button" accessibilityLabel={`See who's in, ${count} ${count === 1 ? 'person' : 'people'}`}>
+          <AvatarStack people={shown} size={34} ring={colors.surface} extra={count > shown.length ? count - shown.length : undefined} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ fontFamily: fonts.bodyExtraBold, fontSize: 14 }}>Who&apos;s in</Text>
+            <Text variant="small" color={colors.textMuted} style={{ fontFamily: fonts.body }}>
+              {count} {count === 1 ? 'person' : 'people'}
+              {canInvite ? ` · room for ${room} more` : ''}
+            </Text>
+          </View>
+          {!canInvite && <Icon name="chevron" size={18} color={colors.textMuted} />}
+        </Pressable>
+      </Link>
+      {canInvite &&
+        (isLive ? (
+          inviteButton
+        ) : (
+          <Link href={`/invite/${trip.id}`} asChild>
+            {inviteButton}
+          </Link>
+        ))}
+    </Surface>
+  );
+}
+
 function EmptyPot() {
   return (
     <View style={styles.emptyPot}>
@@ -247,6 +298,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: radius.pill,
     backgroundColor: colors.surface,
+  },
+  members: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingLeft: 14,
+    paddingRight: 12,
+  },
+  membersMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  invite: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 38,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primary,
   },
   emptyPot: {
     padding: 20,

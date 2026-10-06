@@ -1,5 +1,5 @@
 import { Link, useLocalSearchParams } from 'expo-router';
-import { Alert, Platform, Share, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { PersonRow } from '@/components/trip-rows';
 import { Button } from '@/components/ui/button';
@@ -14,23 +14,7 @@ import { colors, fonts } from '@/constants/theme';
 import type { Trip } from '@/data/types';
 import { useTrip } from '@/features/trips/useTrip';
 import { isLive } from '@/lib/env';
-import { inviteUrl, loadInviteCode } from '@/lib/invite';
-
-/** Live: link undangan hanya ada di HP pembuat trip (rahasianya tidak pernah dikirim ke server). */
-async function shareInvite(trip: Trip) {
-  const code = await loadInviteCode(trip.id);
-  if (!code) {
-    Alert.alert('Invite link', 'Ask the person who created this trip to share the invite link.');
-    return;
-  }
-  const message = `Join our trip "${trip.name}" on Tekosue: ${inviteUrl(code)}`;
-  // Browsers without navigator.share: show the link instead.
-  await Share.share({ message }).catch(() => {
-    // react-native-web has no Alert; prompt() lets the user copy the link.
-    if (Platform.OS === 'web') globalThis.prompt?.('Invite link', inviteUrl(code));
-    else Alert.alert('Invite link', inviteUrl(code));
-  });
-}
+import { shareInvite } from '@/features/trips/shareInvite';
 
 // S6 Trip members — canvas "Final UI" › S06Members
 // TODO: Envio MemberJoined + api → profiles. Batas 10 anggota ada di kontrak.
