@@ -16,7 +16,7 @@ COPY apps/web/package.json apps/web/
 COPY packages/shared/package.json packages/shared/
 COPY packages/contracts/package.json packages/contracts/
 COPY packages/indexer/package.json packages/indexer/
-RUN npm ci -w @tekosoe/indexer && npm cache clean --force
+RUN npm ci -w @tekosue/indexer && npm cache clean --force
 
 COPY packages/indexer/config.yaml packages/indexer/schema.graphql packages/indexer/tsconfig.json packages/indexer/
 COPY packages/indexer/src packages/indexer/src

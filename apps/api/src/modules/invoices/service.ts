@@ -5,8 +5,8 @@ import {
   computeInvoiceHash,
   initialInvoiceStatus,
   invoiceNumber,
-  type InvoiceSettlement,
-} from "@tekosoe/shared";
+  invoiceSettlementsFromOutcome,
+} from "@tekosue/shared";
 import type { AppDeps } from "../../context";
 import type { InvoiceRow, NewInvoice } from "../../db/repos";
 import { checksumAddress } from "../../lib/address";
@@ -43,25 +43,13 @@ export async function ensureInvoices(
   if (!outcome) return { status: "not_settled" };
 
   const members = await ctx.chain.membersOf(groupId);
-  const rows: NewInvoice[] = members.map((address, position) => {
-    const member = address.toLowerCase();
-    const pulled = outcome.pulled.get(member);
-    const refunded = outcome.refunded.get(member);
-    const settlement: InvoiceSettlement = {
-      chainId: ctx.env.CHAIN_ID,
-      groupId,
-      index: position + 1,
-      member,
-      settleTxHash: outcome.txHash,
-      pulled: pulled?.amount ?? 0n,
-      refunded: refunded?.amount ?? 0n,
-      remainingDebt: pulled?.remainingDebt ?? 0n,
-      remainingCredit: refunded?.remainingCredit ?? 0n,
-    };
+  // Same mapping the web verification page uses (from Envio), so both build identical payloads.
+  const settlements = invoiceSettlementsFromOutcome({ chainId: ctx.env.CHAIN_ID, groupId, members, outcome });
+  const rows: NewInvoice[] = settlements.map((settlement) => {
     const payload = buildInvoicePayload(settlement);
     return {
       groupId: id,
-      member,
+      member: settlement.member,
       number: invoiceNumber(groupId, settlement.index),
       status: initialInvoiceStatus(settlement),
       invoiceHash: computeInvoiceHash(payload),

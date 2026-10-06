@@ -1,4 +1,4 @@
-"""Suara notifikasi Tekosoe ("pop-ding"), disintesis dari nol.
+"""Suara notifikasi Tekosue ("pop-ding"), disintesis dari nol.
 
     python apps/mobile/scripts/generate-notification-sound.py
 

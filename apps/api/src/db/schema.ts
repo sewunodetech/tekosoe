@@ -157,7 +157,7 @@ export const receipts = pgTable(
 
 /**
  * Trip invoice. `payload` is the exact canonical JSON that was hashed
- * (`invoiceHash = keccak256(payload)`, see buildInvoicePayload in @tekosoe/shared);
+ * (`invoiceHash = keccak256(payload)`, see buildInvoicePayload in @tekosue/shared);
  * status may move from "due" to "paid" without changing the hash.
  */
 export const invoices = pgTable(

@@ -215,7 +215,7 @@ contract GroupVaultTest is Test {
 
     function test_inviteDigest_matchesWhatAppsSign() public view {
         assertEq(vault.inviteDigest(7, b), _localInviteDigest(7, b));
-        // Same vector computed by inviteDigest() in @tekosoe/shared (viem) for this test setup.
+        // Same vector computed by inviteDigest() in @tekosue/shared (viem) for this test setup.
         assertEq(address(vault), 0x2e234DAe75C793f67A35089C9d99245E1C58470b);
         assertEq(b, 0x0376AAc07Ad725E01357B1725B5ceC61aE10473c);
         assertEq(vault.inviteDigest(7, b), 0xb91892ea3e8d3433951c10b69d5d9072ce1096cdd5878b52f82a8c711ad92782);

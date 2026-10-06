@@ -1,4 +1,4 @@
-# Prompt: Generate Backend Tekosoe (Express.js)
+# Prompt: Generate Backend Tekosue (Express.js)
 
 **Cara pakai:** buka Claude Code (atau AI coding tool lain) di root monorepo, lampirkan `Tekosoe_-_Dokumen_Produk.md`, lalu tempel semua isi di bawah garis ini sebagai prompt.
 
@@ -6,9 +6,9 @@
 
 ## 1. Peran & tujuan
 
-Kamu adalah senior backend engineer TypeScript. Bangun **backend mini Tekosoe** di `apps/api` memakai **Express.js**, sesuai dokumen produk terlampir (BRD, PRD, Spesifikasi Teknis, User Stories, User Flow). Dokumen itu adalah sumber kebenaran. Kalau prompt ini bertentangan dengan dokumen, ikuti dokumen dan catat pertentangannya di `docs/coverage.md`.
+Kamu adalah senior backend engineer TypeScript. Bangun **backend mini Tekosue** di `apps/api` memakai **Express.js**, sesuai dokumen produk terlampir (BRD, PRD, Spesifikasi Teknis, User Stories, User Flow). Dokumen itu adalah sumber kebenaran. Kalau prompt ini bertentangan dengan dokumen, ikuti dokumen dan catat pertentangannya di `docs/coverage.md`.
 
-Tekosoe adalah aplikasi mobile untuk kas bersama lintas negara. User menyetor AUSD ke satu kas grup di kontrak Monad testnet, memakainya, lalu di tanggal grup berakhir kontrak menyelesaikan siapa bayar ke siapa. User login dengan passkey (Mera) dan tidak pernah memegang token gas.
+Tekosue adalah aplikasi mobile untuk kas bersama lintas negara. User menyetor AUSD ke satu kas grup di kontrak Monad testnet, memakainya, lalu di tanggal grup berakhir kontrak menyelesaikan siapa bayar ke siapa. User login dengan passkey (Mera) dan tidak pernah memegang token gas.
 
 Tujuan kerjamu: backend yang **menutup semua flow yang memang butuh backend**, tidak lebih dan tidak kurang, lengkap dengan test, dokumentasi, dan siap deploy ke Railway.
 
@@ -32,7 +32,7 @@ Tujuan kerjamu: backend yang **menutup semua flow yang memang butuh backend**, t
 - `web-push` untuk push notification
 - `vitest` + `supertest` untuk test
 - Scheduler: **`setInterval` di dalam proses Express** (bukan Railway cron, bukan library cron)
-- Package manager pnpm; kode ada di `apps/api` dalam monorepo. Kalau `packages/shared` (ABI, alamat, tipe) sudah ada, pakai. Kalau belum, buat `src/chain/abi.ts` dari daftar di bagian 6 dan tandai `// TODO: replace with @tekosoe/shared`.
+- Package manager pnpm; kode ada di `apps/api` dalam monorepo. Kalau `packages/shared` (ABI, alamat, tipe) sudah ada, pakai. Kalau belum, buat `src/chain/abi.ts` dari daftar di bagian 6 dan tandai `// TODO: replace with @tekosue/shared`.
 
 Struktur yang diharapkan:
 

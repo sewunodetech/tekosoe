@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { SignJWT } from "jose";
 import type { Address, Hash } from "viem";
-import { GROUP_STATUS } from "@tekosoe/shared";
+import { GROUP_STATUS } from "@tekosue/shared";
 import { createApp, createRouteContext } from "../../src/app";
 import type {
   ChainService,

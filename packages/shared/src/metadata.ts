@@ -99,3 +99,84 @@ export function initialInvoiceStatus(s: Pick<InvoiceSettlement, "refunded" | "re
   if (s.refunded > 0n) return "refunded";
   return "paid";
 }
+
+/** `INV-12-003` → `{ groupId: 12n, index: 3 }`; null kalau tidak cocok `^INV-\d+-\d{3,}$`. */
+export function parseInvoiceNumber(number: string): { groupId: bigint; index: number } | null {
+  const m = /^INV-(\d+)-(\d{3,})$/.exec(number);
+  if (!m) return null;
+  const index = Number(m[2]);
+  if (!Number.isSafeInteger(index) || index < 1) return null;
+  return { groupId: BigInt(m[1]!), index };
+}
+
+/** Hasil satu transaksi settle per anggota (alamat lowercase). Bentuk sama dengan SettleOutcome di api. */
+export interface SettleOutcomeLike {
+  txHash: string;
+  pulled: ReadonlyMap<string, { amount: bigint; remainingDebt: bigint }>;
+  refunded: ReadonlyMap<string, { amount: bigint; remainingCredit: bigint }>;
+}
+
+/**
+ * Satu InvoiceSettlement per anggota, urut `membersOf` (index mulai 1).
+ * Dipakai api (receipt RPC) dan web (Envio) supaya payload identik byte-per-byte.
+ */
+export function invoiceSettlementsFromOutcome(input: {
+  chainId: number;
+  groupId: bigint;
+  /** Urutan `membersOf(groupId)`. */
+  members: readonly string[];
+  outcome: SettleOutcomeLike;
+}): InvoiceSettlement[] {
+  const { chainId, groupId, outcome } = input;
+  return input.members.map((address, position) => {
+    const member = address.toLowerCase();
+    const pulled = outcome.pulled.get(member);
+    const refunded = outcome.refunded.get(member);
+    return {
+      chainId,
+      groupId,
+      index: position + 1,
+      member,
+      settleTxHash: outcome.txHash,
+      pulled: pulled?.amount ?? 0n,
+      refunded: refunded?.amount ?? 0n,
+      remainingDebt: pulled?.remainingDebt ?? 0n,
+      remainingCredit: refunded?.remainingCredit ?? 0n,
+    };
+  });
+}
+
+/** Baris Activity Envio (event Pulled/Refunded) yang dibutuhkan untuk membangun ulang hasil settle. */
+export interface SettleActivityRow {
+  /** `${txHash}-${logIndex}` */
+  id: string;
+  /** "Pulled" | "Refunded"; tipe lain diabaikan. */
+  type: string;
+  actor: string;
+  amount: bigint;
+  /** remainingDebt (Pulled) atau remainingCredit (Refunded) dari event. */
+  remaining: bigint;
+  txHash: string;
+}
+
+const logIndexOf = (id: string) => Number(id.slice(id.lastIndexOf("-") + 1));
+
+/**
+ * Baris Activity Envio → SettleOutcomeLike, hanya dari transaksi settle.
+ * Meniru `settleOutcomeFromLogs` di api: urut logIndex, entri terakhir per alamat menang.
+ * `Refunded` dari payDebt/claimCredit (tx lain) tersaring oleh txHash.
+ */
+export function settleOutcomeFromActivities(settleTxHash: string, rows: readonly SettleActivityRow[]): SettleOutcomeLike {
+  const tx = settleTxHash.toLowerCase();
+  const pulled = new Map<string, { amount: bigint; remainingDebt: bigint }>();
+  const refunded = new Map<string, { amount: bigint; remainingCredit: bigint }>();
+  const inTx = rows
+    .filter((row) => row.txHash.toLowerCase() === tx)
+    .sort((a, b) => logIndexOf(a.id) - logIndexOf(b.id));
+  for (const row of inTx) {
+    const member = row.actor.toLowerCase();
+    if (row.type === "Pulled") pulled.set(member, { amount: row.amount, remainingDebt: row.remaining });
+    else if (row.type === "Refunded") refunded.set(member, { amount: row.amount, remainingCredit: row.remaining });
+  }
+  return { txHash: settleTxHash, pulled, refunded };
+}

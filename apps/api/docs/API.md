@@ -1,4 +1,4 @@
-# Tekosoe API — dokumentasi & flow
+# Tekosue API — dokumentasi & flow
 
 Dokumen ini untuk manusia (app developer / juri). Spec teknis mesin ada di
 [`openapi.yaml`](./openapi.yaml) dan interaktif di **Swagger UI**:
@@ -9,7 +9,7 @@ Dokumen ini untuk manusia (app developer / juri). Spec teknis mesin ada di
 | OpenAPI 3.1 | `GET /api/openapi.yaml` |
 | Base URL lokal | `http://localhost:3000` |
 
-Jalankan server dengan `npm run dev -w @tekosoe/api` dari root repo.
+Jalankan server dengan `npm run dev -w @tekosue/api` dari root repo.
 
 ---
 
@@ -67,7 +67,7 @@ Kalau flag mati, route tidak dipasang sama sekali → balasan `404 NOT_FOUND`.
   kontrak + Envio. Satu-satunya nominal di API adalah `payload` invoice (hasil settle,
   string desimal AUSD 6 desimal) yang juga bisa dihitung ulang dari chain.
 - **Metadata dikunci ke chain:** judul pemakaian diterima hanya kalau
-  `computeNoteHash` (dari `@tekosoe/shared`) = `noteHash` on-chain; detail trip hanya dari
+  `computeNoteHash` (dari `@tekosue/shared`) = `noteHash` on-chain; detail trip hanya dari
   creator on-chain. Rahasia undangan tidak pernah dikirim ke api.
 - **Profil dan nama trip bersifat publik** (layar undangan butuh nama sebelum user gabung).
 - Keanggotaan selalu dicek ke kontrak (`membersOf`), bukan ke Envio.
@@ -94,7 +94,7 @@ batas harian, satu klaim per alamat, dan cek saldo.
 ```mermaid
 sequenceDiagram
   participant App as Aplikasi (Expo)
-  participant API as Tekosoe API
+  participant API as Tekosue API
   participant C as Monad
 
   App->>API: POST /api/drip {address}
@@ -163,7 +163,7 @@ flowchart LR
 
 - Invoice: satu per anggota, nomor `INV-{trip}-{urutan}` (urutan = posisi di `membersOf`),
   `invoiceHash = keccak256(payload)`; `payload` dibuat oleh `buildInvoicePayload` di
-  `@tekosoe/shared` dan bisa dihitung ulang siapa pun dari receipt tx settle.
+  `@tekosue/shared` dan bisa dihitung ulang siapa pun dari receipt tx settle.
 - Status: `refunded` (menerima kembalian), `due` (masih ada debt), `paid`. Status tidak ikut di-hash.
 - Pembuatan invoice tidak pernah menghalangi settle; kalau gagal, sweep berikutnya mencoba lagi.
 
@@ -359,7 +359,7 @@ Response `200`: `{ "token": "…", "expiresAt": "…" }` → `Authorization: Bea
 
 ### 6. `PUT /api/profiles/me` — simpan profil
 
-Sama dengan `profileSchema` di `@tekosoe/shared`. Bersifat **publik**.
+Sama dengan `profileSchema` di `@tekosue/shared`. Bersifat **publik**.
 
 ```bash
 curl -X PUT -H "authorization: Bearer $TOKEN" -H "content-type: application/json" \
@@ -409,7 +409,7 @@ Pemakaian tanpa baris di sini ditampilkan app tanpa judul ("Unverified" bila per
 
 ### 12. `PUT /api/groups/:groupId/spends/:spendId/meta` — beri label pemakaian
 
-Body = `spendNoteSchema` di `@tekosoe/shared`:
+Body = `spendNoteSchema` di `@tekosue/shared`:
 
 | Field | Tipe | Aturan |
 | --- | --- | --- |
@@ -537,11 +537,11 @@ decode → `Settled` membuat invoice, `DebtPaid` memperbarui invoice → push le
 ## 13. Menjalankan & deploy
 
 ```bash
-npm run dev -w @tekosoe/api
-npm run typecheck -w @tekosoe/api
-npm test -w @tekosoe/api
-npm run db:generate -w @tekosoe/api   # setelah mengubah src/db/schema.ts
-npm run db:migrate -w @tekosoe/api
+npm run dev -w @tekosue/api
+npm run typecheck -w @tekosue/api
+npm test -w @tekosue/api
+npm run db:generate -w @tekosue/api   # setelah mengubah src/db/schema.ts
+npm run db:migrate -w @tekosue/api
 docker build -f apps/api/Dockerfile .  # dari root repo
 ```
 

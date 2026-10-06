@@ -1,4 +1,4 @@
-import { formatDollars, parseDollars } from "@tekosoe/shared";
+import { formatDollars, parseDollars } from "@tekosue/shared";
 
 /**
  * Helper uang untuk lapisan tampilan. Nominal selalu `bigint` AUSD 6 desimal;

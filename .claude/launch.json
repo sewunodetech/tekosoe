@@ -52,6 +52,18 @@
       ],
       "cwd": "apps/web",
       "port": 3005
+    },
+    {
+      "name": "web-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/preview.mjs"
+      ],
+      "cwd": "apps/web",
+      "env": {
+        "PORT": "3006"
+      },
+      "port": 3006
     }
   ]
 }

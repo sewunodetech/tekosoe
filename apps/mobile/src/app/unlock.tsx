@@ -29,7 +29,7 @@ export default function UnlockScreen() {
       const code = passkeyErrorCode(err);
       if (code === 'UserCancelled') return;
       if (code === 'NoCredentials') {
-        Alert.alert('Passkey not found', "This phone no longer has your Tekosoe passkey. Sign in another way?", [
+        Alert.alert('Passkey not found', "This phone no longer has your Tekosue passkey. Sign in another way?", [
           { text: 'Not now', style: 'cancel' },
           { text: 'Sign in', onPress: () => void switchAccount() },
         ]);

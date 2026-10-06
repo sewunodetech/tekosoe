@@ -15,7 +15,7 @@ import Animated, {
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 /**
- * Teko, maskot Tekosoe — port dari canvas "Final UI" › Teko.dc.html (10 ekspresi).
+ * Teko, maskot Tekosue — port dari canvas "Final UI" › Teko.dc.html (10 ekspresi).
  * SVG asli memakai animasi SMIL yang tidak didukung React Native, jadi tiap pose digambar sebagai
  * frame diam yang paling khas, dan gerakan (naik-turun + goyang) dibuat dengan Reanimated.
  */

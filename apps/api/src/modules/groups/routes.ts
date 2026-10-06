@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { computeNoteHash, spendNoteSchema } from "@tekosoe/shared";
+import { computeNoteHash, spendNoteSchema } from "@tekosue/shared";
 import type { RouteContext } from "../../context";
 import type { GroupMetaRow, SpendMetaRow, SpendReviewRow } from "../../db/repos";
 import { checksumAddress, sameAddress } from "../../lib/address";

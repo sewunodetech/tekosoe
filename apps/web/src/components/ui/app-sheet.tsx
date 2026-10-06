@@ -24,7 +24,7 @@ export function AppAction({
   children,
   className,
   deepLink = "",
-  title = "Do this in the Tekosoe app",
+  title = "Do this in the Tekosue app",
   message = "This page is a preview. Adding money, paying and joining a trip happen on your phone, confirmed with your passkey.",
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -59,7 +59,7 @@ export function AppAction({
             </h2>
             <p className="max-w-[320px] text-center text-sm leading-[21px] text-slate">{message}</p>
             <div className="mt-2 flex w-full flex-col gap-2">
-              <Button href={appLink(deepLink)} label="Open Tekosoe" />
+              <Button href={appLink(deepLink)} label="Open Tekosue" />
               <Button href={GET_APP_HREF} label="Get the app" variant="outline" />
               <Button label="Not now" variant="ghost" onClick={() => setOpen(false)} />
             </div>

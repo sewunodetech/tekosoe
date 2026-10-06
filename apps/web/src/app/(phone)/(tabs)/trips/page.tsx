@@ -75,7 +75,7 @@ export default async function TripsPage() {
       </div>
 
       <Link href="/" className="type-caption self-center text-slate underline-offset-2 hover:underline">
-        About Tekosoe
+        About Tekosue
       </Link>
     </Screen>
   );

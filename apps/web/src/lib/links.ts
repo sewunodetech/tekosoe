@@ -2,7 +2,7 @@
 export const APP_SCHEME = "tekosoe://";
 
 /** Domain publik — sama dengan EXPO_PUBLIC_PASSKEY_DOMAIN di app. */
-export const SITE_DOMAIN = "tekosoe.xyz";
+export const SITE_DOMAIN = "tekosue.xyz";
 
 /**
  * Tujuan tombol "Get the app". Belum ada halaman toko: kalau env tidak diisi, tombol

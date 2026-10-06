@@ -1,4 +1,4 @@
-# Tekosoe — User Stories and Acceptance Criteria
+# Tekosue — User Stories and Acceptance Criteria
 
 A story is done when every acceptance criterion passes on Monad testnet. FR numbers refer to the [PRD](02-prd.md).
 
@@ -78,7 +78,7 @@ A story is done when every acceptance criterion passes on Monad testnet. FR numb
 
 ## Epic 6 — Simulated card (P2)
 
-**US-12. As a member, I want to pay at a shop straight from the pot with the Tekosoe card.** (FR-16)
+**US-12. As a member, I want to pay at a shop straight from the pot with the Tekosue card.** (FR-16)
 
 - [ ] Paying the demo shop really debits the pot on testnet
 - [ ] I still choose who the payment was for

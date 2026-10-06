@@ -17,7 +17,7 @@ import {
   groupVaultAbi,
   MONAD_TESTNET_CHAIN_ID,
   monadTestnet,
-} from '@tekosoe/shared';
+} from '@tekosue/shared';
 
 import { api } from './api';
 import { env, requireLive } from './env';

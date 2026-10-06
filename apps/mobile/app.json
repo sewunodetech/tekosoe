@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Tekosoe",
+    "name": "Tekosue",
     "slug": "tekosoe",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -42,7 +42,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Tekosoe uses the camera to snap receipts for your trip.",
+          "cameraPermission": "Tekosue uses the camera to snap receipts for your trip.",
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": false
@@ -51,8 +51,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Tekosoe lets you pick a receipt photo from your gallery.",
-          "cameraPermission": "Tekosoe uses the camera to snap receipts for your trip.",
+          "photosPermission": "Tekosue lets you pick a receipt photo from your gallery.",
+          "cameraPermission": "Tekosue uses the camera to snap receipts for your trip.",
           "microphonePermission": false
         }
       ],

@@ -18,8 +18,9 @@ export const SECTIONS = [
 /**
  * Navbar landing: menempel di atas, bagian yang sedang dibaca disorot, menu penuh di ponsel.
  * Tautan bagian memakai anchor biasa (`#how`), jadi tetap jalan tanpa JavaScript.
+ * `base` = "/" di halaman lain (mis. /get-app) supaya tautan bagian kembali ke landing.
  */
-export function Navbar() {
+export function Navbar({ base = "" }: { base?: string } = {}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [current, setCurrent] = useState<string | null>(null);
@@ -79,16 +80,16 @@ export function Navbar() {
           scrolled || open ? "" : "[--lg-shadow:0_2px_10px_-6px_rgba(15,23,42,0.12)]"
         }`}
       >
-        <Link href="/" className="flex items-center gap-2" aria-label="Tekosoe home">
+        <Link href="/" className="flex items-center gap-2" aria-label="Tekosue home">
           <TekoMark className="h-7 w-7" />
-          <span className="text-lg font-semibold whitespace-nowrap">Tekosoe</span>
+          <span className="text-lg font-semibold whitespace-nowrap">Tekosue</span>
         </Link>
 
         <ul className="hidden items-center gap-1 lg:flex">
           {SECTIONS.map((s) => (
             <li key={s.id}>
               <a
-                href={`#${s.id}`}
+                href={`${base}#${s.id}`}
                 aria-current={current === s.id ? "true" : undefined}
                 className={`rounded-full px-3.5 py-2 text-sm transition-colors ${
                   current === s.id ? "bg-white/80 font-medium text-black shadow-[0_2px_8px_-3px_rgba(15,23,42,0.2),inset_0_1px_0_#fff]" : "text-gray-700 hover:bg-white/40 hover:text-black"
@@ -131,7 +132,7 @@ export function Navbar() {
         <ul className="flex flex-col">
           {SECTIONS.map((s) => (
             <li key={s.id}>
-              <a href={`#${s.id}`} onClick={() => setOpen(false)} className="block border-b border-black/5 py-4 text-lg text-gray-900">
+              <a href={`${base}#${s.id}`} onClick={() => setOpen(false)} className="block border-b border-black/5 py-4 text-lg text-gray-900">
                 {s.label}
               </a>
             </li>

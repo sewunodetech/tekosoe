@@ -6,7 +6,7 @@ import {
   encodeErrorResult,
   encodeFunctionResult,
 } from "viem";
-import { GROUP_STATUS, groupVaultAbi } from "@tekosoe/shared";
+import { GROUP_STATUS, groupVaultAbi } from "@tekosue/shared";
 import { revertErrorName } from "../../src/chain/groupVault";
 
 describe("groupVaultAbi", () => {

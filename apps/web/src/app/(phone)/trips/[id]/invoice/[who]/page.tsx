@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { InvoiceLines, InvoiceQr, InvoiceSummary, VerifyCard, verifyPath } from "@/components/invoice";
+import { InvoiceLines, InvoiceSummary, VerifyCard } from "@/components/invoice";
+import { InvoiceQr } from "@/components/invoice-qr";
 import { PrintButton, ShareButton } from "@/components/invoice-actions";
 import { AppAction } from "@/components/ui/app-sheet";
 import { buttonClass } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { ScreenHeader } from "@/components/ui/screen-header";
 import { Segmented } from "@/components/ui/segmented";
 import { repo } from "@/data/repo";
 import { money } from "@/lib/money";
+import { verifyHref, verifyLabel } from "@/lib/verify-link";
 
 export const metadata: Metadata = { title: "Trip invoice" };
 export const dynamicParams = false;
@@ -24,7 +26,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   if (!trip || !invoice) notFound();
 
   const due = invoice.totals.find((t) => t.strong)?.value ?? 0n;
-  const url = `https://${verifyPath(invoice.number)}`;
+  // Pratinjau demo: tanpa kode akses, jadi URL tanpa query.
+  const url = verifyHref(invoice.number);
 
   return (
     <Screen
@@ -54,8 +57,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       </div>
       <InvoiceSummary invoice={invoice} />
       <InvoiceLines invoice={invoice} />
-      <VerifyCard invoice={invoice}>
-        <InvoiceQr number={invoice.number} />
+      <VerifyCard label={verifyLabel(invoice.number)}>
+        <InvoiceQr href={url} label={verifyLabel(invoice.number)} />
       </VerifyCard>
     </Screen>
   );

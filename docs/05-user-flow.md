@@ -1,4 +1,4 @@
-# Tekosoe — User Flow
+# Tekosue — User Flow
 
 The app has two main flows. First, signing in and joining a trip (including the first deposit and picking a safety net). Second, spending from the pot until the end date, when settle-up runs by itself. The screen list at the end was the basis for the wireframes.
 
@@ -31,7 +31,7 @@ On the end date, nobody has to press a button. The scheduler runs settle-up, ove
 | 9 | Pay from pot | Recipient (member or address), amount, note, receipt photo, who it's for (everyone by default), even or manual split | Pay from pot | FR-07, FR-08, FR-17 |
 | 10 | Waiting for approval | Details of the payment above the limit | Approve; Decline | FR-09 |
 | 11 | Payment details | Who it was for, time left to dispute | Reject my share | FR-10 |
-| 12 | Card (simulated) | Virtual Tekosoe card labelled as simulated, list of demo shops | Pay at shop | FR-16 |
+| 12 | Card (simulated) | Virtual Tekosue card labelled as simulated, list of demo shops | Pay at shop | FR-16 |
 | 13 | Settle-up result | Each member's put in, spent and net; refunds and charges already made | Pay bill (if any) | FR-11, FR-12 |
 
 **Payment status on every screen:** show "Processing", then "Done", within seconds. Never the words hash, gas or blockchain.

@@ -18,7 +18,7 @@ type Props = {
 
 /**
  * Modal konfirmasi pembatalan perubahan input (Discard changes).
- * Mengikuti sistem desain Tekosoe: Maskot Teko mood "worry", font Bricolage & Manrope,
+ * Mengikuti sistem desain Tekosue: Maskot Teko mood "worry", font Bricolage & Manrope,
  * serta tombol aksi yang ramah.
  */
 export function DiscardModal({

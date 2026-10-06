@@ -15,11 +15,11 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tekosoe — One pot for the whole trip",
-    template: "%s · Tekosoe",
+    default: "Tekosue — One pot for the whole trip",
+    template: "%s · Tekosue",
   },
   description:
-    "Friends from any country chip in to one shared pot, spend together, and Tekosoe settles everyone up on the last day. Sign in with your passkey — no passwords.",
+    "Friends from any country chip in to one shared pot, spend together, and Tekosue settles everyone up on the last day. Sign in with your passkey — no passwords.",
 };
 
 export const viewport: Viewport = {

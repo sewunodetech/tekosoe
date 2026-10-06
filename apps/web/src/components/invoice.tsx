@@ -1,8 +1,7 @@
-import QRCode from "qrcode";
 import { cn } from "@/lib/cn";
 import { money, signed } from "@/lib/money";
-import { SITE_DOMAIN } from "@/lib/links";
 import type { Invoice, InvoiceStatus } from "@/data/types";
+import type { VerifySummary } from "@/data/live/verify";
 import { KeyValue, Pill, Surface } from "./ui/layout";
 
 const BADGE: Record<InvoiceStatus, { label: string; tone: string }> = {
@@ -10,8 +9,6 @@ const BADGE: Record<InvoiceStatus, { label: string; tone: string }> = {
   due: { label: "Due", tone: "bg-peach-soft text-rust" },
   paid: { label: "Paid", tone: "bg-sky text-navy" },
 };
-
-export const verifyPath = (number: string) => `${SITE_DOMAIN}/v/${number}`;
 
 /** Ringkasan invoice: nomor, status, angka utama. */
 export function InvoiceSummary({ invoice }: { invoice: Invoice }) {
@@ -55,27 +52,8 @@ export function InvoiceLines({ invoice }: { invoice: Invoice }) {
   );
 }
 
-/** QR asli yang membuka halaman verifikasi `https://tekosoe.xyz/v/<nomor>`. */
-export async function InvoiceQr({ number, size = 84 }: { number: string; size?: number }) {
-  const svg = await QRCode.toString(`https://${verifyPath(number)}`, {
-    type: "svg",
-    margin: 0,
-    errorCorrectionLevel: "M",
-    color: { dark: "#1d2426", light: "#0000" },
-  });
-  return (
-    <span
-      role="img"
-      aria-label={`QR code that opens ${verifyPath(number)}`}
-      className="block shrink-0 rounded-tile bg-white p-2 [&>svg]:h-full [&>svg]:w-full"
-      style={{ width: size, height: size }}
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
-  );
-}
-
 /** Kartu "Scan to verify". */
-export function VerifyCard({ invoice, children }: { invoice: Invoice; children?: React.ReactNode }) {
+export function VerifyCard({ label, children }: { label: string; children?: React.ReactNode }) {
   return (
     <Surface className="flex items-center gap-3.5 rounded-row! px-3.5! py-3!">
       {children}
@@ -84,9 +62,36 @@ export function VerifyCard({ invoice, children }: { invoice: Invoice; children?:
         <p className="text-xs leading-[17px] font-normal text-slate">
           Rebuilds this invoice from the trip record and checks it was not changed.
         </p>
-        <p className="text-xs font-bold break-all text-teal">{verifyPath(invoice.number)}</p>
+        <p className="text-xs font-bold break-all text-teal">{label}</p>
       </div>
     </Surface>
   );
 }
 
+
+/** Ringkasan invoice live di /v: semua angka dibangun ulang dari catatan trip, bukan dari invoice yang dibagikan. */
+export function LiveInvoiceSummary({ summary }: { summary: VerifySummary }) {
+  const badge = BADGE[summary.status];
+  const headline =
+    summary.remainingDebt > 0n
+      ? { label: "Still to pay", value: money(summary.remainingDebt), tone: "text-ink" }
+      : summary.refunded > 0n
+        ? { label: "Refunded at settle-up", value: signed(summary.refunded), tone: "text-green" }
+        : { label: "All square", value: money(0n), tone: "text-ink" };
+  return (
+    <Surface className="flex flex-col gap-2 rounded-[24px]! px-5! py-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold tracking-[0.5px] text-slate">{summary.number}</span>
+        <Pill label={badge.label} tone={badge.tone} />
+      </div>
+      <p className={cn("type-h1 text-[32px]! leading-[34px]! tracking-[-1px]!", headline.tone)}>{headline.value}</p>
+      <p className="type-caption text-slate">{headline.label}</p>
+      <div className="mt-1 flex flex-col gap-[5px] border-t border-sand pt-2.5">
+        <KeyValue label="Collected at settle-up" value={money(summary.pulled)} />
+        <KeyValue label="Refunded at settle-up" value={money(summary.refunded)} />
+        <KeyValue label="Still to pay" value={money(summary.remainingDebt)} />
+        <KeyValue label="Left in the trip" value={money(summary.remainingCredit)} />
+      </div>
+    </Surface>
+  );
+}

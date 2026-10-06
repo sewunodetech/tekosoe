@@ -1,6 +1,6 @@
-# Tekosoe documentation
+# Tekosue documentation
 
-Everything we planned, decided and built, in one place. Start with the PRD if you want to know *what* Tekosoe does, the technical spec for *how*, and STATUS for *where we are today*.
+Everything we planned, decided and built, in one place. Start with the PRD if you want to know *what* Tekosue does, the technical spec for *how*, and STATUS for *where we are today*.
 
 | File | What's inside |
 | --- | --- |

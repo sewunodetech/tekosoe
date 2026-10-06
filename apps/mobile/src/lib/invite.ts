@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import type { Address, Hex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { inviteDigest, MONAD_TESTNET_CHAIN_ID } from '@tekosoe/shared';
+import { inviteDigest, MONAD_TESTNET_CHAIN_ID } from '@tekosue/shared';
 
 import { env } from './env';
 

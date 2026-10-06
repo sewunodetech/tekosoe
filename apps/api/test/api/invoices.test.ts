@@ -6,7 +6,7 @@ import {
   type Hash,
   type Log,
 } from "viem";
-import { computeInvoiceHash, groupVaultAbi } from "@tekosoe/shared";
+import { computeInvoiceHash, groupVaultAbi } from "@tekosue/shared";
 import { settleOutcomeFromLogs } from "../../src/chain/groupVault";
 import { ensureInvoices } from "../../src/modules/invoices/service";
 import { settleGroup } from "../../src/modules/settle/service";

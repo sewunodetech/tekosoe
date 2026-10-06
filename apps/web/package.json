@@ -1,19 +1,19 @@
 {
-  "name": "@tekosoe/web",
+  "name": "@tekosue/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test scripts/*.test.mjs"
+    "test": "node --test scripts/*.test.mjs && vitest run",
+    "preview": "node scripts/preview.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.1",
-    "@tekosoe/shared": "*",
+    "@tekosue/shared": "*",
     "lucide-react": "^1.48.0",
     "next": "16.3.6",
     "qrcode": "^1.5.4",
@@ -31,7 +31,9 @@
     "@types/three": "^0.186.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "fast-check": "4.10.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.0"
   }
 }

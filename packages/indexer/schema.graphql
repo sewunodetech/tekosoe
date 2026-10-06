@@ -43,6 +43,7 @@ type Member {
   debt: BigInt!
   credit: BigInt!
   joinedAt: BigInt!
+  position: Int! # posisi di membersOf(groupId), mulai 1 (members[] di kontrak hanya push)
 }
 
 type Spend {
@@ -111,4 +112,5 @@ type Activity {
   spendId: BigInt
   timestamp: BigInt!
   txHash: String!
+  remaining: BigInt # Pulled → remainingDebt, Refunded → remainingCredit; kosong untuk event lain
 }

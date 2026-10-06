@@ -171,7 +171,7 @@ function CameraAccess({ loading, canAskAgain, onAllow }: { loading: boolean; can
       <Text variant="caption" color={colors.textMuted} style={{ textAlign: 'center', maxWidth: 240 }}>
         {canAskAgain
           ? 'Allow the camera to take a photo, or pick one from your gallery.'
-          : 'Camera is turned off for Tekosoe. Turn it on in Settings, or pick a photo from your gallery.'}
+          : 'Camera is turned off for Tekosue. Turn it on in Settings, or pick a photo from your gallery.'}
       </Text>
       <Button
         label={canAskAgain ? 'Allow camera' : 'Open settings'}

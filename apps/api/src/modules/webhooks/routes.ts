@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import express, { Router } from "express";
 import { decodeEventLog, type Hex } from "viem";
-import { groupVaultAbi } from "@tekosoe/shared";
+import { groupVaultAbi } from "@tekosue/shared";
 import type { RouteContext } from "../../context";
 import { ensureInvoices } from "../invoices/service";
 import { extractLogs } from "./extract";

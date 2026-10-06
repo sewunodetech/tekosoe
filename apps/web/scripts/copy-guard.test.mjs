@@ -2,17 +2,19 @@
 // Memindai src/**/*.{ts,tsx}, mengabaikan komentar, dan gagal kalau ada kata terlarang.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const SRC = new URL("../src", import.meta.url).pathname;
+const SRC = fileURLToPath(new URL("../src", import.meta.url));
 const FORBIDDEN = /\b(wallets?|gas|seed phrases?|blockchains?|tokens?|hash(?:es)?|transactions?)\b/i;
 
 function files(dir) {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) return files(path);
-    return /\.(ts|tsx)$/.test(name) ? [path] : [];
+    // File tes bukan teks yang terlihat user.
+    return /\.(ts|tsx)$/.test(name) && !/\.test\.tsx?$/.test(name) ? [path] : [];
   });
 }
 
@@ -24,7 +26,12 @@ const stripComments = (code) =>
 test("no crypto vocabulary in user-facing source", () => {
   const hits = [];
   for (const file of files(SRC)) {
-    stripComments(readFileSync(file, "utf8"))
+    // Baris bertanda `copy-guard-ignore` (mis. nama parameter URL) dikosongkan; nomor baris tetap.
+    const source = readFileSync(file, "utf8")
+      .split("\n")
+      .map((line) => (line.includes("copy-guard-ignore") ? "" : line))
+      .join("\n");
+    stripComments(source)
       .split("\n")
       .forEach((line, i) => {
         // Import dan nama identifier (mis. `hashes`) bukan teks yang terlihat user.

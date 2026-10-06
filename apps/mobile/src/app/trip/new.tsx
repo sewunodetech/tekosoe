@@ -65,7 +65,7 @@ export default function NewTripScreen() {
       router.replace(`/trip/${data.id}`);
       if (isLive) {
         // Web browsers without navigator.share reject; the link is still available from Members.
-        Share.share({ message: `Join our trip "${tripName}" on Tekosoe: ${inviteUrl(data.inviteCode)}` }).catch(() => undefined);
+        Share.share({ message: `Join our trip "${tripName}" on Tekosue: ${inviteUrl(data.inviteCode)}` }).catch(() => undefined);
       }
     },
   });
@@ -193,7 +193,7 @@ export default function NewTripScreen() {
             <Button
               label="Share link"
               variant="pill"
-              onPress={() => Share.share({ message: `Join our trip "${tripName}" on Tekosoe: https://${env.webDomain}/j/japan` })}
+              onPress={() => Share.share({ message: `Join our trip "${tripName}" on Tekosue: https://${env.webDomain}/j/japan` })}
             />
             <Link href="/invite/japan" asChild>
               <Button label="Preview" variant="pill" />

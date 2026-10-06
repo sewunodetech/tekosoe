@@ -12,7 +12,7 @@
 #
 # Port 8080 sama dengan `envio dev`; hentikan dulu stack `envio dev` (envio stop) sebelum `up`.
 
-name: tekosoe
+name: tekosue
 
 services:
   graphql-engine:

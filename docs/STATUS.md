@@ -78,10 +78,11 @@ Legend: ✅ done · 🟡 in progress · ⏳ not started
 
 - [x] W-4 Landing page + dashboard demo hanya-baca (`/`, `/trips`, `/trips/[id]`, members, payment details, settle preview, invoice, `/card`, `/profile`), mobile-only, desain dari app, data demo lewat `TripRepository`
 - [x] `/j/[code]` (undangan) dan `/v/[number]` (verifikasi) memakai sistem desain yang sama; `/v` masih data demo
+- [x] Rebrand ke **Tekosue** + domain **`tekosue.xyz`** (6 Oct, ADR 0011): paket `@tekosue/*`, rpId passkey/App Links/link undangan/QR invoice di `tekosue.xyz`, identifier native & kunci perangkat lama dipertahankan (`scripts/rebrand-guard.test.mjs`). *Passkey lama di `tekosoe.mulalabs.biz.id` tidak bisa dipakai lagi. Tertunda manual: DNS `tekosue.xyz` → VPS, router Traefik, `CORS_ORIGINS` api produksi, env EAS + APK baru, `npm run check:wellknown -- tekosue.xyz`.*
 - [ ] W-1 `.well-known`: Team ID Apple, bundle ID `com.tekosoe.xyz`, `Content-Type: application/json` untuk `apple-app-site-association`
-- [ ] W-3 Verifikasi invoice nyata (hitung ulang dari Envio + cocokkan sidik jari dari api) — menunggu D-1, D-2, dan skema invoice di `packages/shared`
+- [ ] 🟡 W-3 Verifikasi invoice nyata + undangan live (6 Oct, ADR 0012): kode selesai dan dites (vitest + fast-check). `/j/<kode>` sudah menampilkan trip nyata dari Envio + api (diuji lokal terhadap testnet: trip 10 "Halan halan", trip 8, trip tidak ada, link salah). `/v/<nomor>?token=` membangun ulang invoice dari Envio dengan `invoiceSettlementsFromOutcome` (sama dengan api) dan mencocokkan payload + sidik jari; app memasukkan kode akses ke QR/share/PDF. Web sekarang static export + nginx (`apps/web/Dockerfile`). *Belum dicentang: butuh deploy indexer baru (`Member.position`, `Activity.remaining`) + sinkron ulang Envio dari `start_block`, deploy image web, lalu uji QR invoice nyata → "cocok" di testnet.*
 - [ ] Sambungkan dashboard ke Envio/api (implementasi live `TripRepository`) — menunggu C-6, D-1
-- [ ] Halaman toko untuk "Get the app" (`NEXT_PUBLIC_APP_DOWNLOAD_URL`)
+- [x] Halaman unduh `/get-app` (6 Oct): gaya landing, tombol "Download for Android" (APK EAS, `NEXT_PUBLIC_ANDROID_APK_URL`), QR untuk laptop, 4 langkah instal, iPhone "coming soon"; `/j/japan` kembali menampilkan undangan contoh
 
 ### P1 — Envio
 

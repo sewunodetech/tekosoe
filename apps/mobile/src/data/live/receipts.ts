@@ -80,9 +80,9 @@ async function tripKeyFor(account: LocalAccount, tripId: string, { create }: { c
     const group = await fetchGroup(tripId);
     const hasReceipts = (group?.spends ?? []).some((s) => s.receiptCount > 0);
     if (!create || hasReceipts) {
-      // Kunci trip dipegang teman; HP mereka membagikannya otomatis saat membuka Tekosoe (syncReceiptKeys).
+      // Kunci trip dipegang teman; HP mereka membagikannya otomatis saat membuka Tekosue (syncReceiptKeys).
       throw new Error(
-        "This phone can't open this trip's receipts yet. It unlocks as soon as a friend in this trip opens Tekosoe. Try again after that.",
+        "This phone can't open this trip's receipts yet. It unlocks as soon as a friend in this trip opens Tekosue. Try again after that.",
       );
     }
     tripKey = newTripKey();

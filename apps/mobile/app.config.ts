@@ -3,7 +3,7 @@ import { AndroidConfig, withAndroidStyles, type ConfigPlugin } from 'expo/config
 
 // Domain passkey (rpId) harus sama dengan yang dipakai src/lib/env.ts dan domain yang
 // melayani /.well-known (apps/web). Saat build EAS nilainya diambil dari environment EAS.
-const passkeyDomain = process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosoe.mulalabs.biz.id';
+const passkeyDomain = process.env.EXPO_PUBLIC_PASSKEY_DOMAIN || 'tekosue.xyz';
 // Domain link undangan (https://<webDomain>/j/<kode>); sama dengan default di src/lib/env.ts.
 const webDomain = process.env.EXPO_PUBLIC_WEB_DOMAIN || passkeyDomain;
 

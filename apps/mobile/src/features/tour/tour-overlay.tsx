@@ -21,7 +21,7 @@ export type TourTargets = {
 type Step = { target?: Target; mood: TekoMood; title: string; body: string; art?: 'trip' };
 
 const steps = (name: string): Step[] => [
-  { mood: 'wink', title: `Welcome, ${name}`, body: 'Want a quick tour of how Tekosoe works? It takes 30 seconds.' },
+  { mood: 'wink', title: `Welcome, ${name}`, body: 'Want a quick tour of how Tekosue works? It takes 30 seconds.' },
   {
     target: 'newTrip',
     mood: 'idle',
